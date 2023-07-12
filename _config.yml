@@ -6,21 +6,21 @@
 # 'jekyll serve'. If you change this file, please restart the server process.
 
 # Site settings
-title: Jarvis' Blog (总有美丽的风景让人流连)
-brief-intro: 总有美丽的风景让人流连
+title: Fisher 
+brief-intro: 黑暗中的黎明，曙光乍现
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://www.jarvis73.com" # the base hostname & protocol for your site
-enforce_ssl: www.jarvis73.com
+# url: "https://www.jarvis73.com" # the base hostname & protocol for your site
+# enforce_ssl: www.jarvis73.com
 
 permalink: /:year/:month/:day/:title/
 
 # other links
 twitter_username: 
 facebook_username: 
-github_username: jarvis73
-email: zjw.math@qq.com
+github_username: even3yu
+email: ligexiao@qq.com
 weibo_username: 
-zhihu_username: lin-xi-1-1
+zhihu_username: 
 linkedIn_username: 
 dribbble_username:
 

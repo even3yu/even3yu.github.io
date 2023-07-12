@@ -3,7 +3,7 @@ layout: post
 title: "NextCloud 教程 (Tutorial of NextCloud)"
 date: 2022-09-07 00:14:00 +0800
 categories: Config
-author: Jarvis
+author: Fisher
 meta: Post
 # pin: True
 ---

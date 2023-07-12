@@ -1,165 +1,253 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Jarvis&apos; Blog (总有美丽的风景让人流连)</title>
+    <title>Fisher</title>
     <description></description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 12 Jul 2023 14:08:29 +0800</pubDate>
-    <lastBuildDate>Wed, 12 Jul 2023 14:08:29 +0800</lastBuildDate>
+    <pubDate>Wed, 12 Jul 2023 16:21:13 +0800</pubDate>
+    <lastBuildDate>Wed, 12 Jul 2023 16:21:13 +0800</lastBuildDate>
     <generator>Jekyll v4.3.2</generator>
     
       <item>
-        <title>ChatGPT 70 款插件测评 惊艳的开发过程与宏大的商业化愿景</title>
-        <description>
-我们对ChatGPT的插件商店中总共70款插件进行了评测。区别于Chrome，AppStore等平台的代码开发范式，开发者仅使用自然语言就可以开发ChatGPT插件，并由GPT模型自行决定在使用过程中是否调用插件。约八成插件集中于购物、餐饮、旅行、住房和求职场景，其余分布在教育、财经咨讯、内容社区和编程技术场景。商业分析、游戏、身体/心理健康、社交以及家庭和育儿场景是蓝海。约七成插件用于已有平台的商业导流，同质化严重；联网、实时信息获取和阅读网页/PDF功能是刚需。Wolfram（数学计算）、WebPilot（网页阅读）、Speak（专业翻译）、Prompt Perfect（提示词润色）、Diagram It（流程图绘制）、AskYourPDF（PDF阅读）、CreatiCode Scratch（少儿编程）、Chess（国际象棋游戏教练）、edX（公开课学习）、FiscalNote（政策咨询）等插件值得一试。
+        <title>如何自建博客</title>
+        <description>&lt;h2 id=&quot;1-安装ruby&quot;&gt;1. 安装ruby&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;mac自带的了一个ruby，但版本是&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;2.6.0&lt;/code&gt; ,不满足安装要求。&lt;/li&gt;
+  &lt;li&gt;
+    brew install ruby –user-install
+一定要带上&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;--user-install&lt;/code&gt;, 不然有权限问题, &lt;a href=&quot;https://zhuanlan.zhihu.com/p/368333535&quot;&gt;参考链接&lt;/a&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    设置环境变量，设置到zsh， 或者bash中,  &lt;a href=&quot;https://www.jianshu.com/p/66a4dd4b2157&quot;&gt;参考链接&lt;/a&gt;
+
+    &lt;div class=&quot;language-js highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;rouge-gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;rouge-code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;nx&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;export PATH=&quot;/usr/local/opt/ruby/bin:$PATH&quot;&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/.bash_profile&lt;/span&gt;&lt;span class=&quot;err&quot;&gt; 
+&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;或者&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;export PATH=&quot;/opt/homebrew/opt/ruby/bin:$PATH&quot;&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/.zshr&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;c
+&lt;/span&gt;   
+&lt;span class=&quot;nx&quot;&gt;source&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/.bash_profil&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;e
+&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    校验版本
+
+    &lt;div class=&quot;language-js highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;rouge-gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;rouge-code&quot;&gt;&lt;pre&gt; &lt;span class=&quot;nx&quot;&gt;ruby&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;v&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    gem sources 更换
+
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;rouge-gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;rouge-code&quot;&gt;&lt;pre&gt;$ gem sources -l
+$ gem sources --remove https://rubygems.org/
+$ gem sources -a http://ruby.taobao.org/ // 失效
+gem sources -a  https://gems.ruby-china.com/    //最新
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+
+    &lt;a href=&quot;https://www.cnblogs.com/kaiye/p/3039345.html&quot;&gt;参考1&lt;/a&gt;
+
+    &lt;a href=&quot;https://blog.csdn.net/wannibadehaizi/article/details/89037000&quot;&gt;参考2&lt;/a&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;2-mac安装jekyll&quot;&gt;2. mac安装jekyll&lt;/h2&gt;
+
+&lt;a href=&quot;https://blog.csdn.net/qq_34347375/article/details/123363173&quot;&gt;参考&lt;/a&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    安装
+
+    &lt;div class=&quot;language-js highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;rouge-gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;rouge-code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;nx&quot;&gt;gem&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;install&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;jekyll&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;bundler&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;install&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    设置环境变量
+
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;rouge-gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;rouge-code&quot;&gt;&lt;pre&gt;# 修改gem的运行环境， 版本修改到对应版本
+echo &apos;export PATH=&quot;$HOME/.gem/ruby/3.0.0/bin:$PATH&quot;&apos; &amp;gt;&amp;gt; ~/.zshrc
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    jekyll -v
+  &lt;/li&gt;
+&lt;/ol&gt;
 </description>
-        <pubDate>Mon, 15 May 2023 10:57:00 +0800</pubDate>
-        <link>http://localhost:4000/2023/05/15/ChatGPT-Plugins/</link>
-        <guid isPermaLink="true">http://localhost:4000/2023/05/15/ChatGPT-Plugins/</guid>
+        <pubDate>Fri, 07 Jul 2023 21:38:00 +0800</pubDate>
+        <link>http://localhost:4000/2023/07/07/blog/</link>
+        <guid isPermaLink="true">http://localhost:4000/2023/07/07/blog/</guid>
+        
+        
+        <category>杂项</category>
+        
+      </item>
+    
+      <item>
+        <title>markdown语法</title>
+        <description>&lt;ul id=&quot;markdown-toc&quot;&gt;
+  &lt;li&gt;&lt;a href=&quot;#段落&quot; id=&quot;markdown-toc-段落&quot;&gt;段落&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#代码高亮&quot; id=&quot;markdown-toc-代码高亮&quot;&gt;代码高亮&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#各种字体&quot; id=&quot;markdown-toc-各种字体&quot;&gt;各种字体&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#引用&quot; id=&quot;markdown-toc-引用&quot;&gt;引用&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#表格&quot; id=&quot;markdown-toc-表格&quot;&gt;表格&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#图片&quot; id=&quot;markdown-toc-图片&quot;&gt;图片&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#无序列表&quot; id=&quot;markdown-toc-无序列表&quot;&gt;无序列表&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#有序列表&quot; id=&quot;markdown-toc-有序列表&quot;&gt;有序列表&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#外部代码&quot; id=&quot;markdown-toc-外部代码&quot;&gt;外部代码&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#内联html标签&quot; id=&quot;markdown-toc-内联html标签&quot;&gt;内联html标签&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#水平线&quot; id=&quot;markdown-toc-水平线&quot;&gt;水平线&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#数学公式&quot; id=&quot;markdown-toc-数学公式&quot;&gt;数学公式&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#参考资料&quot; id=&quot;markdown-toc-参考资料&quot;&gt;参考资料&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr /&gt;
+
+&lt;h2&gt; 二级标题 &lt;/h2&gt;
+&lt;h3&gt; 三级标题 &lt;/h3&gt;
+&lt;h4&gt; 四级标题 &lt;/h4&gt;
+&lt;h5&gt; 五级标题 &lt;/h5&gt;
+&lt;h6&gt; 六级标题 &lt;/h6&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;段落&quot;&gt;段落&lt;/h2&gt;
+先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。然侍卫之臣不懈于内，
+忠志之士忘身于外者，盖追先帝之殊遇，欲报之于陛下也。诚宜开张圣听，以光先帝遗德，
+恢弘志士之气，不宜妄自菲薄，引喻失义，以塞忠谏之路也。
+
+&lt;h2 id=&quot;代码高亮&quot;&gt;代码高亮&lt;/h2&gt;
+
+&lt;div class=&quot;language-c++ highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;rouge-gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;rouge-code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;cp&quot;&gt;#include&lt;/span&gt; &lt;span class=&quot;cpf&quot;&gt;&amp;lt;iostream&amp;gt;&lt;/span&gt;&lt;span class=&quot;cp&quot;&gt;
+&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hello world!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//这是一段很长的注释，人生难免起起伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏伏&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;各种字体&quot;&gt;各种字体&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;粗体&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;意大利斜体&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;del&gt;删除线&lt;/del&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;颜色标记&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/doublesand&quot;&gt;链接&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;引用&quot;&gt;引用&lt;/h2&gt;
+&lt;blockquote&gt;
+  金钱可以购买时间 - 鲁迅
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;表格&quot;&gt;表格&lt;/h2&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;名字&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;语文&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;数学&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;张三&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;20&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;80&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;李四&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;80&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;20&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;小花&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;100&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;100&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&quot;图片&quot;&gt;图片&lt;/h2&gt;
+&lt;img src=&quot;http://localhost:4000/assets/img/girl.jpg&quot; alt=&quot;girl&quot; /&gt;
+
+&lt;h2 id=&quot;无序列表&quot;&gt;无序列表&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;无&lt;/li&gt;
+  &lt;li&gt;序&lt;/li&gt;
+  &lt;li&gt;列&lt;/li&gt;
+  &lt;li&gt;表&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;有序列表&quot;&gt;有序列表&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;有&lt;/li&gt;
+  &lt;li&gt;序&lt;/li&gt;
+  &lt;li&gt;列&lt;/li&gt;
+  &lt;li&gt;表&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;外部代码&quot;&gt;外部代码&lt;/h2&gt;
+可以通过社交网站的外链提供视频或者图片等服务，例如以下的视频
+
+&lt;iframe src=&quot;//player.bilibili.com/player.html?aid=21722417&amp;amp;cid=35820632&amp;amp;page=1&quot; allowfullscreen=&quot;true&quot;&gt; &lt;/iframe&gt;
+
+当然也可以插入音乐
+
+&lt;audio src=&quot;http://music.163.com/song/media/outer/url?id=557581284.mp3&quot; controls=&quot;&quot; preload=&quot;&quot;&gt;&lt;/audio&gt;
+
+&lt;h2 id=&quot;内联html标签&quot;&gt;内联html标签&lt;/h2&gt;
+markdown支持任何html语法
+
+&lt;h2 id=&quot;水平线&quot;&gt;水平线&lt;/h2&gt;
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;数学公式&quot;&gt;数学公式&lt;/h2&gt;
+
+\[\frac{\mathrm{d}}{\mathrm{d}t} \left ( \frac {\partial  L}{\partial \dot{q}_j} \right ) =  \frac {\partial L}{\partial q_j}\]
+
+&lt;h2 id=&quot;参考资料&quot;&gt;参考资料&lt;/h2&gt;
+更多关于markdown的语法资料可以在以下链接找到:
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/adam-p/markdown-here/wiki/Markdown-Here-Cheatsheet#code&quot;&gt;Markdown Here Cheatsheet&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.unexpected-vortices.com/sw/rippledoc/quick-markdown-example.html&quot;&gt;Quick Markdown Example&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://daringfireball.net/projects/markdown/basics&quot;&gt;Markdown Basics&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.github.com/gfm/&quot;&gt;GitHub Flavoured Markdown Spec&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://help.github.com/articles/basic-writing-and-formatting-syntax/#lists&quot;&gt;Basic writing and formatting syntax&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Sat, 03 Nov 2018 21:38:00 +0800</pubDate>
+        <link>http://localhost:4000/2018/11/03/markdown/</link>
+        <guid isPermaLink="true">http://localhost:4000/2018/11/03/markdown/</guid>
         
         
         <category>大模型</category>
-        
-      </item>
-    
-      <item>
-        <title>HTTPS 配置教程 (A Tutorial for HTTPS)</title>
-        <description>
-&lt;a href=&quot;https://developer.mozilla.org/zh-CN/docs/Web/HTTP&quot;&gt;HTTP&lt;/a&gt; 是一种用于分布式、协作式和超媒体信息系统的应用层协议, 它是一种发布和接收 HTML 页面的方法, 被用于在Web浏览器和网站服务器之间传递信息. HTTP 默认工作在 TCP 协议 80 端口, 但它&lt;span style=&quot;color:blue&quot;&gt;以明文方式发送内容, 不提供任何方式的数据加密&lt;/span&gt;, 因此不适合传输敏感信息.
-
-为了解决 HTTP 不安全的问题, &lt;a href=&quot;https://en.wikipedia.org/wiki/HTTPS&quot;&gt;HTTPS&lt;/a&gt; 应运而生. HTTPS 是一种透过计算机网络进行安全通信的传输协议, 它经由 HTTP进行通信, 但&lt;span style=&quot;color:blue&quot;&gt;利用 SSL/TLS 来加密数据包保证数据的机密性和完整性&lt;/span&gt;. HTTPS 默认工作在 TCP 协议 443 端口. HTTPS 比 HTTP 更加安全, 适合传输敏感信息.
-</description>
-        <pubDate>Wed, 26 Apr 2023 16:25:00 +0800</pubDate>
-        <link>http://localhost:4000/2023/04/26/Website-Services/</link>
-        <guid isPermaLink="true">http://localhost:4000/2023/04/26/Website-Services/</guid>
-        
-        
-        <category>Config</category>
-        
-      </item>
-    
-      <item>
-        <title>生成扩散模型(五): 采样加速 (Generative Diffusion Model: Sampling Acceleration)</title>
-        <description>
-扩散模型 DDPM 尽管生成效果不错, 但采样速度相比 GAN 要慢很多. GAN 采样只需要一次神经网络前馈, 而 DDPM 需要 \(T\) 步前馈, \(T\) 的典型取值为 1000. 因此 Nichol and Dhariwal 在 &lt;a href=&quot;https://proceedings.mlr.press/v139/nichol21a.html&quot;&gt;《Improved Denoising Diffusion Probabilistic Models》&lt;/a&gt; 提出 &lt;span style=&quot;color:blue&quot;&gt;improved DDPM&lt;/span&gt;, Song 等人在 &lt;a href=&quot;https://openreview.net/forum?id=St1giarCHLP&quot;&gt;《Denoising Diffusion Implicit Models》&lt;/a&gt; 中提出 &lt;span style=&quot;color:blue&quot;&gt;DDIM&lt;/span&gt; 用于加速扩散模型的采样.
-</description>
-        <pubDate>Sat, 24 Dec 2022 14:59:00 +0800</pubDate>
-        <link>http://localhost:4000/2022/12/24/Diffusion-Model-5/</link>
-        <guid isPermaLink="true">http://localhost:4000/2022/12/24/Diffusion-Model-5/</guid>
-        
-        
-        <category>深度学习</category>
-        
-        <category>生成模型</category>
-        
-      </item>
-    
-      <item>
-        <title>生成模型指标 (Metrics of Generative Models)</title>
-        <description>
-生成模型 (genrative model) 的生成结果通常没有直接的 ground truth 来计算样本的生成质量. 比如图像生成既要考虑生成图像的噪声要低, 清晰度要高, 同时生成的多样性要高. 我们可以直接找一些人来做图灵测试, 从而评估图像生成的效果, 但这样评估的成本显然是比较高的. 本文介绍几种论文中常用的近似指标 IS, FID, NLL. 既然是近似指标, 那么就说明, 这些指标好不代表生成的样本一定好, 它们仅仅是在一定程度上可以反映生成样本的质量.
-</description>
-        <pubDate>Fri, 09 Dec 2022 21:17:00 +0800</pubDate>
-        <link>http://localhost:4000/2022/12/09/Generative-Model-Metrics/</link>
-        <guid isPermaLink="true">http://localhost:4000/2022/12/09/Generative-Model-Metrics/</guid>
-        
-        
-        <category>深度学习</category>
-        
-        <category>生成模型</category>
-        
-      </item>
-    
-      <item>
-        <title>生成扩散模型(四): 扩散模型和得分匹配 (Generative Diffusion Model: Diffusion Matching and Score Matching)</title>
-        <description>
-我们在&lt;a href=&quot;/2022/11/27/Diffusion-Model-3/&quot;&gt;《生成扩散模型(三): 灵活性和易处理性》&lt;/a&gt;一文中讨论了生成扩散模型对前向过程和反向过程的建模, 以及训练模型时所使用的极大化似然函数的推导. 然而先前的扩散模型的生成效果仍然有限, Ho 等人在 &lt;span style=&quot;color:blue&quot;&gt;DDPM&lt;/span&gt; 一文 &lt;a href=&quot;https://arxiv.org/abs/2006.11239&quot;&gt;《Denoising Deffision Probabilistic Models》&lt;/a&gt; 中指出扩散模型实际上可以生成更高质量的样本. 同时, 扩散模型在选择特定超参数的情况下与 &lt;a href=&quot;&quot;&gt;去噪得分匹配 (denoising score matching)&lt;/a&gt; 的训练过程和基于 &lt;a href=&quot;&quot;&gt;退火的朗之万动力学(annealed Langevin dynamics)&lt;/a&gt; 的采样过程是等价的.
-</description>
-        <pubDate>Tue, 29 Nov 2022 14:01:00 +0800</pubDate>
-        <link>http://localhost:4000/2022/11/29/Diffusion-Model-4/</link>
-        <guid isPermaLink="true">http://localhost:4000/2022/11/29/Diffusion-Model-4/</guid>
-        
-        
-        <category>深度学习</category>
-        
-        <category>生成模型</category>
-        
-      </item>
-    
-      <item>
-        <title>生成扩散模型(三): 灵活性和易处理性 (Generative Diffusion Model: Flexibility and Tractability)</title>
-        <description>
-说起机器学习中使用概率模型建模复杂的数据集时, 要&lt;span style=&quot;color:blue&quot;&gt;同时满足概率模型的灵活性 (flexibility) 和易处理性 (tractability) 是一件十分困难的事情&lt;/span&gt;. 如果想要用复杂的模型 \(\phi(\bm{x})\) (比如深度神经网络) 提高建模的灵活性, 那么往往会牺牲易处理性, 因为为了获得数据的概率分布 \(p(\bm{x})=\frac{\phi(\bm{x})}{Z}\), 需要计算标准化常数 \(Z\), 然而这需要计算积分 \(Z=\int\phi(\bm{x})\text{d}x\), 导致计算难度陡增, 需要用蒙特卡洛 (Monte Carlo, MC) 等耗时耗力的方法. 反之, 如果使用易处理的模型 (比如高斯分布) 拟合数据, 那么这类模型又难以描述分布十分复杂的数据.
-</description>
-        <pubDate>Sun, 27 Nov 2022 15:07:00 +0800</pubDate>
-        <link>http://localhost:4000/2022/11/27/Diffusion-Model-3/</link>
-        <guid isPermaLink="true">http://localhost:4000/2022/11/27/Diffusion-Model-3/</guid>
-        
-        
-        <category>深度学习</category>
-        
-        <category>生成模型</category>
-        
-      </item>
-    
-      <item>
-        <title>SSH 工具教程 (Tutorial of SSH tools)</title>
-        <description>
-ssh 是远程连接的利器, 可以说凡是涉及到 linux 服务器, ssh 就是一个绕不开的话题. 本文作为一个教程, 尽可能详细的帮助读者设置 ssh, 并给出一些常用的 ssh 配置方法 (主要用于 linux 系统的远程登录和文件传输).
-</description>
-        <pubDate>Sat, 17 Sep 2022 21:33:00 +0800</pubDate>
-        <link>http://localhost:4000/2022/09/17/SSH-Keygen/</link>
-        <guid isPermaLink="true">http://localhost:4000/2022/09/17/SSH-Keygen/</guid>
-        
-        
-        <category>Tools</category>
-        
-      </item>
-    
-      <item>
-        <title>正态分布的若干结论 (Conclusions of Gaussian distributions)</title>
-        <description>
-本文记录一些遇到的有关正态分布的计算和结论.
-
-正态分布的形式, 正态分布的 KL 散度, 正态分布随机变量的和, 重参数化技巧
-</description>
-        <pubDate>Mon, 05 Sep 2022 17:03:00 +0800</pubDate>
-        <link>http://localhost:4000/2022/09/05/Normal-Distribution/</link>
-        <guid isPermaLink="true">http://localhost:4000/2022/09/05/Normal-Distribution/</guid>
-        
-        
-        <category>数学</category>
-        
-      </item>
-    
-      <item>
-        <title>Ubuntu 安装 NVIDIA 驱动和 CUDA</title>
-        <description>
-记录一下 Ubuntu Server 配置 Nvidia 驱动.
-</description>
-        <pubDate>Sun, 04 Sep 2022 14:56:00 +0800</pubDate>
-        <link>http://localhost:4000/2022/09/04/Nvidia-Driver/</link>
-        <guid isPermaLink="true">http://localhost:4000/2022/09/04/Nvidia-Driver/</guid>
-        
-        
-        <category>Config</category>
-        
-      </item>
-    
-      <item>
-        <title>生成扩散模型(二): VAE 观点 (Generative Diffusion Model: From the Perspective of VAE)</title>
-        <description>
-我们在前面一篇文章&lt;a href=&quot;/2022/08/08/Diffusion-Model-1/&quot;&gt;《生成扩散模型(一): 基础》&lt;/a&gt;中通过迭代式的图像加噪和去噪的角度分析了生成扩散模型, 并最终推导出了和 DDPM 论文中一样的损失函数. 如果我们把图像加噪的过程看作编码, 把去噪的过程看作解码, 那么这两个过程合起来就可以看作一个&lt;a href=&quot;https://en.wikipedia.org/wiki/Autoencoder&quot;&gt;自动编码器 (autoencoder)&lt;/a&gt;.
-</description>
-        <pubDate>Tue, 09 Aug 2022 18:11:00 +0800</pubDate>
-        <link>http://localhost:4000/2022/08/09/Diffusion-Model-2/</link>
-        <guid isPermaLink="true">http://localhost:4000/2022/08/09/Diffusion-Model-2/</guid>
-        
-        
-        <category>深度学习</category>
-        
-        <category>生成模型</category>
         
       </item>
     

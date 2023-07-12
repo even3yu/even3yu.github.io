@@ -5,7 +5,7 @@ data: 2019-5-9 9:50:00
 categories: 图像处理
 mathjax: true
 figure: /images/2019/05/Graph-Cuts-0.png
-author: Jarvis
+author: Fisher
 meta: Post
 ---
 

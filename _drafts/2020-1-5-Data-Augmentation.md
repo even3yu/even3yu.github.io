@@ -5,7 +5,7 @@ date: 2020-01-05 21:19:00 +0800
 categories: 图像处理, 机器学习, Python
 mathjax: true
 # figure: ./images/2020/01/
-author: Jarvis
+author: Fisher
 meta: Post
 ---
 

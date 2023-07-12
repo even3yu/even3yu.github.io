@@ -2,7 +2,7 @@
 layout: post
 title: "numpy.ndarray 笔记"
 date: 2020-8-4 12:15:00 +0800
-author: Jarvis
+author: Fisher
 meta: Wiki_Python
 hidden: true
 ---

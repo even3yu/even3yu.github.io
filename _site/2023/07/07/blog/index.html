@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>如何自建博客</title>
+    <meta name="description" content="1. 安装ruby  mac自带的了一个ruby，但版本是2.6.0 ,不满足安装要求。      brew install ruby –user-install一定要带上--user-install, 不然有权限问题, 参考链接        设置环境变量，设置到zsh， 或者bash中,  参考链接    1...">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2023/07/07/blog/">
+    <link rel="alternate" type="application/rss+xml" title="Fisher" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Fisher</a>
+        <small>黑暗中的黎明，曙光乍现</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>如何自建博客</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2023-07-07
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Fisher
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#杂项" title="Category: 杂项" rel="category">杂项</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <h2 id="1-安装ruby">1. 安装ruby</h2>
+
+<ol>
+  <li>mac自带的了一个ruby，但版本是<code class="language-plaintext highlighter-rouge">2.6.0</code> ,不满足安装要求。</li>
+  <li>
+    <p>brew install ruby –user-install
+一定要带上<code class="language-plaintext highlighter-rouge">--user-install</code>, 不然有权限问题, <a href="https://zhuanlan.zhihu.com/p/368333535">参考链接</a></p>
+  </li>
+  <li>
+    <p>设置环境变量，设置到zsh， 或者bash中,  <a href="https://www.jianshu.com/p/66a4dd4b2157">参考链接</a></p>
+
+    <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="nx">echo</span> <span class="dl">'</span><span class="s1">export PATH="/usr/local/opt/ruby/bin:$PATH"</span><span class="dl">'</span> <span class="o">&gt;&gt;</span> <span class="o">~</span><span class="sr">/.bash_profile</span><span class="err"> 
+</span><span class="nx">或者</span>
+<span class="nx">echo</span> <span class="dl">'</span><span class="s1">export PATH="/opt/homebrew/opt/ruby/bin:$PATH"</span><span class="dl">'</span> <span class="o">&gt;&gt;</span> <span class="o">~</span><span class="sr">/.zshr</span><span class="err">c
+</span>   
+<span class="nx">source</span> <span class="o">~</span><span class="sr">/.bash_profil</span><span class="err">e
+</span></pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>校验版本</p>
+
+    <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre> <span class="nx">ruby</span> <span class="o">-</span><span class="nx">v</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>gem sources 更换</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>$ gem sources -l
+$ gem sources --remove https://rubygems.org/
+$ gem sources -a http://ruby.taobao.org/ // 失效
+gem sources -a  https://gems.ruby-china.com/    //最新
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+
+    <p><a href="https://www.cnblogs.com/kaiye/p/3039345.html">参考1</a></p>
+
+    <p><a href="https://blog.csdn.net/wannibadehaizi/article/details/89037000">参考2</a></p>
+  </li>
+</ol>
+
+<h2 id="2-mac安装jekyll">2. mac安装jekyll</h2>
+
+<p><a href="https://blog.csdn.net/qq_34347375/article/details/123363173">参考</a></p>
+
+<ol>
+  <li>
+    <p>安装</p>
+
+    <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="nx">gem</span> <span class="nx">install</span> <span class="nx">jekyll</span> <span class="nx">bundler</span> <span class="o">--</span><span class="nx">user</span><span class="o">-</span><span class="nx">install</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>设置环境变量</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre># 修改gem的运行环境， 版本修改到对应版本
+echo 'export PATH="$HOME/.gem/ruby/3.0.0/bin:$PATH"' &gt;&gt; ~/.zshrc
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>jekyll -v</p>
+  </li>
+</ol>
+
+<h2 id="3-更换主题">3. 更换主题</h2>
+
+<p><a href="https://blog.csdn.net/ForeverBana/article/details/105431149">参考</a></p>
+
+<ol>
+  <li>
+    <p>初始化</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>jekyll new blogname// blogname 自己取
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>运行</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>//进入博客目录
+<span class="nb">cd </span>blogname
+//运行
+jekyll serve
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>替换主题</p>
+
+    <p>（1）删除blogname文件，除了<strong>Gemfile</strong>文件</p>
+
+    <p>（2）下载主题，把下载的主题里删除<strong>Gemfile</strong>文件， 然后全部copy到blogname 目录下</p>
+
+    <p>（3）运行，正常是大公高成，当然可能出现错误</p>
+  </li>
+  <li>
+    <p>解决错误的方法：</p>
+
+    <ul>
+      <li>错误</li>
+    </ul>
+
+    <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="s2">`require': cannot load such file -- jekyll-sitemap (LoadError)
+</span></pre></td></tr></tbody></table></code></pre></div>    </div>
+
+    <ul>
+      <li>解决方法</li>
+    </ul>
+
+    <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="nx">jekyll</span> <span class="k">new</span> <span class="nx">maptest</span>
+<span class="nx">cd</span> <span class="nx">maptest</span><span class="o">/</span>
+<span class="nx">bundle</span> <span class="nx">add</span> <span class="nx">jekyll</span><span class="o">-</span><span class="nx">sitemap</span>
+<span class="nx">printf</span> <span class="dl">"</span><span class="se">\n</span><span class="s2">plugins:</span><span class="se">\n</span><span class="s2">  - jekyll-sitemap</span><span class="se">\n</span><span class="dl">"</span> <span class="o">&gt;&gt;</span> <span class="nx">_config</span><span class="p">.</span><span class="nx">yml</span> 
+<span class="nx">bundle</span> <span class="nx">exec</span> <span class="nx">jekyll</span> <span class="nx">build</span>
+<span class="nx">cat</span> <span class="nx">_site</span><span class="o">/</span><span class="nx">sitemap</span><span class="p">.</span><span class="nx">xml</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+</ol>
+
+<h2 id="4-参考">4. 参考</h2>
+
+<ol>
+  <li><a href="https://github.com/whenfung/Newton">主题</a></li>
+</ol>
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2018/11/03/markdown/">markdown语法</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/even3yu" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:ligexiao@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>        
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

@@ -6,8 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Fisher</title>
-    <meta name="description" content="">
+    <title>markdown语法</title>
+    <meta name="description" content="  段落  代码高亮  各种字体  引用  表格  图片  无序列表  有序列表  外部代码  内联html标签  水平线  数学公式  参考资料 二级标题  三级标题  四级标题  五级标题  六级标题 段落先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。然侍卫之臣不懈于内，忠志之士忘身于外者...">
 
     <!-- 网站所有权验证 -->
     <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
     <link rel="stylesheet" href="/css/main.css ">
-    <link rel="canonical" href="http://localhost:4000/">
+    <link rel="canonical" href="http://localhost:4000/2018/11/03/markdown/">
     <link rel="alternate" type="application/rss+xml" title="Fisher" href="http://localhost:4000/feed.xml ">
 
 
@@ -50,31 +50,6 @@
 
 
 
-<script>
-window.MathJax = {
-  tex: {
-    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
-    processEscapes: true,
-    tags: "all",
-    macros: {
-      bm: ["{\\boldsymbol #1}",1]
-    },
-    packages: {'[+]': ['noerrors']}
-  },
-  options: {
-    ignoreHtmlClass: 'tex2jax_ignore',
-    processHtmlClass: 'tex2jax_process'
-  },
-  loader: {
-    load: ['input/asciimath', '[tex]/noerrors']
-  }
-};
-</script>
-<script async
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
-</script>
-<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
-
 
 
 <!--  -->
@@ -98,8 +73,8 @@ window.MathJax = {
             <ul>
                 <li>
                     
-                    <a class="active" href="/index.html">
-                        
+                    <a href="/index.html">
+                    
                         <i class="fa fa-home"></i>Home
                     </a>
                 </li>
@@ -171,147 +146,28 @@ window.MathJax = {
 </header>
 
 
-        <div class="page clearfix" index>
+        <div class="page clearfix" post>
     <div class="left-jekyll">
-        <h1>Fisher‘s Blog</h1>
-        <p style="font-size: small; margin-top: 10px;">Fisher Blog</p>
-        <hr>
-        <ul>
+        <h1>markdown语法</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2018-11-03
+            </div>
+
             
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Fisher
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
             
-              <li class="index-left-li">
-                <h2>
-                  <a class="post-link" href="/2023/07/07/blog/">如何自建博客</a>
-                </h2>
-                <div class="label-custom">
-                    <div class="label-custom-card">
-                        <i class="fa fa-calendar"></i>2023-07-07
-                    </div>
-                    <div class="label-custom-card">
-                        <i class="fa fa-user"></i>Fisher
-                        
-                    </div>
-                    <div class="label-custom-card">
-                    
-
-
-<!-- <span class="point">•</span> -->
-<span class="categories">
-  <i class="fa fa-th-list"></i>
-  
-    
-        <a href="/category/#杂项" title="Category: 杂项" rel="category">杂项</a>
-    
-  
-
-  <!-- <span class="point">•</span> -->
-</span>
-
-
-                    </div>
-                </div>
-                <div>
-                    <div class="excerpt-text">
-                        <h2 id="1-安装ruby">1. 安装ruby</h2>
-
-<ol>
-  <li>mac自带的了一个ruby，但版本是<code class="language-plaintext highlighter-rouge">2.6.0</code> ,不满足安装要求。</li>
-  <li>
-    <p>brew install ruby –user-install
-一定要带上<code class="language-plaintext highlighter-rouge">--user-install</code>, 不然有权限问题, <a href="https://zhuanlan.zhihu.com/p/368333535">参考链接</a></p>
-  </li>
-  <li>
-    <p>设置环境变量，设置到zsh， 或者bash中,  <a href="https://www.jianshu.com/p/66a4dd4b2157">参考链接</a></p>
-
-    <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-</pre></td><td class="rouge-code"><pre><span class="nx">echo</span> <span class="dl">'</span><span class="s1">export PATH="/usr/local/opt/ruby/bin:$PATH"</span><span class="dl">'</span> <span class="o">&gt;&gt;</span> <span class="o">~</span><span class="sr">/.bash_profile</span><span class="err"> 
-</span><span class="nx">或者</span>
-<span class="nx">echo</span> <span class="dl">'</span><span class="s1">export PATH="/opt/homebrew/opt/ruby/bin:$PATH"</span><span class="dl">'</span> <span class="o">&gt;&gt;</span> <span class="o">~</span><span class="sr">/.zshr</span><span class="err">c
-</span>   
-<span class="nx">source</span> <span class="o">~</span><span class="sr">/.bash_profil</span><span class="err">e
-</span></pre></td></tr></tbody></table></code></pre></div>    </div>
-  </li>
-  <li>
-    <p>校验版本</p>
-
-    <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-</pre></td><td class="rouge-code"><pre> <span class="nx">ruby</span> <span class="o">-</span><span class="nx">v</span>
-</pre></td></tr></tbody></table></code></pre></div>    </div>
-  </li>
-  <li>
-    <p>gem sources 更换</p>
-
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-</pre></td><td class="rouge-code"><pre>$ gem sources -l
-$ gem sources --remove https://rubygems.org/
-$ gem sources -a http://ruby.taobao.org/ // 失效
-gem sources -a  https://gems.ruby-china.com/    //最新
-</pre></td></tr></tbody></table></code></pre></div>    </div>
-
-    <p><a href="https://www.cnblogs.com/kaiye/p/3039345.html">参考1</a></p>
-
-    <p><a href="https://blog.csdn.net/wannibadehaizi/article/details/89037000">参考2</a></p>
-  </li>
-</ol>
-
-<h2 id="2-mac安装jekyll">2. mac安装jekyll</h2>
-
-<p><a href="https://blog.csdn.net/qq_34347375/article/details/123363173">参考</a></p>
-
-<ol>
-  <li>
-    <p>安装</p>
-
-    <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-</pre></td><td class="rouge-code"><pre><span class="nx">gem</span> <span class="nx">install</span> <span class="nx">jekyll</span> <span class="nx">bundler</span> <span class="o">--</span><span class="nx">user</span><span class="o">-</span><span class="nx">install</span>
-</pre></td></tr></tbody></table></code></pre></div>    </div>
-  </li>
-  <li>
-    <p>设置环境变量</p>
-
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-</pre></td><td class="rouge-code"><pre># 修改gem的运行环境， 版本修改到对应版本
-echo 'export PATH="$HOME/.gem/ruby/3.0.0/bin:$PATH"' &gt;&gt; ~/.zshrc
-</pre></td></tr></tbody></table></code></pre></div>    </div>
-  </li>
-  <li>
-    <p>jekyll -v</p>
-  </li>
-</ol>
-
-                    </div>
-                    
-                </div>
-                <div class="read-all">
-                    <a  href="/2023/07/07/blog/"><i class="fa fa-newspaper-o"></i>阅读全文</a>
-                </div>
-                <hr>
-              </li>
-            
-            
-            
-              <li class="index-left-li">
-                <h2>
-                  <a class="post-link" href="/2018/11/03/markdown/">markdown语法</a>
-                </h2>
-                <div class="label-custom">
-                    <div class="label-custom-card">
-                        <i class="fa fa-calendar"></i>2018-11-03
-                    </div>
-                    <div class="label-custom-card">
-                        <i class="fa fa-user"></i>Fisher
-                        
-                    </div>
-                    <div class="label-custom-card">
-                    
 
 
 <!-- <span class="point">•</span> -->
@@ -327,11 +183,12 @@ echo 'export PATH="$HOME/.gem/ruby/3.0.0/bin:$PATH"' &gt;&gt; ~/.zshrc
 </span>
 
 
-                    </div>
-                </div>
-                <div>
-                    <div class="excerpt-text">
-                        <ul id="markdown-toc">
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
   <li><a href="#段落" id="markdown-toc-段落">段落</a></li>
   <li><a href="#代码高亮" id="markdown-toc-代码高亮">代码高亮</a></li>
   <li><a href="#各种字体" id="markdown-toc-各种字体">各种字体</a></li>
@@ -476,159 +333,73 @@ echo 'export PATH="$HOME/.gem/ruby/3.0.0/bin:$PATH"' &gt;&gt; ~/.zshrc
   <li><a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/#lists">Basic writing and formatting syntax</a></li>
 </ul>
 
-                    </div>
-                    
-                </div>
-                <div class="read-all">
-                    <a  href="/2018/11/03/markdown/"><i class="fa fa-newspaper-o"></i>阅读全文</a>
-                </div>
-                <hr>
-              </li>
-            
-            
-        </ul>
+        </article>
+        <hr>
 
-        <div style="text-align: center;">
-            <ul id="myPager" class="pager" data-page="1" data-rec-total="1" data-elements="prev,nav,next" data-max-nav-count="9"></ul>
-        </div>
+        <!-- 
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
     </div>
-    <!-- <button class="anchor"><i class="fa fa-anchor"></i></button> -->
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2023/07/07/blog/">如何自建博客</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
     <div class="right-jekyll">
         <div class="wrap">
 
-            <!-- 置顶文章 -->
-            <div class="side index-right-div">
-                <div>
-                    <i class="fa fa-anchor" aria-hidden="true"></i>
-                    Pined Articles
-                </div>
-                <ul class="content-ul" recent>
-                    
-                        
-                    
-                        
-                            <li><a href="/2018/11/03/markdown/" class="index-right-recent">markdown语法</a></li>
-                        
-                    
-                </ul>
-            </div>
-
-            <div class="side index-right-div">
-                <div>
-                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                    Recent Articles
-                </div>
-                <ul class="content-ul" recent>
-                    
-                        <li><a href="/2023/07/07/blog/" class="index-right-recent">如何自建博客</a></li>
-                    
-                        <li><a href="/2018/11/03/markdown/" class="index-right-recent">markdown语法</a></li>
-                    
-                </ul>
-            </div>
-
             <!-- Content -->
-            <div class="side index-right-div">
+            <div class="side content">
                 <div>
-                    <i class="fa fa-th-list"></i>
-                    Categories
+                    Content
                 </div>
-                <ul class="content-ul" cate>
+                <ul id="content-side" class="content-ul">
                     
-                    <li>
-                        <a href="/category/#大模型" class="categories-list-item" cate="大模型">
-                            <span class="name">大模型</span>
-                            <span class="label label-badge label-info badge">1</span>
-                        </a>
-                    </li>
-                    
-                    <li>
-                        <a href="/category/#杂项" class="categories-list-item" cate="杂项">
-                            <span class="name">杂项</span>
-                            <span class="label label-badge label-info badge">1</span>
-                        </a>
-                    </li>
-                    
+                    <li><a href="#comments">Comments</a></li>
                 </ul>
             </div>
-
-            <div class="side index-right-div">
-                <div>
-                    <i class="fa fa-book"></i>
-                    Wiki
-                </div>
-                <!-- 对 Wiki 的文章数量进行计数 -->
-                <ul  class="content-ul" wiki>
-                    
-                        
-                        
-                        
-                        <li>
-                            <a href="/wiki/#" class="categories-list-item" >
-                                <span class="name">Latex</span>
-                                <span class="label label-badge label-warning badge">0</span>
-                            </a>
-                        </li>
-                    
-                        
-                        
-                        
-                        <li>
-                            <a href="/wiki/#" class="categories-list-item" >
-                                <span class="name">Python</span>
-                                <span class="label label-badge label-warning badge">0</span>
-                            </a>
-                        </li>
-                    
-                        
-                        
-                        
-                        <li>
-                            <a href="/wiki/#" class="categories-list-item" >
-                                <span class="name">Windows</span>
-                                <span class="label label-badge label-warning badge">0</span>
-                            </a>
-                        </li>
-                    
-                        
-                        
-                        
-                        <li>
-                            <a href="/wiki/#" class="categories-list-item" >
-                                <span class="name">Ubuntu</span>
-                                <span class="label label-badge label-warning badge">0</span>
-                            </a>
-                        </li>
-                    
-                        
-                        
-                        
-                        <li>
-                            <a href="/wiki/#" class="categories-list-item" >
-                                <span class="name">CUDA</span>
-                                <span class="label label-badge label-warning badge">0</span>
-                            </a>
-                        </li>
-                    
-                        
-                        
-                        
-                        <li>
-                            <a href="/wiki/#" class="categories-list-item" >
-                                <span class="name">CMake</span>
-                                <span class="label label-badge label-warning badge">0</span>
-                            </a>
-                        </li>
-                    
-                </ul>
-            </div>
-
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
         </div>
     </div>
 </div>
-<!-- <script src="/js/scroll.min.js " charset="utf-8"></script> -->
-<!-- <script src="/js/pageContent.js " charset="utf-8"></script> -->
-
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
 
     <footer class="site-footer">
 

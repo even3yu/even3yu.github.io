@@ -4,7 +4,7 @@ title: "潜空间扩散模型 (Latent Diffusion Models, LDM)"
 date: 2022-12-25 15:04:00 +0800
 categories: 深度学习 生成模型
 mathjax: true
-author: Jarvis
+author: Fisher
 meta: Post
 ---
 
