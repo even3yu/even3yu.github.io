@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Python 装饰器</title>
+    <meta name="description" content="  1. 通用装饰器 (同时支持带/不带参数)  2. 常用装饰器          @property @name.setter      1. 通用装饰器 (同时支持带/不带参数)通常如果我们想要一个装饰器同时支持带参数和不带参数, 需要编写两个函数来实现. 如下:1234567891011121314151...">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2017/10/31/pydecorater/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>Python 装饰器</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2017-10-31
+            </div>
+
+            
+            <div class="label-custom-card">
+                <i class="fa fa-pencil"></i>2021-05-27
+            </div>
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Wiki_Python  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-通用装饰器-同时支持带不带参数" id="markdown-toc-1-通用装饰器-同时支持带不带参数">1. 通用装饰器 (同时支持带/不带参数)</a></li>
+  <li><a href="#2-常用装饰器" id="markdown-toc-2-常用装饰器">2. 常用装饰器</a>    <ul>
+      <li><a href="#property-namesetter" id="markdown-toc-property-namesetter">@property @name.setter</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="1-通用装饰器-同时支持带不带参数">1. 通用装饰器 (同时支持带/不带参数)</h2>
+
+<p>通常如果我们想要一个装饰器同时支持带参数和不带参数, 需要编写两个函数来实现. 如下:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+</pre></td><td class="rouge-code"><pre><span class="k">def</span> <span class="nf">deco1</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">new_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># do something
+</span>        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">No prefix.</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nf">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_func</span>
+
+<span class="k">def</span> <span class="nf">deco2</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">inner_deco</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">new_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="c1"># do something with `prefix`
+</span>            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Using prefix: </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nf">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_func</span>
+    <span class="k">return</span> <span class="n">inner_deco</span>
+
+<span class="nd">@deco1</span>
+<span class="k">def</span> <span class="nf">foo1</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="nd">@deco2</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="sh">'</span><span class="s">AAA</span><span class="sh">'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">foo2</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="nf">foo1</span><span class="p">()</span>
+<span class="nf">foo2</span><span class="p">()</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>为了简化代码, 我们可以利用 <code class="language-plaintext highlighter-rouge">wrapt.decorator</code> 来简化上面的代码:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+</pre></td><td class="rouge-code"><pre><span class="kn">import</span> <span class="n">wrapt</span>
+<span class="kn">from</span> <span class="n">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="nd">@wrapt.decorator</span>
+<span class="k">def</span> <span class="nf">optional_kwargs_decorator</span><span class="p">(</span><span class="n">wrapped</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nf">wrapped</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nf">partial</span><span class="p">(</span><span class="n">wrapped</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="nd">@optional_kwargs_decorator</span>
+<span class="k">def</span> <span class="nf">deco</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">new_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># do something with `prefix`
+</span>        <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Using prefix: </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">No prefix.</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nf">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_func</span>
+
+<span class="c1"># 不带参数的装饰器, 注意是不加括号的
+</span><span class="nd">@deco</span>
+<span class="k">def</span> <span class="nf">foo1</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="c1"># 带参数的装饰器, 以函数的形式调用并传入参数
+</span><span class="nd">@deco</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="sh">'</span><span class="s">AAA</span><span class="sh">'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">foo2</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="nf">foo1</span><span class="p">()</span>
+<span class="nf">foo2</span><span class="p">()</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>注意上面这段代码中装饰器 <code class="language-plaintext highlighter-rouge">optional_kwargs_decorator</code> 如果被 <code class="language-plaintext highlighter-rouge">wrapt.decorator</code> 装饰了的话, 其签名是固定的.</p>
+
+<p>虽然上面的代码看起来更复杂了, 但我们额外定义的装饰器 <code class="language-plaintext highlighter-rouge">optional_kwargs_decorator</code> 是可以复用的, 它的功能就是令被它装饰的装饰器(这个例子里是 <code class="language-plaintext highlighter-rouge">deco</code>)可以同时以带参数和不带参数的形式使用, 而不需要编写两个函数.</p>
+
+<div class="alert alert-info with-icon card">
+
+<i class="icon-info-sign"></i>
+<div class="zui-card-content">
+
+<div class="title"><strong>提示</strong></div><hr />
+
+<div class="content">
+      <p>要注意区分不带参数的装饰器和带参数的装饰器. @deco 返回的是被装饰过的函数, 而 @deco(prefix=’AAA’) 实际上是个函数调用 deco(prefix=’AAA’), 该函数返回一个装饰器.</p>
+    </div>
+
+</div>
+</div>
+
+<h2 id="2-常用装饰器">2. 常用装饰器</h2>
+<p>通过在类的方法前面加装装饰器, 可以实现更丰富的类的方法和更简洁的用法.</p>
+
+<h3 id="property-namesetter">@property @name.setter</h3>
+
+<p>在 <code class="language-plaintext highlighter-rouge">python</code> 的类中可以直接把属性暴露在外面, 允许使用者直接查看或者修改, 但是这样就无法对属性设定限制:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="k">class</span> <span class="nc">Student</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">s</span> <span class="o">=</span> <span class="nc">Student</span><span class="p">()</span>
+<span class="n">s</span><span class="p">.</span><span class="n">score</span> <span class="o">=</span> <span class="mi">1000</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>所以为了限制属性不能任意指定, 可以通过接口函数来对属性值进行检查:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="rouge-code"><pre><span class="k">class</span> <span class="nc">Student</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">get_score</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">score</span>
+
+    <span class="k">def</span> <span class="nf">set_score</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sh">"</span><span class="s">Score must be a integer or float.</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sh">"</span><span class="s">Score is between 0 and 100</span><span class="sh">"</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">score</span> <span class="o">=</span> <span class="n">value</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre>&gt;&gt;&gt; s = Student()
+&gt;&gt;&gt; s.set_score(60.5)
+&gt;&gt;&gt; s.get_score()
+60.5
+&gt;&gt;&gt; s.set_score(1000)
+Traceback (most recent call last):
+  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
+  File "&lt;stdin&gt;", line 10, in set_score
+ValueError: Score is between 0 and 100
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>但是上面要使用两个函数作为接口函数, 调用时十分不方便, 这时就可以使用 <code class="language-plaintext highlighter-rouge">property</code> 装饰器, 调用了该装饰器后会自动生成相应的 <code class="language-plaintext highlighter-rouge">setter</code> 装饰器:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="rouge-code"><pre><span class="k">class</span> <span class="nc">Student</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">_score</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">_score</span>
+
+    <span class="nd">@score.setter</span>
+    <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sh">'</span><span class="s">setting</span><span class="sh">'</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sh">"</span><span class="s">Score must be a integer or float.</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sh">"</span><span class="s">Score is between 0 and 100</span><span class="sh">"</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">_score</span> <span class="o">=</span> <span class="n">value</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre>&gt;&gt;&gt; s = Student()
+&gt;&gt;&gt; s.score
+0
+&gt;&gt;&gt; s.score = 100
+&gt;&gt;&gt; s.score
+100
+&gt;&gt;&gt; s.score = 1001
+Traceback (most recent call last):
+  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
+  File "&lt;stdin&gt;", line 13, in score
+ValueError: Score is between 0 and 100
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>如果在上面的类中不定义 <code class="language-plaintext highlighter-rouge">score.setter</code> 方法, 那么 <code class="language-plaintext highlighter-rouge">score</code> 就变成了一个只读属性.</p>
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2017/10/20/Graph-Search-Based-3D-Medical-Image-Segmentation-2/">基于图搜索的三维医学图像分割方法 (二)</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2017/10/31/Python-buildin-lib-1/">Python 库函数 (一) logging</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

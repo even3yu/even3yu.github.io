@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Faster R-CNN(Tensorflow) 源码解析</title>
+    <meta name="description" content="">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2018/04/01/Faster-RCNN-Code-Analysis/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>Faster R-CNN(Tensorflow) 源码解析</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2018-04-01
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#目标检测" title="Category: 目标检测" rel="category">目标检测</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-数据预处理--输入层" id="markdown-toc-1-数据预处理--输入层">1. 数据预处理 + 输入层</a>    <ul>
+      <li><a href="#11-数据预处理" id="markdown-toc-11-数据预处理">1.1 数据预处理</a>        <ul>
+          <li><a href="#111-类-pascal_voc" id="markdown-toc-111-类-pascal_voc">1.1.1 类 <code class="language-plaintext highlighter-rouge">pascal_voc</code></a></li>
+          <li><a href="#112-数据处理" id="markdown-toc-112-数据处理">1.1.2 数据处理</a></li>
+        </ul>
+      </li>
+      <li><a href="#12-输入层" id="markdown-toc-12-输入层">1.2 输入层</a>        <ul>
+          <li><a href="#121-类--roidatalayer" id="markdown-toc-121-类--roidatalayer">1.2.1 类  <code class="language-plaintext highlighter-rouge">ROIDataLayer</code></a>            <ul>
+              <li><a href="#get_minibatch" id="markdown-toc-get_minibatch"><code class="language-plaintext highlighter-rouge">get_minibatch()</code></a></li>
+              <li><a href="#_get_image_blob" id="markdown-toc-_get_image_blob"><code class="language-plaintext highlighter-rouge">_get_image_blob()</code></a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#2-神经网络构建---networkpy" id="markdown-toc-2-神经网络构建---networkpy">2. 神经网络构建 —- <code class="language-plaintext highlighter-rouge">network.py</code></a>    <ul>
+      <li><a href="#21-网络输入" id="markdown-toc-21-网络输入">2.1 网络输入</a></li>
+      <li><a href="#22-构建网络---主干部分-self_image_to_head" id="markdown-toc-22-构建网络---主干部分-self_image_to_head">2.2 构建网络 —- 主干部分 <code class="language-plaintext highlighter-rouge">self._image_to_head()</code></a></li>
+      <li><a href="#23-构建网络---rpn-部分-计算-anchors-self_anchor_component" id="markdown-toc-23-构建网络---rpn-部分-计算-anchors-self_anchor_component">2.3 构建网络 —- RPN 部分, 计算 Anchors <code class="language-plaintext highlighter-rouge">self._anchor_component()</code></a></li>
+      <li><a href="#24-构建网络---rpn-部分-计算区域建议-self_region_proposal" id="markdown-toc-24-构建网络---rpn-部分-计算区域建议-self_region_proposal">2.4 构建网络 —- RPN 部分, 计算区域建议 <code class="language-plaintext highlighter-rouge">self._region_proposal()</code></a>        <ul>
+          <li><a href="#241-网络结构" id="markdown-toc-241-网络结构">2.4.1 网络结构</a></li>
+          <li><a href="#计算-rpn-的建议区域-proposals-以及训练-rpn-部分的预测-pred-和标签-label" id="markdown-toc-计算-rpn-的建议区域-proposals-以及训练-rpn-部分的预测-pred-和标签-label">计算 RPN 的建议区域 (proposals), 以及训练 RPN 部分的预测 (pred) 和标签 (label)</a></li>
+          <li><a href="#242-分类指标" id="markdown-toc-242-分类指标">2.4.2 分类指标</a></li>
+          <li><a href="#244-回归指标" id="markdown-toc-244-回归指标">2.4.4 回归指标</a>            <ul>
+              <li><a href="#2441-计算每个-anchor-的-label-值-anchor_target_layerpy" id="markdown-toc-2441-计算每个-anchor-的-label-值-anchor_target_layerpy">2.4.4.1 计算每个 anchor 的 label 值 <code class="language-plaintext highlighter-rouge">anchor_target_layer.py</code></a></li>
+              <li><a href="#2442-计算-bbox-的-label-值-bbox_transformpy" id="markdown-toc-2442-计算-bbox-的-label-值-bbox_transformpy">2.4.4.2 计算 bbox 的 label 值 <code class="language-plaintext highlighter-rouge">bbox_transform.py</code></a></li>
+              <li><a href="#2443-为正负样本给定权重" id="markdown-toc-2443-为正负样本给定权重">2.4.4.3 为正负样本给定权重</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><a href="#25-构建网络---fast-rcnn-部分" id="markdown-toc-25-构建网络---fast-rcnn-部分">2.5 构建网络 —- Fast RCNN 部分</a>        <ul>
+          <li><a href="#251-计算用于-fast-rcnn-的-rois-及其-labels---proposal_target_layerpy" id="markdown-toc-251-计算用于-fast-rcnn-的-rois-及其-labels---proposal_target_layerpy">2.5.1 计算用于 Fast RCNN 的 ROIs 及其 Labels —- <code class="language-plaintext highlighter-rouge">proposal_target_layer.py</code></a></li>
+          <li><a href="#252-roi-pooling-层-_crop_pool_layer" id="markdown-toc-252-roi-pooling-层-_crop_pool_layer">2.5.2 ROI Pooling 层 <code class="language-plaintext highlighter-rouge">_crop_pool_layer()</code></a></li>
+          <li><a href="#253-头到尾部分-self_head_to_tail" id="markdown-toc-253-头到尾部分-self_head_to_tail">2.5.3 头到尾部分 <code class="language-plaintext highlighter-rouge">self._head_to_tail()</code></a></li>
+          <li><a href="#254-区域分类回归部分-self_region_classification" id="markdown-toc-254-区域分类回归部分-self_region_classification">2.5.4 区域分类+回归部分 <code class="language-plaintext highlighter-rouge">self._region_classification()</code></a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#3-损失计算---self_add_losses" id="markdown-toc-3-损失计算---self_add_losses">3. 损失计算 —- <code class="language-plaintext highlighter-rouge">self._add_losses()</code></a></li>
+  <li><a href="#4-收集摘要用于-tensorboard" id="markdown-toc-4-收集摘要用于-tensorboard">4. 收集摘要用于 Tensorboard</a></li>
+  <li><a href="#5-求解器---solverwrapper" id="markdown-toc-5-求解器---solverwrapper">5. 求解器 —- <code class="language-plaintext highlighter-rouge">SolverWrapper</code></a>    <ul>
+      <li><a href="#方法" id="markdown-toc-方法">方法</a>        <ul>
+          <li><a href="#snapshotself-sess-iter" id="markdown-toc-snapshotself-sess-iter"><code class="language-plaintext highlighter-rouge">snapshot(self, sess, iter)</code></a></li>
+          <li><a href="#from_snapshotself-sess-sfile-nfile" id="markdown-toc-from_snapshotself-sess-sfile-nfile"><code class="language-plaintext highlighter-rouge">from_snapshot(self, sess, sfile, nfile)</code></a></li>
+          <li><a href="#remove_snapshotself-np_paths-ss_paths" id="markdown-toc-remove_snapshotself-np_paths-ss_paths"><code class="language-plaintext highlighter-rouge">remove_snapshot(self, np_paths, ss_paths)</code></a></li>
+          <li><a href="#find_previousself" id="markdown-toc-find_previousself"><code class="language-plaintext highlighter-rouge">find_previous(self)</code></a></li>
+          <li><a href="#initializeself-sess" id="markdown-toc-initializeself-sess"><code class="language-plaintext highlighter-rouge">initialize(self, sess)</code></a></li>
+          <li><a href="#restoreself-sess-sfile-nfile" id="markdown-toc-restoreself-sess-sfile-nfile"><code class="language-plaintext highlighter-rouge">restore(self, sess, sfile, nfile)</code></a></li>
+          <li><a href="#train_modelself-sess-max_iters" id="markdown-toc-train_modelself-sess-max_iters"><code class="language-plaintext highlighter-rouge">train_model(self, sess, max_iters)</code></a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>以下代码来源于<a href="https://github.com/endernewton/tf-faster-rcnn">Faster RCNN</a>. 由于该代码太长, 所以这里做个注释, 即是为了自己理清思路, 也是为了改写时方便.</p>
+
+<p>源码运行入口在 <code class="language-plaintext highlighter-rouge">./tf-faster-rcnn/experiments/scripts/train_faster_rcnn.sh</code></p>
+
+<p>python 程序入口在 <code class="language-plaintext highlighter-rouge">./tf-faster-rcnn/tools/trainval_net.py</code></p>
+
+<h2 id="1-数据预处理--输入层">1. 数据预处理 + 输入层</h2>
+
+<p>目前数据工厂里支持的数据集有</p>
+
+<ul>
+  <li>VOC: 2007, 2012</li>
+  <li>COCO: 2014, 2015</li>
+</ul>
+
+<h3 id="11-数据预处理">1.1 数据预处理</h3>
+
+<p>该程序支持同时使用多个数据集, 首先对多个数据集 (字符串, 用加号连接) 进行预处理:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">imdb</span><span class="p">,</span> <span class="n">roidb</span> <span class="o">=</span> <span class="nf">combined_roidb</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">imdb_name</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>获取单个数据集, 这里的 <code class="language-plaintext highlighter-rouge">imdb</code> 是由匿名函数生成的类 <code class="language-plaintext highlighter-rouge">pascal_voc</code> 或者类 <code class="language-plaintext highlighter-rouge">coco</code> 的一个实例.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">imdb</span> <span class="o">=</span> <span class="nf">get_imdb</span><span class="p">(</span><span class="n">imdb_name</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>以 <code class="language-plaintext highlighter-rouge">pascal_voc 2007</code> 为例, 给出该数据集的目录树</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+</pre></td><td class="rouge-code"><pre>tf-faster-rcnn/data/VOCdevkit2007
+└── VOC2007
+    ├── Annotations
+    |   ├── 000001.xml
+    |   ├── ...
+    |   └── 009963.xml
+    ├── ImageSets
+    │   ├── Layout
+    │   │   ├── test.txt
+    │   │   ├── train.txt
+    │   │   ├── trainval.txt
+    │   │   └── val.txt
+    │   ├── Main
+    │   │   ├── aeroplane_test.txt
+    │   │   ├── aeroplane_train.txt
+    │   │   ├── aeroplane_trainval.txt
+    │   │   ├── aeroplane_val.txt
+    │   │   ├── ...
+    │   │   ├── test.txt
+    │   │   ├── train.txt
+    │   │   ├── trainval.txt
+    │   │   └── val.txt
+    │   └── Segmentation
+    │       ├── test.txt
+    │       ├── train.txt
+    │       ├── trainval.txt
+    │       └── val.txt
+    ├── JPEGImages
+    ├── SegmentationClass
+    └── SegmentationObject
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>类 <code class="language-plaintext highlighter-rouge">pascal_voc</code> , 该类继承自类 <code class="language-plaintext highlighter-rouge">imdb</code> , <code class="language-plaintext highlighter-rouge">imdb</code> 是所有数据集的公共类.</p>
+
+<h4 id="111-类-pascal_voc">1.1.1 类 <code class="language-plaintext highlighter-rouge">pascal_voc</code></h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">self._year</code> 为数据集的年份</li>
+  <li><code class="language-plaintext highlighter-rouge">self._image_set</code> 取值于 <code class="language-plaintext highlighter-rouge">['tran', 'val', 'trainval', 'test']</code> .</li>
+  <li><code class="language-plaintext highlighter-rouge">self._devkit_path</code>  数据根目录: <code class="language-plaintext highlighter-rouge">./tf-faster-rcnn/data/VOCdevkit2007/</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self._data_path</code>  数据目录: <code class="language-plaintext highlighter-rouge">./tf-faster-rcnn/data/VOCdevkit2007/VOC2007</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self._classes</code>  元组, 背景的类别名称总是在第 0 个位置</li>
+  <li><code class="language-plaintext highlighter-rouge">self._class_to_ind</code>  字典, 类别到数字的映射</li>
+  <li><code class="language-plaintext highlighter-rouge">self._image_ext</code>  图像的后缀</li>
+  <li><code class="language-plaintext highlighter-rouge">self._image_index</code>  列表, 该数据集中每幅图像的编号</li>
+  <li><code class="language-plaintext highlighter-rouge">self._roidb_handler</code>  两种选择, <code class="language-plaintext highlighter-rouge">gt_roidb</code> 或 <code class="language-plaintext highlighter-rouge">rpn_roidb</code> .</li>
+  <li><code class="language-plaintext highlighter-rouge">self.roidb</code> 边界框数据库, 等于下面 <code class="language-plaintext highlighter-rouge">gt_roidb</code> 函数的返回值</li>
+</ul>
+
+<p><strong>获得 ground truth 感兴趣区域的数据库, 并保存为 <code class="language-plaintext highlighter-rouge">pkl</code> 格式的文件</strong></p>
+
+<p>如果已经存在数据库, 则直接返回存在的数据库, 否则生成新的数据库. 下面的 <code class="language-plaintext highlighter-rouge">self._load_pascal_annotation()</code> 使用图像的编号从 xml 文件中读取相应的标注 (标注文件的名称与图像标号一致), 该函数返回一个字典, 包含如下键值对:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">boxes</code>  二维数组, <code class="language-plaintext highlighter-rouge">shape = [num_objs, 4]</code> , 4 表示边界框是左上和右下两点的坐标</li>
+  <li><code class="language-plaintext highlighter-rouge">gt_classes</code>  一维数组, <code class="language-plaintext highlighter-rouge">shape = [num_objs]</code></li>
+  <li><code class="language-plaintext highlighter-rouge">gt_overlaps</code>  二维数组, <code class="language-plaintext highlighter-rouge">shape = [num_objs, num_cls]</code> , 每一行表示一个物体, 表示该物体的列对应的值设为 1.0, 其他均为 0.</li>
+  <li><code class="language-plaintext highlighter-rouge">seg_areas</code>  一维数组, <code class="language-plaintext highlighter-rouge">shape = [num_objs]</code> , 边界框包含区域的面积</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+</pre></td><td class="rouge-code"><pre><span class="k">def</span> <span class="nf">gt_roidb</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Return the database of ground-truth regions of interest.
+
+    This function loads/saves from/to a cache file to speed up future calls.
+    </span><span class="sh">"""</span>
+    <span class="n">cache_file</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">cache_path</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">name</span> <span class="o">+</span> <span class="sh">'</span><span class="s">_gt_roidb.pkl</span><span class="sh">'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="nf">exists</span><span class="p">(</span><span class="n">cache_file</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">cache_file</span><span class="p">,</span> <span class="sh">'</span><span class="s">rb</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">roidb</span> <span class="o">=</span> <span class="n">pickle</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">roidb</span> <span class="o">=</span> <span class="n">pickle</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="sh">'</span><span class="s">bytes</span><span class="sh">'</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">{} gt roidb loaded from {}</span><span class="sh">'</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cache_file</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">roidb</span>
+
+    <span class="c1"># a dict consists of bounding boxes an  objects of one image
+</span>    <span class="n">gt_roidb</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="nf">_load_pascal_annotation</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">image_index</span><span class="p">]</span>
+    <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">cache_file</span><span class="p">,</span> <span class="sh">'</span><span class="s">wb</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="p">.</span><span class="nf">dump</span><span class="p">(</span><span class="n">gt_roidb</span><span class="p">,</span> <span class="n">fid</span><span class="p">,</span> <span class="n">pickle</span><span class="p">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">wrote gt roidb to {}</span><span class="sh">'</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">cache_file</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">gt_roidb</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="112-数据处理">1.1.2 数据处理</h4>
+
+<ol>
+  <li>获取 <code class="language-plaintext highlighter-rouge">pascal_voc</code> 类的一个实例, <code class="language-plaintext highlighter-rouge">imdb = get_imdb(imdb_name)</code></li>
+  <li>设置建议方法 <code class="language-plaintext highlighter-rouge">imdb.set_proposal_method(cfg.TRAIN.PROPOSAL_METHOD)</code> , 有 <code class="language-plaintext highlighter-rouge">gt</code> 和 <code class="language-plaintext highlighter-rouge">rpn</code> 两种选择</li>
+  <li>获取 roidb (即为 labels)
+    <ul>
+      <li>添加反转后的边界框 <code class="language-plaintext highlighter-rouge">imdb.append_flipped_images</code></li>
+      <li>准备训练数据 <code class="language-plaintext highlighter-rouge">rdl_roidb.prepare_roidb(imdb)</code> . 这一步为 roidb 列表中的每个字典添加了部分键:
+        <ul>
+          <li><code class="language-plaintext highlighter-rouge">image</code>  图像路径</li>
+          <li><code class="language-plaintext highlighter-rouge">width</code>  图像宽度</li>
+          <li><code class="language-plaintext highlighter-rouge">height</code>  图像高度</li>
+          <li><code class="language-plaintext highlighter-rouge">max_classes</code>  一维数组, <code class="language-plaintext highlighter-rouge">shape = [num_objs]</code> , 每一行表示与该边界框重合度最高的物体类别(由于这里是使用的 ground truth, 所以这里的类别就是该物体自己的类别)</li>
+          <li><code class="language-plaintext highlighter-rouge">max_overlaps</code>  一维数组, <code class="language-plaintext highlighter-rouge">shape = [num_objs]</code> ,  每个值这里都为 1, 表示每个物体的边界框与某个物体的边界框(包括它自己的) 最大的重叠度为 1. 这两个指标在使用 ground truth rois 的时候是没用的, 因为取值都为 1, 没有实用价值. 当我们使用 <code class="language-plaintext highlighter-rouge">rpn</code> 的建议方法时应该就会有用了.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="12-输入层">1.2 输入层</h3>
+
+<h4 id="121-类--roidatalayer">1.2.1 类  <code class="language-plaintext highlighter-rouge">ROIDataLayer</code></h4>
+
+<p>输入 ground truth rois 的层, 使用 <code class="language-plaintext highlighter-rouge">self.forward()</code> 方法来获取下一个小批. 其中涉及到一个函数 <code class="language-plaintext highlighter-rouge">get_minibatch()</code> 用于把小批的 <code class="language-plaintext highlighter-rouge">roidb[i]</code> (也就是一小批字典) 中的边界框信息提取出来并整合为输入的格式.</p>
+
+<h5 id="get_minibatch"><code class="language-plaintext highlighter-rouge">get_minibatch()</code></h5>
+
+<p>返回网络输入的一个小批, 是一个字典:</p>
+
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">data</code>: 三维数组, 形状为 <code class="language-plaintext highlighter-rouge">[num_img, h, w, 3]</code>. 神经网络的图像输入, 此处的 <code class="language-plaintext highlighter-rouge">num_img=1</code></p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">gt_boxes</code>: 边界框, 形状为 <code class="language-plaintext highlighter-rouge">[num_gt_indexs, 5]</code></p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">im_info</code>: 图像信息, 三个元素, 前两个元素为最终输入图像的高和宽, 第三个元素为原始图像缩放为当前图像的比例</p>
+  </li>
+</ul>
+
+<h5 id="_get_image_blob"><code class="language-plaintext highlighter-rouge">_get_image_blob()</code></h5>
+
+<h2 id="2-神经网络构建---networkpy">2. 神经网络构建 —- <code class="language-plaintext highlighter-rouge">network.py</code></h2>
+
+<p>先列出一些变量含义:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">变量</th>
+      <th>含义</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">img_bs</code></td>
+      <td>输入图像的 batch size, 代码中 <code class="language-plaintext highlighter-rouge">img_bs = 1</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">tri_bs</code></td>
+      <td>训练 Fast RCNN 所用 <code class="language-plaintext highlighter-rouge">rois</code> 的批大小</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">h</code></td>
+      <td>主干网络头部输出的特征图的高度</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">w</code></td>
+      <td>主干网络头部输出的特征图的宽度</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">A</code></td>
+      <td>在上述特征图上的每个点产生 <code class="language-plaintext highlighter-rouge">A</code> 个 anchor</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">K</code></td>
+      <td>多目标检测任务的种类数, 背景也算一类</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>下面给出 <code class="language-plaintext highlighter-rouge">class Network</code> 的变量列表, 一级列表均为字典, 二级列表为字典的键:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">self._predictions</code>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">rpn_cls_score</code>  RPN 网络二分类的的得分, 未经过 <code class="language-plaintext highlighter-rouge">softmax</code> 层, <code class="language-plaintext highlighter-rouge">shape = [img_bs, h, w, A*2]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">rpn_cls_score_reshape</code>  RPN 网络二分类的得分, 未经过 <code class="language-plaintext highlighter-rouge">softmax</code> 层, <code class="language-plaintext highlighter-rouge">shape = [img_bs, A*h, w, 2]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">rpn_cls_prob</code>  RPN 网络二分类的概率, 经过了 <code class="language-plaintext highlighter-rouge">softmax</code> 层, <code class="language-plaintext highlighter-rouge">shape = [img_bs, A*h, w, 2]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">rpn_cls_pred</code>  RPN 网络二分类的预测结果, <code class="language-plaintext highlighter-rouge">shape = [img_bs*A*h*w]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">rpn_bbox_pred</code>  RPN 网络边界框回归的预测结果, <code class="language-plaintext highlighter-rouge">shape = [img_bs, h, w, A*4]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">cls_score</code>  Fast RCNN 网络多分类的得分, 未经过 <code class="language-plaintext highlighter-rouge">softmax</code> 层, <code class="language-plaintext highlighter-rouge">shape = [tri_bs, K]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">cls_pred</code>  Fast RCNN 网络多分类的预测及过, <code class="language-plaintext highlighter-rouge">shape = [tri_bs]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">cls_prob</code>  Fast RCNN 网络多分类的概率, 经过了 <code class="language-plaintext highlighter-rouge">softmax</code> 层, <code class="language-plaintext highlighter-rouge">shape = [tri_bs, K]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">bbox_pred</code>  Fast RCNN 网络边界框回归的预测结果, <code class="language-plaintext highlighter-rouge">shape = [tri_bs, K*4]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">rois</code>  RPN 网络 (代替 Selective Search) 产生的感兴趣区域, 可直接用于训练 Fast RCNN 部分, <code class="language-plaintext highlighter-rouge">shape = [tri_bs, 5]</code> . 这里的 <code class="language-plaintext highlighter-rouge">5</code> 表示 <code class="language-plaintext highlighter-rouge">[img_index, x1, y1, x2, y2]</code> .</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">self._anchor_targets</code>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">rpn_labels</code>  RPN 网络二分类的稀疏 ground truth, <code class="language-plaintext highlighter-rouge">shape = [img_bs, 1, A*h, w]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">rpn_bbox_targets</code>  RPN 网络边界框回归的 ground truth, <code class="language-plaintext highlighter-rouge">shape = [img_bs, h, w, A*4]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">rpn_bbox_inside_weights</code>  RPN 网络边界框回归的权重, <code class="language-plaintext highlighter-rouge">shape = [img_bs, h, w, A*4]</code> .</li>
+      <li><code class="language-plaintext highlighter-rouge">rpn_bbox_outside_weights</code>  RPN 网络边界框回归的权重, <code class="language-plaintext highlighter-rouge">shape = [img_bs, h, w, A*4]</code> . 计算光滑化的 <code class="language-plaintext highlighter-rouge">L1</code> 损失时内部权重与 <code class="language-plaintext highlighter-rouge">bbox_labels</code> 和 <code class="language-plaintext highlighter-rouge">bbox_targets</code> 的差相乘, 外部权重与 <code class="language-plaintext highlighter-rouge">L1</code> 损失相乘. 代码中内部损失已经弃用 (权重设置为了 <code class="language-plaintext highlighter-rouge">[1.0, 1.0, 1.0, 1.0]</code>) .</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">self._proposal_targets</code>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">rois</code>  从 <code class="language-plaintext highlighter-rouge">self._predictions</code>  的 <code class="language-plaintext highlighter-rouge">rois</code> 中采样出的 <code class="language-plaintext highlighter-rouge">TRAIN.BATCH_SIZE</code> 个样本</li>
+      <li><code class="language-plaintext highlighter-rouge">labels</code>  Fast RCNN 网络多分类的稀疏 ground truth, <code class="language-plaintext highlighter-rouge">shape= [tri_bs, 1]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">bbox_targets</code>  Fast RCNN 网络边界框回归的 ground truth, <code class="language-plaintext highlighter-rouge">shape = [tri_bs, K*4]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">bbox_inside_weights</code>  Fast RCNN 网络边界框回归的权重, <code class="language-plaintext highlighter-rouge">shape = [tri_bs, K*4]</code></li>
+      <li><code class="language-plaintext highlighter-rouge">bbox_outside_weights</code> Fast RCNN 网络边界框回归的权重, <code class="language-plaintext highlighter-rouge">shape = [tri_bs, K*4]</code> . 内外权重与上面类似, 不再赘述.</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">self._losses</code>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">rpn_cross_entropy</code>  RPN 网络二分类的交叉熵损失</li>
+      <li><code class="language-plaintext highlighter-rouge">rpn_loss_box</code>  RPN 网络边界框回归的光滑化 <code class="language-plaintext highlighter-rouge">L1</code> 损失</li>
+      <li><code class="language-plaintext highlighter-rouge">cross_entropy</code>  Fast RCNN 网络多分类的交叉熵损失</li>
+      <li><code class="language-plaintext highlighter-rouge">loss_box</code>  Fast RCNN 网络边界框回归的光滑化 <code class="language-plaintext highlighter-rouge">L1</code> 损失</li>
+      <li><code class="language-plaintext highlighter-rouge">total_loss</code> 包含了以上四项损失以及权重/偏置的 <code class="language-plaintext highlighter-rouge">L2</code> 正则化的总损失</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">self._layers</code>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">head</code>  主干网络的头部输出</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">self._act_summaries</code> (该变量是一个列表)
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">net</code>  主干网络的头部输出</li>
+      <li><code class="language-plaintext highlighter-rouge">rpn</code>  RPN 网络使用 <code class="language-plaintext highlighter-rouge">3x3</code> 卷积代替滑窗全连接层的输出</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">self._score_summaries</code>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">self._anchor_targets</code></li>
+      <li><code class="language-plaintext highlighter-rouge">self._proposal_targets</code></li>
+      <li><code class="language-plaintext highlighter-rouge">self._predictions</code></li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">self._event_summaries</code>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">self._losses</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="21-网络输入">2.1 网络输入</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="n">self</span><span class="p">.</span><span class="n">_image</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>	<span class="c1"># [bs, h, w, c]
+</span><span class="n">self</span><span class="p">.</span><span class="n">_im_info</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>	<span class="c1"># [h, w, image_scale]
+</span><span class="n">self</span><span class="p">.</span><span class="n">_gt_boxes</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>Faster RCNN 由于其网络结构的特殊性, 输入 <code class="language-plaintext highlighter-rouge">_image</code> 仅允许 <code class="language-plaintext highlighter-rouge">batch size = 1</code> ; 但也得益于网络结构, 接受不同大小图片的输入.</li>
+  <li><code class="language-plaintext highlighter-rouge">_im_info</code> 有三个元素, 前两个元素为最终输入图像的高和宽, 第三个元素为原始图像缩放为当前图像的比例</li>
+  <li>而另一个输入 <code class="language-plaintext highlighter-rouge">_gt_boxes</code> 为边界框, 第 0 维对应当前输入图像中要寻找的物体的数量, 第 1 维的值为 5, 对应 \([t_x, t_y, t_w, t_h, label]\). 这里的 <code class="language-plaintext highlighter-rouge">label</code> 是该物体的编号值.</li>
+</ul>
+
+<hr />
+
+<p>下面的部分主要分析各个<strong>网络层 —- <code class="language-plaintext highlighter-rouge">self._build_network()</code></strong></p>
+
+<ol>
+  <li>定义权重/偏置的初始化器以及正则化器 —- <code class="language-plaintext highlighter-rouge">initializer &amp; regularizer</code></li>
+  <li>输入图像 –&gt; 主干网络前端 —- <code class="language-plaintext highlighter-rouge">self._image_to_head()</code></li>
+  <li>计算 anchors (即在网格上计算所有的 anchors, 每个格点 A 个) —- <code class="language-plaintext highlighter-rouge">self._anchor_component()</code></li>
+  <li>主干网络前端 –&gt; 区域建议 —- <code class="language-plaintext highlighter-rouge">self._region_proposals()</code></li>
+  <li>区域建议 –&gt; roi pooling 层 —- <code class="language-plaintext highlighter-rouge">self._crop_pool_layer()</code></li>
+  <li>roi pooling 层 –&gt; 主干网络尾部 —- <code class="language-plaintext highlighter-rouge">self._head_to_tail()</code></li>
+  <li>主干网络尾部 –&gt; 预测输出 —- <code class="language-plaintext highlighter-rouge">self._region_classification()</code></li>
+</ol>
+
+<p><strong>其中 2 是共享网络 (Faster R-CNN 原文中是共享的, 该代码中已经合并为同一个网络); 3, 4 属于 RPN 网络部分; 5, 6, 7 属于 Fast R-CNN 部分</strong> . 接下来对每个部分进行详细的解析.</p>
+
+<hr />
+
+<h3 id="22-构建网络---主干部分-self_image_to_head">2.2 构建网络 —- 主干部分 <code class="language-plaintext highlighter-rouge">self._image_to_head()</code></h3>
+
+<p><code class="language-plaintext highlighter-rouge">Network</code> 类是一个基类, 构建网络的主干部分要求由继承 <code class="language-plaintext highlighter-rouge">Network</code> 的类来实现.</p>
+
+<p>使用了 Tensorflow 的一个 contribution —- <code class="language-plaintext highlighter-rouge">slim</code> , 可以大幅简化 Tensorflow 网络构建过程. 以 VGG16为例:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre></td><td class="rouge-code"><pre><span class="k">with</span> <span class="n">tf</span><span class="p">.</span><span class="nf">variable_scope</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">_scope</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">_scope</span><span class="p">,</span> <span class="n">reuse</span><span class="o">=</span><span class="n">reuse</span><span class="p">):</span>
+  <span class="n">net</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">_image</span>
+  <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">repeat</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">slim</span><span class="p">.</span><span class="n">conv2d</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">trainable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">conv1</span><span class="sh">'</span><span class="p">)</span>
+  <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">max_pool2d</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="sh">'</span><span class="s">SAME</span><span class="sh">'</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">pool1</span><span class="sh">'</span><span class="p">)</span>
+  <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">repeat</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">slim</span><span class="p">.</span><span class="n">conv2d</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">trainable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">conv2</span><span class="sh">'</span><span class="p">)</span>
+  <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">max_pool2d</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="sh">'</span><span class="s">SAME</span><span class="sh">'</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">pool2</span><span class="sh">'</span><span class="p">)</span>
+  <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">repeat</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">slim</span><span class="p">.</span><span class="n">conv2d</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">trainable</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">conv3</span><span class="sh">'</span><span class="p">)</span>
+  <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">max_pool2d</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="sh">'</span><span class="s">SAME</span><span class="sh">'</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">pool3</span><span class="sh">'</span><span class="p">)</span>
+  <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">repeat</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">slim</span><span class="p">.</span><span class="n">conv2d</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">trainable</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">conv4</span><span class="sh">'</span><span class="p">)</span>
+  <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">max_pool2d</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="sh">'</span><span class="s">SAME</span><span class="sh">'</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">pool4</span><span class="sh">'</span><span class="p">)</span>
+  <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">repeat</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">slim</span><span class="p">.</span><span class="n">conv2d</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">trainable</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">conv5</span><span class="sh">'</span><span class="p">)</span>
+
+  <span class="n">self</span><span class="p">.</span><span class="n">_act_summaries</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+  <span class="n">self</span><span class="p">.</span><span class="n">_layers</span><span class="p">[</span><span class="sh">'</span><span class="s">head</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">net</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>注意这里的前两个 repeat 块都设置了 <code class="language-plaintext highlighter-rouge">trainable = False</code> .</p>
+
+<h3 id="23-构建网络---rpn-部分-计算-anchors-self_anchor_component">2.3 构建网络 —- RPN 部分, 计算 Anchors <code class="language-plaintext highlighter-rouge">self._anchor_component()</code></h3>
+
+<p>函数 <code class="language-plaintext highlighter-rouge">self._anchor_component()</code> 计算得到特征图上所有 Anchors 的坐标 (注意, anchors 是在特征图上计算的, 但是该函数返回的坐标是 anchor 在原始图像上的坐标), 函数内部定义了两个成员变量:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">self._anchors</code> 形状为 <code class="language-plaintext highlighter-rouge">[w*h*3*3, 4]</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self._anchor_length</code> 一个整数, 值为 <code class="language-plaintext highlighter-rouge">w * h * 3 * 3</code></li>
+</ul>
+
+<p>由于要在每个位置产生 A 个 anchors, 所以可以只计算以左上角的点为中心的 A 个 anchors, 然后在二维网格上平移即可得到所有的 anchors. 下面的代码用于计算左上角的点为中心的 A 个 anchors:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+</pre></td><td class="rouge-code"><pre><span class="k">def</span> <span class="nf">generate_anchors</span><span class="p">(</span><span class="n">base_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">ratios</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                     <span class="n">scales</span><span class="o">=</span><span class="mi">2</span> <span class="o">**</span> <span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">)):</span>
+    <span class="sh">"""</span><span class="s">
+    Generate anchor (reference) windows by enumerating aspect ratios X
+    scales wrt a reference (0, 0, 15, 15) window.
+    </span><span class="sh">"""</span>
+
+    <span class="n">base_anchor</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">base_size</span><span class="p">,</span> <span class="n">base_size</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">ratio_anchors</span> <span class="o">=</span> <span class="nf">_ratio_enum</span><span class="p">(</span><span class="n">base_anchor</span><span class="p">,</span> <span class="n">ratios</span><span class="p">)</span>
+    <span class="c1">#                                 h : w
+</span>    <span class="c1"># [[ -3.5   2.   18.5  13. ]    0.5 : 1
+</span>    <span class="c1">#  [  0.    0.   15.   15. ]      1 : 1
+</span>    <span class="c1">#  [  2.5  -3.   12.5  18. ]]     2 : 1
+</span>    
+    <span class="n">anchors</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">vstack</span><span class="p">([</span><span class="nf">_scale_enum</span><span class="p">(</span><span class="n">ratio_anchors</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">scales</span><span class="p">)</span>
+                         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">ratio_anchors</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
+
+    <span class="k">return</span> <span class="n">anchors</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>这里给出 A = 3x3 的一个例子, 下表列出这 9 个 anchors 的详细信息</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>No.</th>
+      <th>h * scales, w * scales</th>
+      <th>ratio</th>
+      <th>scales</th>
+      <th>shape</th>
+      <th>Approx area</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>[ -84.  -40.   99.   55.]</td>
+      <td>0.5 : 1</td>
+      <td>8</td>
+      <td>[ 96, 184]</td>
+      <td>(16x16) x (8x8)</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>[-176.  -88.  191.  103.]</td>
+      <td>0.5 : 1</td>
+      <td>16</td>
+      <td>[192, 368]</td>
+      <td>(16x16) x (16x16)</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>[-360. -184.  375.  199.]</td>
+      <td>0.5 : 1</td>
+      <td>32</td>
+      <td>[384, 736]</td>
+      <td>(16x16) x (32x32)</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>[ -56.  -56.   71.   71.]</td>
+      <td>1 : 1</td>
+      <td>8</td>
+      <td>[128, 128]</td>
+      <td>(16x16) x (8x8)</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>[-120. -120.  135.  135.]</td>
+      <td>1 : 1</td>
+      <td>16</td>
+      <td>[256, 256]</td>
+      <td>(16x16) x (16x16)</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>[-248. -248.  263.  263.]</td>
+      <td>1 : 1</td>
+      <td>32</td>
+      <td>[512, 512]</td>
+      <td>(16x16) x (32x32)</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>[ -36.  -80.   51.   95.]</td>
+      <td>2 : 1</td>
+      <td>8</td>
+      <td>[176,  88]</td>
+      <td>(16x16) x (8x8)</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>[ -80. -168.   95.  183.]</td>
+      <td>2 : 1</td>
+      <td>16</td>
+      <td>[352, 176]</td>
+      <td>(16x16) x (16x16)</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>[-168. -344.  183.  359.]</td>
+      <td>2 : 1</td>
+      <td>32</td>
+      <td>[704, 352]</td>
+      <td>(16x16) x (32x32)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>然后使用把这 9 个 anchors 在二维网格上平移得到所有位置的所有 anchors. 这里的 anchors 是绝对位置, 总共有 \(K \times A = (w \times h) \times (n \times n)\) 个, 所以最终是一个形状为 \([k \times A, 4]\) 的数组. 这里的 width 和 height 均为最后一个卷积输出的特征图的尺寸, 即 RPN 网络会在该特征图上滑动.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="rouge-code"><pre><span class="n">A</span> <span class="o">=</span> <span class="n">anchors</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>    <span class="c1"># A = 9
+</span><span class="n">shift_x</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span> <span class="o">*</span> <span class="n">feat_stride</span>
+<span class="n">shift_y</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span> <span class="o">*</span> <span class="n">feat_stride</span>
+<span class="n">shift_x</span><span class="p">,</span> <span class="n">shift_y</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">meshgrid</span><span class="p">(</span><span class="n">shift_x</span><span class="p">,</span> <span class="n">shift_y</span><span class="p">)</span>
+
+<span class="c1"># ravel(): Return a flattened array.
+# shift length of [x1, y1, x2, y2]
+</span><span class="n">shifts</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">vstack</span><span class="p">((</span><span class="n">shift_x</span><span class="p">.</span><span class="nf">ravel</span><span class="p">(),</span> <span class="n">shift_y</span><span class="p">.</span><span class="nf">ravel</span><span class="p">(),</span>
+                    <span class="n">shift_x</span><span class="p">.</span><span class="nf">ravel</span><span class="p">(),</span> <span class="n">shift_y</span><span class="p">.</span><span class="nf">ravel</span><span class="p">())).</span><span class="nf">transpose</span><span class="p">()</span>
+<span class="n">K</span> <span class="o">=</span> <span class="n">shifts</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># w * h
+# width changes faster, so here it is H, W, C
+</span><span class="n">anchors</span> <span class="o">=</span> <span class="n">anchors</span><span class="p">.</span><span class="nf">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span> <span class="o">+</span> <span class="n">shifts</span><span class="p">.</span><span class="nf">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="mi">4</span><span class="p">)).</span><span class="nf">transpose</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">anchors</span> <span class="o">=</span> <span class="n">anchors</span><span class="p">.</span><span class="nf">reshape</span><span class="p">((</span><span class="n">K</span> <span class="o">*</span> <span class="n">A</span><span class="p">,</span> <span class="mi">4</span><span class="p">)).</span><span class="nf">astype</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="24-构建网络---rpn-部分-计算区域建议-self_region_proposal">2.4 构建网络 —- RPN 部分, 计算区域建议 <code class="language-plaintext highlighter-rouge">self._region_proposal()</code></h3>
+
+<h4 id="241-网络结构">2.4.1 网络结构</h4>
+
+<p>使用卷积代替全连接来加快计算速度. 第一个 <code class="language-plaintext highlighter-rouge">slim.conv2d</code> 使用 3x3 的卷积核来代替在 3x3 的 window 中的全连接操作, 得到 <code class="language-plaintext highlighter-rouge">cfg.RPN_CHANNELS</code> 维 (比如 512) 的向量 (实际上是 height x width x 512 的张量). 后面的两个 <code class="language-plaintext highlighter-rouge">slim.conv2d</code> 分别得到 <code class="language-plaintext highlighter-rouge">2A</code> 个分类结果和 <code class="language-plaintext highlighter-rouge">4A</code> 个 BBox 回归系数.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+</pre></td><td class="rouge-code"><pre><span class="n">rpn</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">conv2d</span><span class="p">(</span><span class="n">net_conv</span><span class="p">,</span> <span class="n">cfg</span><span class="p">.</span><span class="n">RPN_CHANNELS</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> 
+                  <span class="n">trainable</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span>
+                  <span class="n">weights_initializer</span><span class="o">=</span><span class="n">initializer</span><span class="p">,</span>
+                  <span class="n">scope</span><span class="o">=</span><span class="sh">"</span><span class="s">rpn_conv/3x3</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">self</span><span class="p">.</span><span class="n">_act_summaries</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">rpn</span><span class="p">)</span>
+<span class="c1"># [bs, h, w, 9*2]
+</span><span class="n">rpn_cls_score</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">conv2d</span><span class="p">(</span><span class="n">rpn</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">_num_anchors</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> 
+                            <span class="n">trainable</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span>
+                            <span class="n">weights_initializer</span><span class="o">=</span><span class="n">initializer</span><span class="p">,</span>
+                            <span class="n">padding</span><span class="o">=</span><span class="sh">'</span><span class="s">VALID</span><span class="sh">'</span><span class="p">,</span> 
+                            <span class="n">activation_fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                            <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">rpn_cls_score</span><span class="sh">'</span><span class="p">)</span>
+<span class="bp">...</span>
+<span class="bp">...</span>
+<span class="bp">...</span>
+<span class="c1"># [bs, h, w, 9*4]
+</span><span class="n">rpn_bbox_pred</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">conv2d</span><span class="p">(</span><span class="n">rpn</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">_num_anchors</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                            <span class="n">trainable</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span>
+                            <span class="n">weights_initializer</span><span class="o">=</span><span class="n">initializer</span><span class="p">,</span>
+                            <span class="n">padding</span><span class="o">=</span><span class="sh">'</span><span class="s">VALID</span><span class="sh">'</span><span class="p">,</span> 
+                            <span class="n">activation_fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                            <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">rpn_bbox_pred</span><span class="sh">'</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<hr />
+
+<h4 id="计算-rpn-的建议区域-proposals-以及训练-rpn-部分的预测-pred-和标签-label">计算 RPN 的建议区域 (proposals), 以及训练 RPN 部分的预测 (pred) 和标签 (label)</h4>
+
+<p>这一部分比较繁杂, 需要计算的指标比较多, 下面先列举一下:</p>
+
+<ol>
+  <li>RPN 给出的建议区域, 形状应与 [num_rois, 5] 匹配 —- <code class="language-plaintext highlighter-rouge">rois</code> (形状为 [2000, 5])</li>
+  <li>RPN 给出的建议区域的得分, 形状应与 [num_rois] 匹配 —- <code class="language-plaintext highlighter-rouge">rois_scores</code> (形状为 [2000])</li>
+  <li>预测的分类输出, 形状应与 [1, h, w, 9, 2] 匹配 —- <code class="language-plaintext highlighter-rouge">rpn_cls_prob</code> (形状为 [1, h, w, 9x2])</li>
+  <li>预测的回归输出, 形状应与 [1, h, w, 9, 4] 匹配 —- <code class="language-plaintext highlighter-rouge">rpn_bbox_pred</code> (形状为 [1, h, w, 9x4])</li>
+  <li>ground truth 分类 label, 形状应与 [1, h, w, 9, 2] 匹配 —- <code class="language-plaintext highlighter-rouge">rpn_labels</code> (形状为 [1, 1, 9xh, w])</li>
+  <li>ground truth 回归 label, 形状应与 [1, h, w, 9, 4] 匹配 —- <code class="language-plaintext highlighter-rouge">rpn_bbox_targets</code> (形状为 [1, h, w, 9x4])</li>
+</ol>
+
+<p>这里的<strong>形状匹配</strong>是指形状各个维度匹配即可, 实际的形状可能略有不同, 由于 tensorflow 不支持 五维及以上的数组, 所以需要使用四位数组来<em>周旋</em>.</p>
+
+<hr />
+
+<h4 id="242-分类指标">2.4.2 分类指标</h4>
+
+<p>对二分类 (是/不是物体) 结果使用 softmax 得到</p>
+
+<ul>
+  <li>二分类概率值 <code class="language-plaintext highlighter-rouge">rpn_cls_prob</code> —- 计算损失的指标, 第一个值表示不是物体的概率, 第二个表示是物体的概率.</li>
+  <li>概率高的类别 <code class="language-plaintext highlighter-rouge">rpn_cls_pred</code> —- 预测结果(是/不是物体).</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre><span class="c1"># change it so that the score has 2 as its channel size
+# [bs, h*9, w, 2]
+</span><span class="n">rpn_cls_score_reshape</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_reshape_layer</span><span class="p">(</span><span class="n">rpn_cls_score</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="sh">"</span><span class="s">rpn_cls_score_reshape</span><span class="sh">"</span><span class="p">)</span>  
+<span class="n">rpn_cls_prob_reshape</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_softmax_layer</span><span class="p">(</span><span class="n">rpn_cls_score_reshape</span><span class="p">,</span> <span class="sh">"</span><span class="s">rpn_cls_prob_reshape</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">rpn_cls_pred</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">argmax</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="n">rpn_cls_score_reshape</span><span class="p">,[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">rpn_cls_pred</span><span class="sh">"</span><span class="p">)</span>
+<span class="c1"># [bs, h, w, 2*9]
+</span><span class="n">rpn_cls_prob</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_reshape_layer</span><span class="p">(</span><span class="n">rpn_cls_prob_reshape</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">_num_anchors</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="sh">"</span><span class="s">rpn_cls_prob</span><span class="sh">"</span><span class="p">)</span> 
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>####2.4.3 获取 2000 个建议区域  <code class="language-plaintext highlighter-rouge">proposal_layer.py</code></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">rois</span><span class="p">,</span> <span class="n">roi_scores</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_proposal_layer</span><span class="p">(</span><span class="n">rpn_cls_prob</span><span class="p">,</span> <span class="n">rpn_bbox_pred</span><span class="p">,</span> <span class="sh">"</span><span class="s">rois</span><span class="sh">"</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>该函数使用所有 anchors 的<em>类别预测</em>结果与<em>边界框预测</em>结果作为输入, 返回应用 NMS 后的少量 anchors. 下面详述该函数的具体实现.</p>
+
+<p>首先使用 <code class="language-plaintext highlighter-rouge">anchors</code> 和 <code class="language-plaintext highlighter-rouge">rpn_bbox_pred</code> 计算 BBox 回归修正后的 anchors 的四个坐标值. 然后把超出图像边界的推荐框裁剪到图像边界. 这里出现的函数</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">bbox_transform_inv(boxes, delta)</code> 表示对 anchor 平移 delta 后得到预测的边界框, 而</li>
+  <li><code class="language-plaintext highlighter-rouge">bbox_trainsform(ex_rois, gt_rois)</code> 表示使用 anchor 和 ground truth bbox 计算四个变换参数</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre><span class="n">proposals</span> <span class="o">=</span> <span class="nf">bbox_transform_inv</span><span class="p">(</span><span class="n">anchors</span><span class="p">,</span> <span class="n">rpn_bbox_pred</span><span class="p">)</span>
+<span class="n">proposals</span> <span class="o">=</span> <span class="nf">clip_boxes</span><span class="p">(</span><span class="n">proposals</span><span class="p">,</span> <span class="n">im_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>然后按照每个区域被认为是物体的得分高低进行排序, 选出前 <code class="language-plaintext highlighter-rouge">pre_nms_topN </code> 个区域 (大约 12000 个).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="n">order</span> <span class="o">=</span> <span class="n">scores</span><span class="p">.</span><span class="nf">ravel</span><span class="p">().</span><span class="nf">argsort</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">if</span> <span class="n">pre_nms_topN</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">order</span><span class="p">[:</span><span class="n">pre_nms_topN</span><span class="p">]</span>
+<span class="n">proposals</span> <span class="o">=</span> <span class="n">proposals</span><span class="p">[</span><span class="n">order</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>再应用 <code class="language-plaintext highlighter-rouge">NMS</code> (非极大抑制) 从每一批重合度最高的区域中选出并保留得分最高的一个, 最后保留 <code class="language-plaintext highlighter-rouge">post_nms_topN</code> 个区域 (大约 2000 个) 即为我们最终的感兴趣区域 <code class="language-plaintext highlighter-rouge">rois</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre><span class="n">keep</span> <span class="o">=</span> <span class="nf">nms</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">hstack</span><span class="p">((</span><span class="n">proposals</span><span class="p">,</span> <span class="n">scores</span><span class="p">)),</span> <span class="n">nms_thresh</span><span class="p">)</span>
+
+<span class="c1"># Pick th top region proposals after NMS
+</span><span class="k">if</span> <span class="n">post_nms_topN</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="n">keep</span><span class="p">[:</span><span class="n">post_nms_topN</span><span class="p">]</span>
+<span class="n">proposals</span> <span class="o">=</span> <span class="n">proposals</span><span class="p">[</span><span class="n">keep</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>现在的 <code class="language-plaintext highlighter-rouge">proposals</code> 只有 4 列, 但是我们最后的 <code class="language-plaintext highlighter-rouge">rois</code> 是 5 列, 实际上最后又添加了一列图像的指标, 由于我们这里仅支持每一小批单幅图像, 所以在第一列添加 <code class="language-plaintext highlighter-rouge">index = 0</code> (这里添加的原因可能是为了适应原来的 Fast R-CNN 的代码, 在 Fast R-CNN 中是每一小批两幅图片的, 不过我并未看过 Fast R-CNN 的代码, 仅是猜测).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="c1"># Only support single image as input
+</span><span class="n">batch_inds</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="n">proposals</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">blob</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">hstack</span><span class="p">((</span><span class="n">batch_inds</span><span class="p">,</span> <span class="n">proposals</span><span class="p">.</span><span class="nf">astype</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="bp">False</span><span class="p">)))</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="244-回归指标">2.4.4 回归指标</h4>
+
+<h5 id="2441-计算每个-anchor-的-label-值-anchor_target_layerpy">2.4.4.1 计算每个 anchor 的 label 值 <code class="language-plaintext highlighter-rouge">anchor_target_layer.py</code></h5>
+
+<p>这一步要给 <code class="language-plaintext highlighter-rouge">self._anchors</code> 中的所有 anchor 赋以一个 label 值:</p>
+
+<ul>
+  <li>1 : 正样本</li>
+  <li>0 : 负样本</li>
+  <li>-1 : 非样本, 不用于训练</li>
+</ul>
+
+<p>首先从所有的 \(K\times A\times n\times n\) 个 anchors 中筛掉超出图像边界的, 注意这里是筛掉, 而不是裁剪到边界.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="rouge-code"><pre><span class="c1"># allow boxes to sit over the edge by a small amount
+</span><span class="n">_allowed_border</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># only keep anchors inside the image
+</span><span class="n">inds_inside</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">all_anchors</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">_allowed_border</span><span class="p">)</span> <span class="o">&amp;</span>
+    <span class="p">(</span><span class="n">all_anchors</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">_allowed_border</span><span class="p">)</span> <span class="o">&amp;</span>
+    <span class="p">(</span><span class="n">all_anchors</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">im_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">_allowed_border</span><span class="p">)</span> <span class="o">&amp;</span>  <span class="c1"># width
+</span>    <span class="p">(</span><span class="n">all_anchors</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">im_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">_allowed_border</span><span class="p">)</span>  <span class="c1"># height
+</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># keep only inside anchors
+</span><span class="n">anchors</span> <span class="o">=</span> <span class="n">all_anchors</span><span class="p">[</span><span class="n">inds_inside</span><span class="p">,</span> <span class="p">:]</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>然后计算所有的 anchors 和 ground truth anchors 之间的重叠 (overlaps). 这里的重叠是一个二维数组, 形状为 [N, K] , 这里 N 是边界筛选后 anchors 的数量, K 是 gt anchors 的数量.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">argmax_overlaps</code> : 对每个 anchor 选择一个与其重叠最高的 gt anchor 的 index, N 维向量, 取值于 [0, K - 1]</li>
+  <li><code class="language-plaintext highlighter-rouge">max_overlaps</code> : 上述 index 对应的 overlaps, N 维向量</li>
+  <li><code class="language-plaintext highlighter-rouge">gt_argmax_overlaps</code> : 对每个 gt anchor 选择一个与其重叠最高的 anchor 的 index, K 维向量, 取值于 [0, N - 1]</li>
+  <li><code class="language-plaintext highlighter-rouge">gt_max_overlaps</code> : 上述 index 对应的 overlaps, K 维向量</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="rouge-code"><pre><span class="c1"># overlaps between the anchors and the gt boxes
+# overlaps (ex, gt)
+</span><span class="n">overlaps</span> <span class="o">=</span> <span class="nf">bbox_overlaps</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">ascontiguousarray</span><span class="p">(</span><span class="n">anchors</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="nb">float</span><span class="p">),</span>
+        			     <span class="n">np</span><span class="p">.</span><span class="nf">ascontiguousarray</span><span class="p">(</span><span class="n">gt_boxes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="nb">float</span><span class="p">))</span>
+<span class="n">argmax_overlaps</span> <span class="o">=</span> <span class="n">overlaps</span><span class="p">.</span><span class="nf">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">max_overlaps</span> <span class="o">=</span> <span class="n">overlaps</span><span class="p">[</span><span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">inds_inside</span><span class="p">)),</span> <span class="n">argmax_overlaps</span><span class="p">]</span>   <span class="c1"># N
+</span><span class="n">gt_argmax_overlaps</span> <span class="o">=</span> <span class="n">overlaps</span><span class="p">.</span><span class="nf">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">gt_max_overlaps</span> <span class="o">=</span> <span class="n">overlaps</span><span class="p">[</span><span class="n">gt_argmax_overlaps</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="n">overlaps</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>  <span class="c1"># K
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>正样本:</p>
+
+<ul>
+  <li>所有 anchors 中, 与 gt anchor 重叠最高的 anchor (即重叠矩阵中每一列选一个), 有 K 个</li>
+  <li>与任一个 gt anchor 重叠超过阈值 IOU 的 anchor (即重叠矩阵中按行筛选)</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre><span class="n">labels</span><span class="p">[</span><span class="n">gt_argmax_overlaps</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">labels</span><span class="p">[</span><span class="n">max_overlaps</span> <span class="o">&gt;=</span> <span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">RPN_POSITIVE_OVERLAP</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>负样本:</p>
+
+<p>这里的 <code class="language-plaintext highlighter-rouge">cfg.TRAIN.RPN_CLOBBER_POSITIVES</code> 看起来没什么用, 一般来说正例的阈值要比反例的阈值高, 所以这里负样本在正样本之前赋值或之后赋值都不影响.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="k">if</span> <span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">RPN_CLOBBER_POSITIVES</span><span class="p">:</span>
+    <span class="c1"># assign bg labels last so that negative labels can clobber positives
+</span>    <span class="n">labels</span><span class="p">[</span><span class="n">max_overlaps</span> <span class="o">&lt;</span> <span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">RPN_NEGATIVE_OVERLAP</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>接下来如果得到的正样本数量超过了每批中需要的正样本数量, 则从其中随机选出需要的数量, 剩下的赋以 <code class="language-plaintext highlighter-rouge">label = -1</code> 即可, 负样本类似筛选, 但要与正样本数量互补.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre><span class="n">num_fg</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">RPN_FG_FRACTION</span> <span class="o">*</span> <span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">RPN_BATCHSIZE</span><span class="p">)</span>
+<span class="n">fg_inds</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="n">labels</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">fg_inds</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">num_fg</span><span class="p">:</span>
+    <span class="n">disable_inds</span> <span class="o">=</span> <span class="n">npr</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span>
+        <span class="n">fg_inds</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">fg_inds</span><span class="p">)</span> <span class="o">-</span> <span class="n">num_fg</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">labels</span><span class="p">[</span><span class="n">disable_inds</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+<span class="n">num_bg</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">RPN_BATCHSIZE</span> <span class="o">-</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">labels</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">...</span><span class="bp">...</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h5 id="2442-计算-bbox-的-label-值-bbox_transformpy">2.4.4.2 计算 bbox 的 label 值 <code class="language-plaintext highlighter-rouge">bbox_transform.py</code></h5>
+
+<p>只需要应用论文中的四个公式即可, 这里 <code class="language-plaintext highlighter-rouge">bbox_targets</code> 的形状与 <code class="language-plaintext highlighter-rouge">labels</code> 相同也是 <code class="language-plaintext highlighter-rouge">N</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">bbox_targets</span> <span class="o">=</span> <span class="nf">_compute_targets</span><span class="p">(</span><span class="n">anchors</span><span class="p">,</span> <span class="n">gt_boxes</span><span class="p">[</span><span class="n">argmax_overlaps</span><span class="p">,</span> <span class="p">:])</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h5 id="2443-为正负样本给定权重">2.4.4.3 为正负样本给定权重</h5>
+
+<p>这里的权重分为两种:</p>
+
+<ul>
+  <li>第一种是一致权重 (uniform weight), 正负样本都除以总的样本数</li>
+  <li>第二种是非一致权重, 正样本权重为 \(p/num(pos)\) , 负样本权重为 \((1-p)/num(neg)\) .</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="rouge-code"><pre><span class="n">bbox_outside_weights</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="nf">len</span><span class="p">(</span><span class="n">inds_inside</span><span class="p">),</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">RPN_POSITIVE_WEIGHT</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="c1"># uniform weighting of examples (given non-uniform sampling)
+</span>    <span class="n">num_examples</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">labels</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">positive_weights</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">num_examples</span>
+    <span class="n">negative_weights</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">num_examples</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nf">assert </span><span class="p">((</span><span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">RPN_POSITIVE_WEIGHT</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">RPN_POSITIVE_WEIGHT</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">positive_weights</span> <span class="o">=</span> <span class="p">(</span><span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">RPN_POSITIVE_WEIGHT</span> <span class="o">/</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">labels</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">negative_weights</span> <span class="o">=</span> <span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">RPN_POSITIVE_WEIGHT</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">labels</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>
+<span class="n">bbox_outside_weights</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">positive_weights</span>
+<span class="n">bbox_outside_weights</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">negative_weights</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>最后由于 <code class="language-plaintext highlighter-rouge">labels</code> 和 <code class="language-plaintext highlighter-rouge">bbox_targets</code> 均是 N 个 anchors 的 (筛去超出边界的), 需要反映射到原始 anchors 上 (未筛选过的), 所以最后使用 <code class="language-plaintext highlighter-rouge">_unmap(data, count, inds, fill=0)</code> 函数进行反向映射, 这里不再赘述.</p>
+
+<h3 id="25-构建网络---fast-rcnn-部分">2.5 构建网络 —- Fast RCNN 部分</h3>
+
+<h4 id="251-计算用于-fast-rcnn-的-rois-及其-labels---proposal_target_layerpy">2.5.1 计算用于 Fast RCNN 的 ROIs 及其 Labels —- <code class="language-plaintext highlighter-rouge">proposal_target_layer.py</code></h4>
+
+<p>这里就承接了 Fast RCNN 的部分, 使用 RPN 产生的 2000 个 proposals 代替 Selective Search 产生的区域, 然后从这 2000 个中选择 <code class="language-plaintext highlighter-rouge">cfg.TRAIN.BATCH_SIZE</code> 个作为训练的一批.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre><span class="n">num_images</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">rois_per_image</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">BATCH_SIZE</span> <span class="o">/</span> <span class="n">num_images</span>
+<span class="n">fg_rois_per_image</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">round</span><span class="p">(</span><span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">FG_FRACTION</span> <span class="o">*</span> <span class="n">rois_per_image</span><span class="p">)</span>
+
+<span class="c1"># Sample rois with classification labels and bounding box regression
+# targets
+</span><span class="n">labels</span><span class="p">,</span> <span class="n">rois</span><span class="p">,</span> <span class="n">roi_scores</span><span class="p">,</span> <span class="n">bbox_targets</span><span class="p">,</span> <span class="n">bbox_inside_weights</span> <span class="o">=</span> <span class="nf">_sample_rois</span><span class="p">(</span>
+    <span class="n">all_rois</span><span class="p">,</span> <span class="n">all_scores</span><span class="p">,</span> <span class="n">gt_boxes</span><span class="p">,</span> <span class="n">fg_rois_per_image</span><span class="p">,</span>
+    <span class="n">rois_per_image</span><span class="p">,</span> <span class="n">_num_classes</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>下面详述函数 <code class="language-plaintext highlighter-rouge">_sample_rois()</code> 的细节.  首先使用 <code class="language-plaintext highlighter-rouge">bbox_overlaps()</code> 函数计算 proposals 和 gt boxes 的重叠矩阵. 然后对每一个 proposals, 获得与其重叠最大的 gt boxes 的指标和重叠值, 将该 gt boxes 的 label 作为该 proposal 的 label.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre><span class="c1"># overlaps: (rois x gt_boxes)
+</span><span class="n">overlaps</span> <span class="o">=</span> <span class="nf">bbox_overlaps</span><span class="p">(</span>
+    <span class="n">np</span><span class="p">.</span><span class="nf">ascontiguousarray</span><span class="p">(</span><span class="n">all_rois</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="nb">float</span><span class="p">),</span>
+    <span class="n">np</span><span class="p">.</span><span class="nf">ascontiguousarray</span><span class="p">(</span><span class="n">gt_boxes</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="nb">float</span><span class="p">))</span>
+<span class="n">gt_assignment</span> <span class="o">=</span> <span class="n">overlaps</span><span class="p">.</span><span class="nf">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">max_overlaps</span> <span class="o">=</span> <span class="n">overlaps</span><span class="p">.</span><span class="nf">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">gt_boxes</span><span class="p">[</span><span class="n">gt_assignment</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>然后使用 Fast RCNN 中建议的阈值:</p>
+
+<ul>
+  <li>25% 的前景 (u ≥ 1) 从与 ground truth 的 IoU 重叠超过 0.5 的推荐区域中选择</li>
+  <li>75% 的背景 (u = 0) 从 IoU 在 [0.1, 0.5) 的区域中选取</li>
+</ul>
+
+<p>这里的 25% 对应于上面的 <code class="language-plaintext highlighter-rouge">cfg.TRAIN_FG_FRACTION</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="n">fg_inds</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="n">max_overlaps</span> <span class="o">&gt;=</span> <span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">FG_THRESH</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">bg_inds</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">where</span><span class="p">((</span><span class="n">max_overlaps</span> <span class="o">&lt;</span> <span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">BG_THRESH_HI</span><span class="p">)</span> <span class="o">&amp;</span>
+                   <span class="p">(</span><span class="n">max_overlaps</span> <span class="o">&gt;=</span> <span class="n">cfg</span><span class="p">.</span><span class="n">TRAIN</span><span class="p">.</span><span class="n">BG_THRESH_LO</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>对 Fast RCNN 原始版本微调, 确保可以得到固定数量的样本</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre></td><td class="rouge-code"><pre><span class="k">if</span> <span class="n">fg_inds</span><span class="p">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">bg_inds</span><span class="p">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">fg_rois_per_image</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span><span class="n">fg_rois_per_image</span><span class="p">,</span> <span class="n">fg_inds</span><span class="p">.</span><span class="n">size</span><span class="p">)</span>    
+    <span class="n">fg_inds</span> <span class="o">=</span> <span class="n">npr</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">fg_inds</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="nf">int</span><span class="p">(</span>
+        <span class="n">fg_rois_per_image</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">bg_rois_per_image</span> <span class="o">=</span> <span class="n">rois_per_image</span> <span class="o">-</span> <span class="n">fg_rois_per_image</span>
+    <span class="n">to_replace</span> <span class="o">=</span> <span class="n">bg_inds</span><span class="p">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">bg_rois_per_image</span>
+    <span class="n">bg_inds</span> <span class="o">=</span> <span class="n">npr</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">bg_inds</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="nf">int</span><span class="p">(</span>
+        <span class="n">bg_rois_per_image</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="n">to_replace</span><span class="p">)</span>
+<span class="k">elif</span> <span class="n">fg_inds</span><span class="p">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">to_replace</span> <span class="o">=</span> <span class="n">fg_inds</span><span class="p">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">rois_per_image</span>
+    <span class="n">fg_inds</span> <span class="o">=</span> <span class="n">npr</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">fg_inds</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="nf">int</span><span class="p">(</span>
+        <span class="n">rois_per_image</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="n">to_replace</span><span class="p">)</span>
+    <span class="n">fg_rois_per_image</span> <span class="o">=</span> <span class="n">rois_per_image</span>
+<span class="k">elif</span> <span class="n">bg_inds</span><span class="p">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">to_replace</span> <span class="o">=</span> <span class="n">bg_inds</span><span class="p">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">rois_per_image</span>
+    <span class="n">bg_inds</span> <span class="o">=</span> <span class="n">npr</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">bg_inds</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="nf">int</span><span class="p">(</span>
+        <span class="n">rois_per_image</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="n">to_replace</span><span class="p">)</span>
+    <span class="n">fg_rois_per_image</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="n">pdb</span>
+    <span class="n">pdb</span><span class="p">.</span><span class="nf">set_trace</span><span class="p">()</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>把正负样本的指标合并, 并把负样本的类别设为 0 . 得到 <code class="language-plaintext highlighter-rouge">rois</code> 和 <code class="language-plaintext highlighter-rouge">roi_scores</code> :</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="rouge-code"><pre><span class="c1"># The indices that we're selecting (both fg and bg)
+</span><span class="n">keep_inds</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">fg_inds</span><span class="p">,</span> <span class="n">bg_inds</span><span class="p">)</span>
+<span class="c1"># Select sampled values from various arrays:
+</span><span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="p">[</span><span class="n">keep_inds</span><span class="p">]</span>
+<span class="c1"># Clamp labels for the background RoIs to 0
+</span><span class="n">labels</span><span class="p">[</span><span class="nf">int</span><span class="p">(</span><span class="n">fg_rois_per_image</span><span class="p">):]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">rois</span> <span class="o">=</span> <span class="n">all_rois</span><span class="p">[</span><span class="n">keep_inds</span><span class="p">]</span>
+<span class="n">roi_scores</span> <span class="o">=</span> <span class="n">all_scores</span><span class="p">[</span><span class="n">keep_inds</span><span class="p">]</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>最后使用四个公式计算回归的偏移, 形状为 [N, 5], 其中的 5 表示 [class, tx, ty, th, tw]:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre><span class="n">bbox_target_data</span> <span class="o">=</span> <span class="nf">_compute_targets</span><span class="p">(</span><span class="n">rois</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span>
+         							<span class="n">gt_boxes</span><span class="p">[</span><span class="n">gt_assignment</span><span class="p">[</span><span class="n">keep_inds</span><span class="p">],</span> <span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="n">labels</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>然后把 label 的形状重构一下, 变成 [N, 4xK], K 是类别数这样每行就只有 4 个值有意义</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">bbox_targets</span><span class="p">,</span> <span class="n">bbox_inside_weights</span> <span class="o">=</span> <span class="nf">_get_bbox_regression_labels</span><span class="p">(</span><span class="n">bbox_target_data</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>该层最终返回如下:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">rois</code>  形状为 [bs, 5], 第一列为 0</li>
+  <li><code class="language-plaintext highlighter-rouge">roi_scores</code>  形状为 [bs]</li>
+  <li><code class="language-plaintext highlighter-rouge">labels</code>  形状为 [bs, 1]</li>
+  <li><code class="language-plaintext highlighter-rouge">bbox_targets</code>  形状为 [bs, 4xK], K 为类别数</li>
+  <li><code class="language-plaintext highlighter-rouge">bbox_inside_weights</code>  形状为 [bs, 4xK]</li>
+  <li><code class="language-plaintext highlighter-rouge">bbox_outside_weights</code>  形状为 [bs, 4xK]</li>
+</ul>
+
+<h4 id="252-roi-pooling-层-_crop_pool_layer">2.5.2 ROI Pooling 层 <code class="language-plaintext highlighter-rouge">_crop_pool_layer()</code></h4>
+
+<p>我们现在有了 <code class="language-plaintext highlighter-rouge">rois</code> , 其坐标是在原始图像下的, 而 ROI Pooling 是在特征图上进行的, 所以先要转换坐标, 这里是直接除以 <code class="language-plaintext highlighter-rouge">_image_to_head</code> 所下采样的倍数. <code class="language-plaintext highlighter-rouge">bottom</code> 是指 <code class="language-plaintext highlighter-rouge">_image_to_head</code> 的输出.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="n">height</span> <span class="o">=</span> <span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">to_float</span><span class="p">(</span><span class="n">bottom_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mf">1.</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">float32</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">_feat_stride</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">width</span> <span class="o">=</span> <span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">to_float</span><span class="p">(</span><span class="n">bottom_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="mf">1.</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">float32</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">_feat_stride</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">x1</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">slice</span><span class="p">(</span><span class="n">rois</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">x1</span><span class="sh">"</span><span class="p">)</span> <span class="o">/</span> <span class="n">width</span>
+<span class="n">y1</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">slice</span><span class="p">(</span><span class="n">rois</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">y1</span><span class="sh">"</span><span class="p">)</span> <span class="o">/</span> <span class="n">height</span>
+<span class="n">x2</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">slice</span><span class="p">(</span><span class="n">rois</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">x2</span><span class="sh">"</span><span class="p">)</span> <span class="o">/</span> <span class="n">width</span>
+<span class="n">y2</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">slice</span><span class="p">(</span><span class="n">rois</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">y2</span><span class="sh">"</span><span class="p">)</span> <span class="o">/</span> <span class="n">height</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>由于反向传播通过 ROI Pooling 层时不需要传播到 ROIs , 所以直接阻止梯度沿 ROIs 继续传播, 同时可以节省时间:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">bboxes</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">stop_gradient</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">concat</span><span class="p">([</span><span class="n">y1</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">x2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>接下来使用 tensorflow 中的 <code class="language-plaintext highlighter-rouge">tf.image.crop_and_resize()</code> 函数来提取 ROIs. 该函数参数如下:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">image</code>  4D 的待裁剪张量</li>
+  <li><code class="language-plaintext highlighter-rouge">boxes</code>  裁剪框, 形状为 [num_boxes, 4]</li>
+  <li><code class="language-plaintext highlighter-rouge">box_ind</code>  框的指标, 用于指示第 <code class="language-plaintext highlighter-rouge">i</code> 个框属于第几张输入的图, 形状为 [num_boxes], (由于我们每次使用一张图, 所以该向量全为 0).</li>
+  <li><code class="language-plaintext highlighter-rouge">crop_size</code>  两个元素, <code class="language-plaintext highlighter-rouge">size = [crop_height, crop_width]</code> . 所有用 <code class="language-plaintext highlighter-rouge">boxes</code> 裁出来的块都会 resize 到该大小.</li>
+  <li><code class="language-plaintext highlighter-rouge">method</code>  resize 的方法, 默认为双线性.</li>
+</ul>
+
+<p>返回值:</p>
+
+<ul>
+  <li>4-D 张量, 形状为 <code class="language-plaintext highlighter-rouge">[num_boxes, crop_height, crop_width, depth]</code> .</li>
+</ul>
+
+<p>这里把 <code class="language-plaintext highlighter-rouge">crop_size</code> 设置为需要的两倍大, 最后采用一个 <code class="language-plaintext highlighter-rouge">max_pooling</code> .</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre><span class="n">pre_pool_size</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">.</span><span class="n">POOLING_SIZE</span> <span class="o">*</span> <span class="mi">2</span>
+<span class="n">crops</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">image</span><span class="p">.</span><span class="nf">crop_and_resize</span><span class="p">(</span><span class="n">bottom</span><span class="p">,</span> 
+                                 <span class="n">bboxes</span><span class="p">,</span> 
+                                 <span class="n">tf</span><span class="p">.</span><span class="nf">to_int32</span><span class="p">(</span><span class="n">batch_ids</span><span class="p">),</span> 
+                                 <span class="p">[</span><span class="n">pre_pool_size</span><span class="p">,</span> <span class="n">pre_pool_size</span><span class="p">],</span> 
+                                 <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">crops</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">slim</span><span class="p">.</span><span class="nf">max_pool2d</span><span class="p">(</span><span class="n">crops</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="sh">'</span><span class="s">SAME</span><span class="sh">'</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="253-头到尾部分-self_head_to_tail">2.5.3 头到尾部分 <code class="language-plaintext highlighter-rouge">self._head_to_tail()</code></h4>
+
+<p>这一段为 Fast RCNN 网络结构中的 FCs 的部分</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="rouge-code"><pre><span class="k">with</span> <span class="n">tf</span><span class="p">.</span><span class="nf">variable_scope</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">_scope</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">_scope</span><span class="p">,</span> <span class="n">reuse</span><span class="o">=</span><span class="n">reuse</span><span class="p">):</span>
+  <span class="n">pool5_flat</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">flatten</span><span class="p">(</span><span class="n">pool5</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">flatten</span><span class="sh">'</span><span class="p">)</span>
+  <span class="n">fc6</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">fully_connected</span><span class="p">(</span><span class="n">pool5_flat</span><span class="p">,</span> <span class="mi">4096</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">fc6</span><span class="sh">'</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">is_training</span><span class="p">:</span>
+      <span class="n">fc6</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">dropout</span><span class="p">(</span><span class="n">fc6</span><span class="p">,</span> <span class="n">keep_prob</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">dropout6</span><span class="sh">'</span><span class="p">)</span>
+  <span class="n">fc7</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">fully_connected</span><span class="p">(</span><span class="n">fc6</span><span class="p">,</span> <span class="mi">4096</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">fc7</span><span class="sh">'</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">is_training</span><span class="p">:</span>
+      <span class="n">fc7</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">dropout</span><span class="p">(</span><span class="n">fc7</span><span class="p">,</span> <span class="n">keep_prob</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">dropout7</span><span class="sh">'</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="254-区域分类回归部分-self_region_classification">2.5.4 区域分类+回归部分 <code class="language-plaintext highlighter-rouge">self._region_classification()</code></h4>
+
+<p>这一段是 Fast RCNN 网络结构中的 Outputs 部分</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="rouge-code"><pre><span class="n">cls_score</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">fully_connected</span><span class="p">(</span><span class="n">fc7</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">_num_classes</span><span class="p">,</span>
+                                 <span class="n">weights_initializer</span><span class="o">=</span><span class="n">initializer</span><span class="p">,</span>
+                                 <span class="n">trainable</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span>
+                                 <span class="n">activation_fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">cls_score</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">cls_prob</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_softmax_layer</span><span class="p">(</span><span class="n">cls_score</span><span class="p">,</span> <span class="sh">"</span><span class="s">cls_prob</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">cls_pred</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">argmax</span><span class="p">(</span><span class="n">cls_score</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">cls_pred</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">bbox_pred</span> <span class="o">=</span> <span class="n">slim</span><span class="p">.</span><span class="nf">fully_connected</span><span class="p">(</span><span class="n">fc7</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">_num_classes</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
+                                 <span class="n">weights_initializer</span><span class="o">=</span><span class="n">initializer_bbox</span><span class="p">,</span>
+                                 <span class="n">trainable</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span>
+                                 <span class="n">activation_fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">bbox_pred</span><span class="sh">'</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="3-损失计算---self_add_losses">3. 损失计算 —- <code class="language-plaintext highlighter-rouge">self._add_losses()</code></h2>
+
+<p>总共有五项损失:</p>
+
+<ul>
+  <li>RPN, 类别损失, 使用交叉熵</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="rouge-code"><pre><span class="n">rpn_cls_score</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">_predictions</span><span class="p">[</span><span class="sh">'</span><span class="s">rpn_cls_score_reshape</span><span class="sh">'</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">rpn_label</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">_anchor_targets</span><span class="p">[</span><span class="sh">'</span><span class="s">rpn_labels</span><span class="sh">'</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">rpn_select</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">not_equal</span><span class="p">(</span><span class="n">rpn_label</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">rpn_cls_score</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">gather</span><span class="p">(</span><span class="n">rpn_cls_score</span><span class="p">,</span> <span class="n">rpn_select</span><span class="p">),</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">rpn_label</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">gather</span><span class="p">(</span><span class="n">rpn_label</span><span class="p">,</span> <span class="n">rpn_select</span><span class="p">),</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">rpn_cross_entropy</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">reduce_mean</span><span class="p">(</span>
+    <span class="n">tf</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="nf">sparse_softmax_cross_entropy_with_logits</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">rpn_cls_score</span><span class="p">,</span>
+                                                   <span class="n">labels</span><span class="o">=</span><span class="n">rpn_label</span><span class="p">))</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>RPN, 边界框损失, 使用光滑化的 <code class="language-plaintext highlighter-rouge">L1</code> 损失函数:</li>
+</ul>
+
+\[\text{smooth}_{L_1}(x) = \left\{
+\begin{array}{ll}
+\frac{\sigma^2}{2}x^2 &amp; \text{if } \lvert x\rvert &lt; \frac1{\sigma^2} \\
+\lvert x\rvert-\frac1{2\sigma^2} &amp; \text{otherwise,}
+\end{array}\right.\]
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="rouge-code"><pre><span class="n">rpn_bbox_pred</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">_predictions</span><span class="p">[</span><span class="sh">'</span><span class="s">rpn_bbox_pred</span><span class="sh">'</span><span class="p">]</span>
+<span class="n">rpn_bbox_targets</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">_anchor_targets</span><span class="p">[</span><span class="sh">'</span><span class="s">rpn_bbox_targets</span><span class="sh">'</span><span class="p">]</span>
+<span class="n">rpn_bbox_inside_weights</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">_anchor_targets</span><span class="p">[</span><span class="sh">'</span><span class="s">rpn_bbox_inside_weights</span><span class="sh">'</span><span class="p">]</span>
+<span class="n">rpn_bbox_outside_weights</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">_anchor_targets</span><span class="p">[</span><span class="sh">'</span><span class="s">rpn_bbox_outside_weights</span><span class="sh">'</span><span class="p">]</span>
+<span class="n">rpn_loss_box</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_smooth_l1_loss</span><span class="p">(</span><span class="n">rpn_bbox_pred</span><span class="p">,</span> 
+                                    <span class="n">rpn_bbox_targets</span><span class="p">,</span>
+                                    <span class="n">rpn_bbox_inside_weights</span><span class="p">,</span>
+                                    <span class="n">rpn_bbox_outside_weights</span><span class="p">,</span> 
+                                    <span class="n">sigma</span><span class="o">=</span><span class="n">sigma_rpn</span><span class="p">,</span> 
+                                    <span class="n">dim</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>RCNN, 类别损失</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="n">cls_score</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">_predictions</span><span class="p">[</span><span class="sh">"</span><span class="s">cls_score</span><span class="sh">"</span><span class="p">]</span>
+<span class="n">label</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">_proposal_targets</span><span class="p">[</span><span class="sh">"</span><span class="s">labels</span><span class="sh">"</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">cross_entropy</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">reduce_mean</span><span class="p">(</span>
+    <span class="n">tf</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="nf">sparse_softmax_cross_entropy_with_logits</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">cls_score</span><span class="p">,</span> 
+                                                   <span class="n">labels</span><span class="o">=</span><span class="n">label</span><span class="p">))</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>RCNN, 边界框损失</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="n">bbox_pred</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">_predictions</span><span class="p">[</span><span class="sh">'</span><span class="s">bbox_pred</span><span class="sh">'</span><span class="p">]</span>
+<span class="n">bbox_targets</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">_proposal_targets</span><span class="p">[</span><span class="sh">'</span><span class="s">bbox_targets</span><span class="sh">'</span><span class="p">]</span>
+<span class="n">bbox_inside_weights</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">_proposal_targets</span><span class="p">[</span><span class="sh">'</span><span class="s">bbox_inside_weights</span><span class="sh">'</span><span class="p">]</span>
+<span class="n">bbox_outside_weights</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">_proposal_targets</span><span class="p">[</span><span class="sh">'</span><span class="s">bbox_outside_weights</span><span class="sh">'</span><span class="p">]</span>
+<span class="n">loss_box</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_smooth_l1_loss</span><span class="p">(</span>
+    <span class="n">bbox_pred</span><span class="p">,</span> <span class="n">bbox_targets</span><span class="p">,</span> <span class="n">bbox_inside_weights</span><span class="p">,</span> <span class="n">bbox_outside_weights</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>权重正则化损失</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">regularization_loss</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">add_n</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">losses</span><span class="p">.</span><span class="nf">get_regularization_losses</span><span class="p">(),</span> <span class="sh">'</span><span class="s">regu</span><span class="sh">'</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="4-收集摘要用于-tensorboard">4. 收集摘要用于 Tensorboard</h2>
+
+<p>摘要内容包括:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">self._add_gt_image_summary()</code>  带有边界框的 ground truth 图片 —- <code class="language-plaintext highlighter-rouge">tf.summary.image</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self._event_summaries()</code>  损失 —- <code class="language-plaintext highlighter-rouge">tf.summary.scalar</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self._score_summaries()</code>  得分 —- <code class="language-plaintext highlighter-rouge">tf.summary.histogram</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self._act_summaries()</code>  特征图的稀疏度 —- <code class="language-plaintext highlighter-rouge">tf.summary.histogram &amp; tf.summary.scalar</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self._train_summaries()</code>  权重/偏置 —- <code class="language-plaintext highlighter-rouge">tf.summary.histogram</code></li>
+</ul>
+
+<h2 id="5-求解器---solverwrapper">5. 求解器 —- <code class="language-plaintext highlighter-rouge">SolverWrapper</code></h2>
+
+<p><strong>参数:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">sess</code>: 用于训练的 tensorflow 会话</li>
+  <li><code class="language-plaintext highlighter-rouge">network</code>: 主干网络类的对象, 可从 <code class="language-plaintext highlighter-rouge">/lib/nets/</code> 中选取</li>
+  <li><code class="language-plaintext highlighter-rouge">imdb</code>: 图像数据库类的对象, 可从 <code class="language-plaintext highlighter-rouge">/lib/datasets/</code> 中选取</li>
+  <li><code class="language-plaintext highlighter-rouge">roidb</code>: 感兴趣区域数据库, 一个列表, 其中的元素为字典, 每个元素包含了一个目标的边界框等信息</li>
+  <li><code class="language-plaintext highlighter-rouge">valroidb</code>: 用于验证的感兴趣区域数据库</li>
+  <li><code class="language-plaintext highlighter-rouge">output_dir</code>: 保存中间结果的文件夹</li>
+  <li><code class="language-plaintext highlighter-rouge">tbdir</code>: 保存摘要的文件夹, 用于 tensorboard</li>
+  <li><code class="language-plaintext highlighter-rouge">pretrained_model</code>: 与训练模型, 可选</li>
+</ul>
+
+<p><strong>变量:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">self.net</code>: 主干网络</li>
+  <li><code class="language-plaintext highlighter-rouge">self.imdb</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self.roidb</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self.valroidb</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self.output_dir</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self.tbdir</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self.tbvaldir</code>: 验证时保存摘要的文件夹</li>
+  <li><code class="language-plaintext highlighter-rouge">self.pretrained_model</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self.data_layer</code>: ROIDataLayer 类的对象, 由 roidb 产生, 用于提供训练用的数据</li>
+  <li><code class="language-plaintext highlighter-rouge">self.data_layer_val</code></li>
+  <li><code class="language-plaintext highlighter-rouge">self.optimizer</code>: 优化器</li>
+  <li><code class="language-plaintext highlighter-rouge">self.saver</code>: 检查点储存器</li>
+  <li><code class="language-plaintext highlighter-rouge">self.writer</code>: 摘要储存器</li>
+  <li><code class="language-plaintext highlighter-rouge">self.valwriter</code>: 验证集摘要储存器</li>
+</ul>
+
+<h3 id="方法">方法</h3>
+
+<h5 id="snapshotself-sess-iter"><code class="language-plaintext highlighter-rouge">snapshot(self, sess, iter)</code></h5>
+
+<p>保存 tensorflow 的检查点, numpy 的随机数状态, 以及训练集和验证机的当前状态. 保存两类文件:</p>
+
+<ul>
+  <li>Tensorflow 的检查点文件 (.ckpt)</li>
+  <li>Numpy 的转储文件 (.pkl)</li>
+</ul>
+
+<h5 id="from_snapshotself-sess-sfile-nfile"><code class="language-plaintext highlighter-rouge">from_snapshot(self, sess, sfile, nfile)</code></h5>
+
+<p>从检查点载入权重</p>
+
+<h5 id="remove_snapshotself-np_paths-ss_paths"><code class="language-plaintext highlighter-rouge">remove_snapshot(self, np_paths, ss_paths)</code></h5>
+
+<p>删除旧的检查点, 早于 <code class="language-plaintext highlighter-rouge">__C.TRAIN.SNAPSHOT_KEPT</code> 数量的检查点被删除</p>
+
+<h5 id="find_previousself"><code class="language-plaintext highlighter-rouge">find_previous(self)</code></h5>
+
+<p>查找所有已保存的检查点</p>
+
+<h5 id="initializeself-sess"><code class="language-plaintext highlighter-rouge">initialize(self, sess)</code></h5>
+
+<p>初始化检查点的路径列表, 从预训练的模型中载入权重.</p>
+
+<h5 id="restoreself-sess-sfile-nfile"><code class="language-plaintext highlighter-rouge">restore(self, sess, sfile, nfile)</code></h5>
+
+<p>从检查点载入权重和学习率</p>
+
+<p>#####<code class="language-plaintext highlighter-rouge">construct_graph(self, sess)</code></p>
+
+<p>构建全部的计算图, 包括</p>
+
+<ul>
+  <li>神经网络结构</li>
+  <li>定义学习率</li>
+  <li>定义优化器</li>
+  <li>定义训练/验证摘要储存器 (writer)</li>
+</ul>
+
+<h5 id="train_modelself-sess-max_iters"><code class="language-plaintext highlighter-rouge">train_model(self, sess, max_iters)</code></h5>
+
+<ul>
+  <li>创建训练数据读取层和验证数据读取层</li>
+  <li>构建计算图</li>
+  <li>载入检查点</li>
+  <li>迭代训练, 保存检查点, 中间输出</li>
+  <li>训练完毕, 保存最后一步输出</li>
+  <li>关闭储存器 (writer)</li>
+</ul>
+
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2018/01/24/LSTM-Learn/">循环神经网络 (Recurrent Neural Network, RNN)</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2018/04/10/Group-Normalizatioin/">Group Normalization 阅读笔记</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

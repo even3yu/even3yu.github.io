@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>机器学习(二): 离散数据的生成式模型</title>
+    <meta name="description" content="">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2018/09/27/Generative-Models-for-discrete-data/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
+    processEscapes: true,
+    tags: "all",
+    macros: {
+      bm: ["{\\boldsymbol #1}",1]
+    },
+    packages: {'[+]': ['noerrors']}
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['input/asciimath', '[tex]/noerrors']
+  }
+};
+</script>
+<script async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
+</script>
+<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>机器学习(二): 离散数据的生成式模型</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2018-09-27
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#机器学习" title="Category: 机器学习" rel="category">机器学习</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-贝叶斯概念学习" id="markdown-toc-1-贝叶斯概念学习">1. 贝叶斯概念学习</a>    <ul>
+      <li><a href="#11-似然" id="markdown-toc-11-似然">1.1 似然</a></li>
+      <li><a href="#12-先验和后验" id="markdown-toc-12-先验和后验">1.2 先验和后验</a></li>
+      <li><a href="#13-mle-和-map" id="markdown-toc-13-mle-和-map">1.3 MLE 和 MAP</a></li>
+      <li><a href="#14-后验预测分布" id="markdown-toc-14-后验预测分布">1.4 后验预测分布</a></li>
+    </ul>
+  </li>
+  <li><a href="#2-补充" id="markdown-toc-2-补充">2. 补充</a>    <ul>
+      <li><a href="#过拟合和黑天鹅悖论" id="markdown-toc-过拟合和黑天鹅悖论">过拟合和黑天鹅悖论</a></li>
+      <li><a href="#似然先验后验举例" id="markdown-toc-似然先验后验举例">似然/先验/后验举例</a></li>
+    </ul>
+  </li>
+</ul>
+
+<p>在二分类任务中, 标准的分类技术通常要同时使用正样本和负样本进行训练, 在本章的<strong>生成式模型</strong>中, 我们主要探讨如何单独从正样本中学习. 比如我提出一个概念(但是我保密), 同时我给出一些符合这个概念的例子(正样本), 你如何猜出这个概念(数据分布).</p>
+
+<p><strong>举个例子:</strong> 假设我们的样本空间是 1 到 100, 并且我给出一个正样本 16, 那么你猜我所提出的概念是什么? 偶数? 2 的 n 次幂? 小于 50 的数? 我们可以看到有太多种猜测的结果, 但实际上我们对每种猜的结果的倾向性是不同的, 比如也许会更倾向于 2 的 n 次幂. 当我再给出一个数字 64, 你是否会更加肯定这种倾向? 同时虽然 {16, 64} 都是偶数, 但是也许你对 2 的 n 次幂的倾向性会更大. 那么这种倾向性如何衡量? 下面会给出进一步的答案.</p>
+
+<p>此外, 本章我们仅考虑离散数据.</p>
+
+<div class="polaroid">
+    <img class="cool-img" src="/images/2018/09/Bayes.jpg" shannon="" />
+    <div class="container">
+        <a href="https://en.wikipedia.org/wiki/Thomas_Bayes">Thomas Bayes 1701-1761.</a>
+    </div>
+</div>
+
+<h2 id="1-贝叶斯概念学习">1. 贝叶斯概念学习</h2>
+
+<p>通俗的说, <strong>贝叶斯概念学习</strong>就是从一个集合的样本中学习出一般的概念. 比如我们前言中的例子, 给出集合 \(\mathcal{D}=\{16, 8, 2, 64\}\), 我们可以比较肯定得说这个集合背后的”概念”是 <em>2的幂</em>, 而不太倾向于说是<em>偶数</em>.</p>
+
+<h3 id="11-似然">1.1 似然</h3>
+
+<p>为了解释这个原因, 我们引入<strong>似然</strong>的概念(或称为<strong>似然函数</strong>):</p>
+
+<blockquote>
+  <p><strong>定义:</strong> 令 \(X\) 是一个离散随机变量, 概率密度函数 \(p\) 依赖于参数 \(\theta\) , 那么函数
+  \(\mathcal{L}(\theta\lvert x)=p_{\theta}(x)=P_{\theta}(X=x),\)
+  是参数 \(\theta\) 的函数, 称为给定 \(x\) 下 \(\theta\) 的<strong>似然函数(likelihood function)</strong>.</p>
+</blockquote>
+
+<p>这里要注意似然和概率的区别.</p>
+
+<ul>
+  <li>概率: 指的是概率空间中某个事件发生的概率, 是关于联合样本 \(\mathbf{x}\) 的函数</li>
+  <li>似然: 指的是联合样本 \(\mathbf{x}\) 关于未知参数 \(\theta\) 的似然, 是关于参数 \(\theta\) 的函数</li>
+</ul>
+
+<p>此外, 我们还需要引入一个法则:</p>
+
+<blockquote>
+  <p><a href="https://en.wikipedia.org/wiki/Occam%27s_razor"><strong>奥卡姆剃刀(Occam’s Razor)</strong></a>: 如无必要, 勿增实体, 即”简单有效原理”.</p>
+</blockquote>
+
+<p>在这样的法则下, 我们可以假设抽取集合 \(\mathcal{D}\) 时是简单随机抽样, 并且每个元素被抽到的概率相等(即均匀分布), 那么从满足”概念” \(h\) 的集合中抽取到集合 \(\mathcal{D}\) 的概率就是可计算的</p>
+
+\[p(\mathcal{D}\lvert h)=\left[\frac{1}{size(h)}\right]^{size(\mathcal{D})}.\]
+
+<p>现在我们可以计算一下上面的例子. 2 的幂次的集合为 \(h_{powers~of~2}\triangleq\{1,2,4,8,16,32,64\}\), 而偶数的集合为 \(h_{even}\triangleq\{2,4,6,\dots,100\}\). 从而 \(p(\mathcal{D}\lvert h_{povers~of~2})=(1/7)^4=4.2\times10^{-4}\), 而 \(p(\mathcal{D}\lvert h_{even})=(1/50)^4=1.6\times10^{-7}\). 显然认为这个”概念”是 <em>2 的幂</em>时能够抽取到集合 \(\mathcal{D}\) 的概率更大, 那么我们也更倾向于相信这种猜测. 同时我们也能得到给定集合 \(\mathcal{D}\) 时参数 \(h_{powers~of~2}\) 的似然要远大于 \(h_{even}\) 的似然.</p>
+
+<h3 id="12-先验和后验">1.2 先验和后验</h3>
+
+<blockquote>
+  <p><strong>定义:</strong>  在贝叶斯统计学中, 一个不确定量的<strong>先验概率分布</strong>(也称为<strong>先验</strong>)指的是在”观测到数据”之前, 我们对于这个未知量不确定性的一种估计.</p>
+</blockquote>
+
+<p>一个直观的例子就是我们在1.1节中每种假设下, 该假设集合中的每个元素被抽到的概率相等, 那么这里的先验分布就是一个均匀分布.</p>
+
+<blockquote>
+  <p><strong>定义:</strong> <strong>后验概率分布</strong>(也称为<strong>后验</strong>)则指的是在给出”观测数据”之后, 对于未知量的条件概率分布.  其表达式为</p>
+
+\[p(h\lvert\mathcal{D})=\frac{p(\mathcal{D}\lvert h)p(h)}{\sum_{h'\in\mathcal{H}}p(\mathcal{D}, h')}\]
+
+  <p>其中 \(p(h\lvert\mathcal{D})\) 为后验概率, \(p(\mathcal{D}\lvert h)\) 为似然, \(p(h)\) 为先验概率.</p>
+</blockquote>
+
+<p>后验概率可以解释为先验概率和似然经过正则化的乘积. 为了说明先验, 后验和似然的关系, 我们仍然用上面的例子 —- “猜概念”. 首先我们给出30种不同的先验: 偶数的集合, 奇数的集合, 以 6 结尾的数…等. 再考虑”观测数据”的集合 \(\mathcal{D}=\{16, 8, 2, 64\}\), 下面两幅图给出了先验概率, 似然和后验概率的结果:</p>
+
+<div class="polaroid-script">
+	<img class="cool-img" src="/images/2018/09/c301.png" />
+    <div class="container">
+        <p>先验/似然/后验</p>
+    </div>
+</div>
+
+<p>下面对上图做一些评论:</p>
+
+<ul>
+  <li>“奇数”和”偶数”这两个猜想的先验概率很高, “2 的幂加上 {37}”和”2 的幂减去 {32}”这两个猜想先验概率很低</li>
+  <li>当出现观测值 \(\mathcal{D}\) 时, 绝大部分猜想由于与观测值相悖(如: “奇数”)而似然为 0; 而有一些猜想的似然很高(如: “2 的幂次”, “2 的幂次减去 {32}”等), 有一些猜想的似然很低(如: “偶数” 接近 0) .</li>
+  <li>后验概率为第三列, 可以发现两个似然很高的特殊情况”2 的幂次加上 {37}”和”2 的幂次减去 {32}”由于先验很低, 所以最终的后验概率也极低. 而”2 的幂次”这个猜想获得了最高的后验概率.</li>
+</ul>
+
+<p>从上面的几点评论中我们进一步证实了为什么见到观测数据 \(\mathcal{D}=\{16,8,2,64 \}\) 后我们更倾向于认为原始猜想是”2 的幂次”而非”偶数”了.</p>
+
+<h3 id="13-mle-和-map">1.3 MLE 和 MAP</h3>
+
+<p>这一小节主要理清最大似然估计(maximum likelihood estimation, MLE), 最大后验概率(maximum a posterior probability estimation, MAP)的概念和关系. 这二者都是数理统计中参数估计的方法. 根据前面似然函数的知识, \(MLE=\text{argmax}_{h}p(\mathcal{D}\lvert h)\). 而最大后验概率 \(MAP=\text{argmax}_hp(\mathcal{D}\lvert h)p(h)\). 可以发现二者仅相差一个 \(p(h)\) , 其含义便有所区别:</p>
+
+<ul>
+  <li>MLE 是寻找一个 \(h\) 使得数据集 \(\mathcal{D}\) 出现的概率最大</li>
+  <li>MAP 是我们(主观的)给出事件的一个先验概率后, 寻找一个 \(h\) 使得数据集 \(\mathcal{D}\) 出现的概率最大</li>
+</ul>
+
+<p>这二者的区别主要是由<strong>先验概率</strong>决定的, 实际上我们可以把 MLE 的先验看作均匀分布, 这也是一个直观的解释: 当我们对数据分布<em>一无所知</em>时, 那么均匀分布就是最好的先验分布.</p>
+
+<h3 id="14-后验预测分布">1.4 后验预测分布</h3>
+
+<p>当我们知道了什么是似然, 什么是先验分布和后验分布, 那我们接下来就该考虑一个更实际的二分类问题:</p>
+
+<blockquote>
+  <p>假设我们从数据空间已经获取了一批带标注的数据集 \(\mathcal{D}\), 当给出一个新的数据点 \(\tilde{x}\) 时, 如何估计该数据点的类别?</p>
+</blockquote>
+
+<ul>
+  <li><strong>法一(基于规则的推理 rule-based reasoning):</strong> 最直接的想法就是使用数据集 \(\mathcal{D}\) 估计该数据集分布的最优参数 \(\theta\) , 然后自然根据参数就能得到新数据点 \(\tilde{x}\) 的预测值.</li>
+</ul>
+
+<p>法一最大的优势在于简单, 容易实现. 根据数据集估计最优参数, 那么这其实就是求极大似然估计MLE的过程. 并且把这种使用单一参数值作进行估计的方法称为<strong>插入近似(plug-in approximation)</strong>. 同时, 这个”最优参数”就是所谓的<strong>规则</strong>. 根据描述, 我们容易得到 \(\tilde{x}\) 的后验预测分布(定义见下文)为</p>
+
+\[p(\tilde{x}=1\lvert\mathcal{D})= p(\tilde{x}\lvert\theta_{MLE})\]
+
+<p>法一虽然简单, 但是它完全忽视了数据的<strong>不确定性</strong>. 换句话说就是数据集 \(\mathcal{D}\) 的分布可能并不完全和数据空间相同, 因为采样是存在偏差的.  仅估计一个单一的 \(\theta\) 值就忽视了偏差的存在, 即忽视了数据采样的不确定性, 因此我们提出法二.</p>
+
+<ul>
+  <li><strong>法二(基于相似度的推理 similarity-based reasoning):</strong> 不把 \(\theta\) 固定为一个值, 而是使用概率分布, 即 \(\theta\) 以不同的概率取不同的值. 离散形式如下式</li>
+</ul>
+
+\[p(\tilde{x}=1\lvert\mathcal{D})=\sum_{\theta}p(x=1\lvert\tilde{x})p(\theta\lvert\mathcal{D}),\]
+
+<p>连续形式为</p>
+
+\[p(\tilde{x}=1\lvert\mathcal{D})=\int_{\Theta}p(x=1\lvert\theta)p(\theta\lvert\mathcal{D})\,d\theta.\]
+
+<p>上面两式称为<strong>后验预测分布</strong>, 它实际上是不同参数假设下数据分布的加权平均, 也称为<strong>贝叶斯模型平均</strong>(bayes model averaging, BMA), 显然它把不确定性考虑在内了. 哪个估计的参数值越接近真实参数值, 那么可以想象它所对应的概率也越大, 这就是<strong>相似度</strong>的含义.</p>
+
+<ul>
+  <li><strong>特点:</strong> 可以发现当已观测到的数据集 \(\mathcal{D}\) 非常小时, 使用插入近似的后验预测分布会变得很窄(即过拟合了); 增大数据集 \(\mathcal{D}\) 时, 后验预测分布会逐渐变宽(增加数据减轻过拟合). 使用贝叶斯模型平均方法则后验预测分布会从宽变窄. 而当数据量不断增大, 两种方法最终会收敛到相同的结果.</li>
+</ul>
+
+<p>下面仍然考虑上面的例子, 数据空间为[1, 100]. (因为仅考虑离散数据)我们给定如下不同的先验:</p>
+
+<ul>
+  <li>奇数</li>
+  <li>偶数</li>
+  <li>平方数</li>
+  <li>3 的倍数, 4的倍数, …, 10 的倍数</li>
+  <li>以 1 结尾, 以 2 结尾, …, 以 9 结尾</li>
+  <li>2 的幂次, 3 的幂次, …, 10 的幂次</li>
+  <li>所有数据</li>
+  <li>2 的幂次去掉 37</li>
+  <li>2 的幂次 添上 32</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th>数据集</th>
+      <th>\(\mathcal{D}=\{16\}\)</th>
+      <th>\(\mathcal{D}=\{16, 8, 2, 64\}\)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>插入近似</td>
+      <td>(窄) 4 的幂次似然最大, 图 1</td>
+      <td>(宽) 2 的幂次似然最大, 图 2</td>
+    </tr>
+    <tr>
+      <td>贝叶斯模型平均</td>
+      <td>(宽)</td>
+      <td>(窄)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>[注:] 下次画几张图</p>
+
+<h2 id="2-补充">2. 补充</h2>
+
+<h4 id="过拟合和黑天鹅悖论">过拟合和黑天鹅悖论</h4>
+
+<p>在1.4节提到插入法得到的后验预测分布过窄, 这其实是<strong>过拟合</strong>, 维基百科定义如下</p>
+
+<blockquote>
+  <p><strong>定义:</strong> 在统计学中, 过拟合是对一组数据分析得过于恰好的结果, 以至于可能会无法拟合额外的数据或无法对未来做出可靠的预测.</p>
+</blockquote>
+
+<p>在另外一些定义中, 可能会提到使用”过多的参数”导致的过拟合, 维基百科的这个定义是更加”一般化”的说法. 比如数据量过少时插入法得到的后验预测分布就很容易产生过拟合, 但这种过拟合并不是参数过多导致的, 而是选择了个”过于恰好”的模型.</p>
+
+<p>黑天鹅悖论则是与之相关的一个概念. <a href="https://baike.baidu.com/item/%E9%BB%91%E5%A4%A9%E9%B9%85%E7%90%86%E8%AE%BA">百度百科</a>. <a href="https://en.wikipedia.org/wiki/Black_swan_theory">维基百科</a>.</p>
+
+<h4 id="似然先验后验举例">似然/先验/后验举例</h4>
+
+<p>参考 <a href="https://mitpress.mit.edu/books/machine-learning-1">Machine Learning: A Probabilistic Perspective</a>, by Kevin P. Murphy 第三章</p>
+
+<ul>
+  <li>3.3 The beta-binomial model</li>
+  <li>3.4 The Dirichlet-multinomial model</li>
+</ul>
+
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2018/09/25/CUDA-Computing/">GPU 编程 (一) -- CUDA 的安装和环境的配置</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2018/10/31/Powershell-Common-Settings/">Powershell: 定制一个优雅的终端</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

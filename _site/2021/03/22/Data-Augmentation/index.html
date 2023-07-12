@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>数据增广 (Data Augmentation)</title>
+    <meta name="description" content="">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2021/03/22/Data-Augmentation/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
+    processEscapes: true,
+    tags: "all",
+    macros: {
+      bm: ["{\\boldsymbol #1}",1]
+    },
+    packages: {'[+]': ['noerrors']}
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['input/asciimath', '[tex]/noerrors']
+  }
+};
+</script>
+<script async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
+</script>
+<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>数据增广 (Data Augmentation)</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2021-03-22
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Wiki_Deep Learning  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#深度学习" title="Category: 深度学习" rel="category">深度学习</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-传统数据增广技术" id="markdown-toc-1-传统数据增广技术">1. 传统数据增广技术</a>    <ul>
+      <li><a href="#11-平移-translating" id="markdown-toc-11-平移-translating">1.1 平移 (translating)</a></li>
+      <li><a href="#12-翻转-flipping" id="markdown-toc-12-翻转-flipping">1.2 翻转 (flipping)</a></li>
+      <li><a href="#13-缩放-scaling" id="markdown-toc-13-缩放-scaling">1.3 缩放 (scaling)</a></li>
+      <li><a href="#14-裁剪-cropping" id="markdown-toc-14-裁剪-cropping">1.4 裁剪 (cropping)</a></li>
+      <li><a href="#15-旋转-rotating" id="markdown-toc-15-旋转-rotating">1.5 旋转 (rotating)</a></li>
+      <li><a href="#16-颜色扰动-color-jitter" id="markdown-toc-16-颜色扰动-color-jitter">1.6 颜色扰动 (color jitter)</a></li>
+    </ul>
+  </li>
+  <li><a href="#2-其他数据增广技术" id="markdown-toc-2-其他数据增广技术">2. 其他数据增广技术</a></li>
+</ul>
+
+<p>本文讨论深度学习中的数据增广(也叫数据增强, data augmentation)技术. 深度学习因其用于高效的用于特征提取的分层结构和大规模的数据集, 在计算机视觉领域大放异彩. 然而, 由于大规模模型的参数量达到了数千万到数十亿的级别, 并且数据集标签的搜集成本较高, 因此充分地使用数据增广和正则化技术是避免模型过拟合的有效途径. 本文主要讨论传统的数据增广技术和近几年新流行的技术.</p>
+
+<p>首先导入所需要的库, 并读取一张图像:</p>
+
+<ul class="nav nav-tabs">
+  <li class="active"><a data-tab="" href="#tabContent0-1">PyTorch</a></li>
+  <li><a data-tab="" href="#tabContent0-2">Tensorflow</a></li>
+</ul>
+<div class="tab-content">
+<div class="tab-pane active" id="tabContent0-1">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="kn">import</span> <span class="n">torch</span>
+<span class="kn">import</span> <span class="n">torchvision</span>
+<span class="kn">from</span> <span class="n">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+
+<span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">example.png</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">W</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">image</span><span class="p">.</span><span class="n">size</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">image</span><span class="p">.</span><span class="n">mode</span><span class="p">))</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+<div class="tab-pane" id="tabContent0-2">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="kn">import</span> <span class="n">tensorflow</span> <span class="k">as</span> <span class="n">tf</span>
+<span class="kn">import</span> <span class="n">tensorflow_addons</span> <span class="k">as</span> <span class="n">tfa</span>
+
+<span class="n">raw_data</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">io</span><span class="p">.</span><span class="nf">read_file</span><span class="p">(</span><span class="sh">"</span><span class="s">example.png</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">image</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">io</span><span class="p">.</span><span class="nf">decode_png</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+<span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">image</span><span class="p">.</span><span class="n">shape</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+</div>
+
+<h2 id="1-传统数据增广技术">1. 传统数据增广技术</h2>
+
+<h3 id="11-平移-translating">1.1 平移 (translating)</h3>
+
+<ul>
+  <li><strong>参数</strong> \((a, b): -aW \leq x_t &lt; aW, -bH \leq y_t &lt; bH\) 平移的距离和最大范围</li>
+</ul>
+
+<ul class="nav nav-tabs">
+  <li class="active"><a data-tab="" href="#tabContent1-1">PyTorch</a></li>
+  <li><a data-tab="" href="#tabContent1-2">Tensorflow</a></li>
+</ul>
+<div class="tab-content">
+<div class="tab-pane active" id="tabContent1-1">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="c1"># image: PIL.Image [W, H, C] / torch.Tensor [C, H, W]
+</span><span class="n">trans</span> <span class="o">=</span> <span class="n">transforms</span><span class="p">.</span><span class="nc">Compose</span><span class="p">([</span><span class="n">torchvision</span><span class="p">.</span><span class="n">transforms</span><span class="p">.</span><span class="nc">RandomAffine</span><span class="p">(</span><span class="n">translate</span><span class="o">=</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))])</span>
+<span class="n">image2</span> <span class="o">=</span> <span class="nf">trans</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+<div class="tab-pane" id="tabContent1-2">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="c1"># image: tf.Tensor, [H, W, C]
+</span><span class="n">shifts</span> <span class="o">=</span> <span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">([</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">W</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">b</span> <span class="o">*</span> <span class="n">H</span><span class="p">]</span>
+<span class="n">image2</span> <span class="o">=</span> <span class="n">tfa</span><span class="p">.</span><span class="n">image</span><span class="p">.</span><span class="nf">translate</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">shifts</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+</div>
+
+<h3 id="12-翻转-flipping">1.2 翻转 (flipping)</h3>
+
+<ul>
+  <li><strong>参数</strong> \(p:\) 翻转的概率</li>
+</ul>
+
+<ul class="nav nav-tabs">
+  <li class="active"><a data-tab="" href="#tabContent2-1">PyTorch</a></li>
+  <li><a data-tab="" href="#tabContent2-2">Tensorflow</a></li>
+</ul>
+<div class="tab-content">
+<div class="tab-pane active" id="tabContent2-1">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="c1"># image: PIL.Image [W, H, C] / torch.Tensor [C, H, W]
+</span><span class="n">trans</span> <span class="o">=</span> <span class="n">transforms</span><span class="p">.</span><span class="nc">Compose</span><span class="p">([</span><span class="n">torchvision</span><span class="p">.</span><span class="n">transforms</span><span class="p">.</span><span class="nc">RandomHorizontalFlip</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)])</span>
+<span class="n">image2</span> <span class="o">=</span> <span class="nf">trans</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+<div class="tab-pane" id="tabContent2-2">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="c1"># image: tf.Tensor, [H, W, C]
+</span><span class="n">image2</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">image</span><span class="p">.</span><span class="nf">random_flip_left_right</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+</div>
+
+<h3 id="13-缩放-scaling">1.3 缩放 (scaling)</h3>
+
+<ul>
+  <li><strong>参数</strong> \((a, b): a \leq s \leq b\) 缩放的尺度范围</li>
+</ul>
+
+<ul class="nav nav-tabs">
+  <li class="active"><a data-tab="" href="#tabContent3-1">PyTorch</a></li>
+  <li><a data-tab="" href="#tabContent3-2">Tensorflow</a></li>
+</ul>
+<div class="tab-content">
+<div class="tab-pane active" id="tabContent3-1">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="c1"># image: PIL.Image [W, H, C] / torch.Tensor [C, H, W]
+</span><span class="n">trans</span> <span class="o">=</span> <span class="n">transforms</span><span class="p">.</span><span class="nc">Compose</span><span class="p">([</span>
+    <span class="n">torchvision</span><span class="p">.</span><span class="n">transforms</span><span class="p">.</span><span class="nc">RandomAffine</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="n">resample</span><span class="o">=</span><span class="n">Image</span><span class="p">.</span><span class="n">NEAREST</span><span class="p">)])</span>
+<span class="n">image2</span> <span class="o">=</span> <span class="nf">trans</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+<div class="tab-pane" id="tabContent3-2">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="c1"># image: tf.Tensor, [H, W, C]
+</span><span class="n">size</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">cast</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">((),</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">*</span> <span class="p">[</span><span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">],</span> <span class="n">tf</span><span class="p">.</span><span class="n">int32</span><span class="p">)</span>
+<span class="n">image2</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">image</span><span class="p">.</span><span class="nf">resize</span><span class="p">(</span>
+    <span class="n">image</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="sh">'</span><span class="s">nearest</span><span class="sh">'</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+</div>
+
+<h3 id="14-裁剪-cropping">1.4 裁剪 (cropping)</h3>
+
+<ul>
+  <li><strong>参数</strong> \((h, w):\) 裁剪的大小</li>
+</ul>
+
+<ul class="nav nav-tabs">
+  <li class="active"><a data-tab="" href="#tabContent4-1">PyTorch</a></li>
+  <li><a data-tab="" href="#tabContent4-2">Tensorflow</a></li>
+</ul>
+<div class="tab-content">
+<div class="tab-pane active" id="tabContent4-1">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="c1"># image: PIL.Image [W, H, C] / torch.Tensor [C, H, W]
+</span><span class="n">trans</span> <span class="o">=</span> <span class="n">transforms</span><span class="p">.</span><span class="nc">Compose</span><span class="p">([</span><span class="n">torchvision</span><span class="p">.</span><span class="n">transforms</span><span class="p">.</span><span class="nc">RandomCrop</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">))])</span>
+<span class="n">image2</span> <span class="o">=</span> <span class="nf">trans</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+<div class="tab-pane" id="tabContent4-2">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="c1"># image: tf.Tensor, [H, W, C]
+</span><span class="n">image2</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">image</span><span class="p">.</span><span class="nf">random_crop</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">C</span><span class="p">))</span>
+
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+</div>
+
+<h3 id="15-旋转-rotating">1.5 旋转 (rotating)</h3>
+
+<ul>
+  <li><strong>参数</strong> \(\theta: -d \leq \theta \leq d\) 随机旋转的范围</li>
+</ul>
+
+<ul class="nav nav-tabs">
+  <li class="active"><a data-tab="" href="#tabContent5-1">PyTorch</a></li>
+  <li><a data-tab="" href="#tabContent5-2">Tensorflow</a></li>
+</ul>
+<div class="tab-content">
+<div class="tab-pane active" id="tabContent5-1">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="c1"># image: PIL.Image [W, H, C] / torch.Tensor [C, H, W]
+</span><span class="n">trans</span> <span class="o">=</span> <span class="n">transforms</span><span class="p">.</span><span class="nc">Compose</span><span class="p">([</span><span class="n">torchvision</span><span class="p">.</span><span class="n">transforms</span><span class="p">.</span><span class="nc">RandomRotation</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="n">d</span><span class="p">)])</span>
+<span class="n">image2</span> <span class="o">=</span> <span class="nf">trans</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+<div class="tab-pane" id="tabContent5-2">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="c1"># image: tf.Tensor, [H, W, C]
+</span><span class="n">degree</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">((),</span> <span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<span class="n">image2</span> <span class="o">=</span> <span class="n">tfa</span><span class="p">.</span><span class="n">image</span><span class="p">.</span><span class="nf">rotate</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+</div>
+
+<h3 id="16-颜色扰动-color-jitter">1.6 颜色扰动 (color jitter)</h3>
+
+<ul>
+  <li><strong>参数</strong> \(a: -a \leq \alpha \leq a\) 随机亮度的变化范围</li>
+  <li><strong>参数</strong> \(b: -b \leq \beta \leq b\) 随机对比度的变化范围</li>
+  <li><strong>参数</strong> \(c: -c \leq \gamma \leq c\) 随机饱和度的变化范围</li>
+</ul>
+
+<ul class="nav nav-tabs">
+  <li class="active"><a data-tab="" href="#tabContent6-1">PyTorch</a></li>
+  <li><a data-tab="" href="#tabContent6-2">Tensorflow</a></li>
+</ul>
+<div class="tab-content">
+<div class="tab-pane active" id="tabContent6-1">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="c1"># image: PIL.Image [W, H, C] / torch.Tensor [C, H, W]
+</span><span class="n">trans</span> <span class="o">=</span> <span class="n">transforms</span><span class="p">.</span><span class="nc">Compose</span><span class="p">([</span>
+    <span class="n">torchvision</span><span class="p">.</span><span class="n">transforms</span><span class="p">.</span><span class="nc">ColorJitter</span><span class="p">(</span>
+        <span class="n">brightness</span><span class="o">=</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">b1</span><span class="p">),</span> <span class="n">contrast</span><span class="o">=</span><span class="p">(</span><span class="n">a2</span><span class="p">,</span> <span class="n">b2</span><span class="p">),</span> <span class="n">saturation</span><span class="o">=</span><span class="p">(</span><span class="n">a3</span><span class="p">,</span> <span class="n">b3</span><span class="p">))])</span>
+<span class="n">image2</span> <span class="o">=</span> <span class="nf">trans</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+<div class="tab-pane" id="tabContent6-2">
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="c1"># image: tf.Tensor, [H, W, C]
+</span><span class="n">image2</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">image</span><span class="p">.</span><span class="nf">random_brightness</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+<span class="n">image3</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">image</span><span class="p">.</span><span class="nf">random_contrast</span><span class="p">(</span><span class="n">image2</span><span class="p">,</span> <span class="o">-</span><span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">image4</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">image</span><span class="p">.</span><span class="nf">random_saturation</span><span class="p">(</span><span class="n">image3</span><span class="p">,</span> <span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </div>
+</div>
+
+<div class="alert alert-warning with-icon card">
+
+<i class="icon-warning-sign"></i>
+<div class="zui-card-content">
+
+<div class="title"><strong>警告</strong></div><hr />
+
+<div class="content">
+      <p>PyTorch 和 Tensorflow 对 ColorJitter 的内部实现方式是不同的.</p>
+    </div>
+
+</div>
+</div>
+
+<h2 id="2-其他数据增广技术">2. 其他数据增广技术</h2>
+
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2020/12/28/WGAN/">训练 GAN 的理论分析和实践 (Wasserstein GAN)</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2021/03/22/Thinking-About-FSL-2/">关于少样本学习的思考 (二) (Thinking About FSL 2)</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

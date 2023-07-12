@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Thinkpad X1C 睡眠耗电很快</title>
+    <meta name="description" content="TL;DR. 在 BIOS 中把电源管理从 Windows 10 修改为 Linux.">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2022/03/24/Power-Management/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>Thinkpad X1C 睡眠耗电很快</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2022-03-24
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#Issue" title="Category: Issue" rel="category">Issue</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-问题来源" id="markdown-toc-1-问题来源">1. 问题来源</a></li>
+  <li><a href="#2-原因分析" id="markdown-toc-2-原因分析">2. 原因分析</a></li>
+  <li><a href="#3-解决方案" id="markdown-toc-3-解决方案">3. 解决方案</a></li>
+  <li><a href="#4-其他" id="markdown-toc-4-其他">4. 其他</a></li>
+</ul>
+
+<h2 id="1-问题来源">1. 问题来源</h2>
+
+<p>由于常年需要使用笔记本开着大量的程序工作, 常年没有关电脑的习惯, 通常晚上直接锁定走人. 有时候把笔记本睡眠后带回家, 但是忘了插电, 过两天再打开就发现电量已经耗尽关机了.</p>
+
+<h2 id="2-原因分析">2. 原因分析</h2>
+
+<p>这种把电池榨干的睡眠方法可以说是毫无人性, 不知道微软为什么要和笔记本厂商联合起来搞这种完全不成熟的方案.</p>
+
+<p>网上一通搜索之后发现现代 Windows 系统 (比如 Win11, 或者 Win10 &gt;=2004) 在强推 <a href="https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/modern-standby">Modern Standby</a>.</p>
+
+<blockquote>
+  <p>Windows 10 Modern Standby (Modern Standby) expands the Windows 8.1 Connected Standby power model. Connected Standby, and consequently Modern Standby, enable an <strong>instant on / instant off</strong> user experience, <strong>similar to smartphone power models</strong>. Just like the phone, the S0 low power idle model enables the system to stay connected to the network while in a low power mode.</p>
+</blockquote>
+
+<p>意思就是想让电脑像手机一样, 在待机时仍然保持一种低功耗状态, 并且同时能够实现一定的功能 (比如联网接收即时消息). 但这几年下来用户实测效果相当不好, 然后就出现了上文说的待机两天电池榨干的情况.</p>
+
+<p>打开 Windows 管理员命令行, 输入 <code class="language-plaintext highlighter-rouge">powercfg -a</code> (CMD 输入 <code class="language-plaintext highlighter-rouge">powercfg /a</code>) 来获取当前的待机模式. 我的待机模式如下:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+</pre></td><td class="rouge-code"><pre>此系统上有以下睡眠状态:
+    待机 (S0 低电量待机)
+
+此系统上没有以下睡眠状态:
+    待机 (S1)
+        系统固件不支持此待机状态。
+
+    待机 (S2)
+        系统固件不支持此待机状态。
+
+    待机 (S3)
+        系统固件不支持此待机状态。
+
+    休眠
+        尚未启用休眠。
+
+    混合睡眠
+        休眠不可用。
+        虚拟机监控程序不支持此待机状态。
+
+    快速启动
+        休眠不可用。
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>可以看到有 S0-S3 这几种待机模式, 当前待机模式是 S0, 这就是前述的 “Modern Standby”. 而在 S0 模式之前常用的是 S3 模式, 即 “CPU 停止工作, 内存持续通电以保持数据” 的一种状态.</p>
+
+<h2 id="3-解决方案">3. 解决方案</h2>
+
+<p>为了切换回 S3 模式, 我们需要从系统设置和 BIOS 设置两个层面检查:</p>
+
+<ul>
+  <li>
+    <p>如果系统是 Win10 2004, 那么无法改回 S3 模式, 可以考虑升级系统.  (<a href="https://www.reddit.com/r/Dell/comments/h0r56s/getting_back_s3_sleep_and_disabling_modern/">参考</a>.)</p>
+  </li>
+  <li>如果系统是 Win10 20H2 及以上. 首先尝试通过修改注册表, 在 <code class="language-plaintext highlighter-rouge">HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power</code> 下面新建一个 <code class="language-plaintext highlighter-rouge">REG_DWORD</code> 类型的变量, 名称为 <code class="language-plaintext highlighter-rouge">PlatformAoAcOverride</code>, 值为 <code class="language-plaintext highlighter-rouge">0</code>. 重启系统, 查看当前待机模式. 如果为 S3 则成功, 否则删除该注册表项, 进入下一步.
+    <ul>
+      <li>上面的 <code class="language-plaintext highlighter-rouge">PlatformAoAcOverride</code> 的意思是 Platform Always-on/Always-connect Override.</li>
+    </ul>
+  </li>
+  <li>检查 BIOS 设置. 在 <code class="language-plaintext highlighter-rouge">Power</code> 相关的选项中寻找
+    <ul>
+      <li>如果有 <code class="language-plaintext highlighter-rouge">ACPI</code> (Advanced Configuration and Power Management Interface) 相关的选项, 则切换为 S3 模式</li>
+      <li>如果有 <code class="language-plaintext highlighter-rouge">Power Mode = Windows 10</code> 相关的选项, 则切换为 <code class="language-plaintext highlighter-rouge">Linux</code>. (我的 Thinkpad X1C 就是这种情况.) 这里的 <code class="language-plaintext highlighter-rouge">Linux</code> 模式就是 S3 模式. (不知道联想为啥要写的这么隐晦.)</li>
+    </ul>
+
+    <p>保存设置重启系统. 再次命令行里检查待机模式, 发现成功切换为 S3.</p>
+  </li>
+</ul>
+
+<p>最后待机模式如下:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+</pre></td><td class="rouge-code"><pre>此系统上有以下睡眠状态:
+    待机 (S3)
+
+此系统上没有以下睡眠状态:
+    待机 (S1)
+        系统固件不支持此待机状态。
+
+    待机 (S2)
+        系统固件不支持此待机状态。
+
+    休眠
+        尚未启用休眠。
+
+    待机(S0 低电量待机)
+        系统固件不支持此待机状态。
+
+    混合睡眠
+        休眠不可用。
+        虚拟机监控程序不支持此待机状态。
+
+    快速启动
+        休眠不可用。
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>在 S3 待机模式下, 睡眠后发现显示屏关闭, 片刻后风扇停止, CPU应该停止工作了. 此时动鼠标和键盘都不能唤醒电脑, 按电源键可以唤醒, 大约两秒钟进入登陆界面.</p>
+
+<h2 id="4-其他">4. 其他</h2>
+
+<p>如果发现切换到 S3 模式之后, 还是无法成功睡眠, 则可以参考下面的链接排查原因.</p>
+
+<p><a href="https://zhuanlan.zhihu.com/p/93306740">一劳永逸解决WIN10所有睡眠问题</a></p>
+
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2022/02/17/MLExpManage/">MongoDB + Omniboard 实验管理</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2022/03/29/Attention-and-Transformer/">注意力机制和 Transformer (Attention and Transformer)</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

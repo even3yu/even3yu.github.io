@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>生成扩散模型(三): 灵活性和易处理性 (Generative Diffusion Model: Flexibility and Tractability)</title>
+    <meta name="description" content="说起机器学习中使用概率模型建模复杂的数据集时, 要同时满足概率模型的灵活性 (flexibility) 和易处理性 (tractability) 是一件十分困难的事情. 如果想要用复杂的模型 \(\phi(\bm{x})\) (比如深度神经网络) 提高建模的灵活性, 那么往往会牺牲易处理性, 因为为了获得数据的概...">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2022/11/27/Diffusion-Model-3/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
+    processEscapes: true,
+    tags: "all",
+    macros: {
+      bm: ["{\\boldsymbol #1}",1]
+    },
+    packages: {'[+]': ['noerrors']}
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['input/asciimath', '[tex]/noerrors']
+  }
+};
+</script>
+<script async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
+</script>
+<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>生成扩散模型(三): 灵活性和易处理性 (Generative Diffusion Model: Flexibility and Tractability)</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2022-11-27
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#深度学习" title="Category: 深度学习" rel="category">深度学习</a>&nbsp;
+    
+        <a href="/category/#生成模型" title="Category: 生成模型" rel="category">生成模型</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#扩散概率模型" id="markdown-toc-扩散概率模型">扩散概率模型</a></li>
+  <li><a href="#前向过程" id="markdown-toc-前向过程">前向过程</a></li>
+  <li><a href="#反向过程" id="markdown-toc-反向过程">反向过程</a></li>
+  <li><a href="#模型概率" id="markdown-toc-模型概率">模型概率</a></li>
+  <li><a href="#训练模型" id="markdown-toc-训练模型">训练模型</a></li>
+</ul>
+
+<p>说起机器学习中使用概率模型建模复杂的数据集时, 要<span style="color:blue">同时满足概率模型的灵活性 (flexibility) 和易处理性 (tractability) 是一件十分困难的事情</span>. 如果想要用复杂的模型 \(\phi(\bm{x})\) (比如深度神经网络) 提高建模的灵活性, 那么往往会牺牲易处理性, 因为为了获得数据的概率分布 \(p(\bm{x})=\frac{\phi(\bm{x})}{Z}\), 需要计算标准化常数 \(Z\), 然而这需要计算积分 \(Z=\int\phi(\bm{x})\text{d}x\), 导致计算难度陡增, 需要用蒙特卡洛 (Monte Carlo, MC) 等耗时耗力的方法. 反之, 如果使用易处理的模型 (比如高斯分布) 拟合数据, 那么这类模型又难以描述分布十分复杂的数据.</p>
+
+<p>而 Sohl-Dickstein 等人在 2015 年的工作<a href="https://proceedings.mlr.press/v37/sohl-dickstein15.html">《Deep Unsupervised Learning using Nonequilibrium Thermodynamics》</a> 提出了一种新的模型 (也就是我们现在所熟知的扩散模型) 来解决上面不能两全的问题, 以同时追求灵活性和易处理性. 扩散模型源自于<span style="color:red">非平衡热力学 (non-equilibrium thermodynamics) </span>的现象, 即系统性地、缓慢地、一步一步地摧毁原始的数据分布 (也即<strong>扩散过程</strong>), 我们只需要去建模这个扩散过程的逆过程即可恢复数据分布.</p>
+
+<h2 id="扩散概率模型">扩散概率模型</h2>
+
+<p>扩散模型有如下优点:</p>
+
+<ol>
+  <li>模型结构是灵活的</li>
+  <li>确定的采样过程</li>
+  <li>易于和其他分布相乘 (比如计算后验分布时)</li>
+  <li>模型的对数似然和每一步中间状态的概率分布都可以计算</li>
+</ol>
+
+<h2 id="前向过程">前向过程</h2>
+
+<p>扩散模型的<span style="color:red">前向过程 (forward/inference process)</span> 中, 我们把原始的数据分布记为 \(q(\bm{x}_0)\) (注意, 该分布是未知的, 我们只有一些从该分布中采样得到的样本, 即我们拿到的训练数据), 数据的分布在扩散过程中逐渐变成一个简单的(易处理的)分布 \(q(\bm{x}_T)\), 其中 \(T\) 是扩散的步数. 我们假设扩散过程是服从<span style="color:red">马尔科夫 (Markov)</span> 性质的, 即当前状态只跟上一个状态有关, 而与再早以前的状态无关. 前向过程可以表示为:</p>
+
+\[\label{eq:forward}
+    q(\bm{x}_{0:T})=q(\bm{x}_0)\prod_{t=1}^T q(\bm{x}_t\vert\bm{x}_{t-1}).\]
+
+<p>其中的 \(q(\bm{x}_t\vert\bm{x}_{t-1})\) 可以是高斯分布或者二项分布. 扩散最终的结果是一个标准高斯分布或二项分布.</p>
+
+<div class="alert alert-info with-icon card">
+
+<i class="icon-info-sign"></i>
+<div class="zui-card-content">
+
+<div class="title"><strong>提示</strong></div><hr />
+
+<div class="content">
+      <p>我们使用 \(p(\bm{x}_{0:T})\) 表示随机变量 \(\bm{x}_0,\cdots,\bm{x}_T\) 联合分布的密度函数.</p>
+    </div>
+
+</div>
+</div>
+
+<h2 id="反向过程">反向过程</h2>
+
+<p><span style="color:red">反向过程 (reverse process)</span> 通过训练可以描述前向过程的反向过程:</p>
+
+\[\label{eq:backward}
+    p(\bm{x}_{0:T})=p(\bm{x}_T)\prod_{t=1}^T p(\bm{x}_{t-1}\vert \bm{x}_t).\]
+
+<p>当扩散步长 \(\beta\) 足够小的时候, 其逆向过程也是一个高斯(二项)分布. 下文主要考虑高斯分布, 那么只需要考虑计算高斯分布的均值和方差(协方差矩阵)即可.</p>
+
+<p>特别地, 我们定义反向过程的起点等于前向过程的终点, 即 \(p(\bm{x}_T)=q(\bm{x}_T)\).</p>
+
+<h2 id="模型概率">模型概率</h2>
+
+<p>上面定义的扩散模型是一个隐变量模型, \(\bm{x}_1\cdots\bm{x}_T\) 都属于隐变量, \(\bm{x}_0\) 是观测变量, 那么对该隐变量模型联合分布的密度函数在所有隐变量上积分即可得到观测变量的边缘分布</p>
+
+\[p(\bm{x}_0) = \int d\bm{x}_{1:T}\,p(\bm{x}_{0:T}).\]
+
+<p>这个积分是不易处理的, 我们可以把上面的式子变成反向过程和前向过程的相对概率</p>
+
+\[\begin{align}
+        p(\bm{x}_0) &amp;= \int d\bm{x}_{1:T}\,p(\bm{x}_{0:T}) \frac{q(\bm{x}_{1:T}\vert \bm{x}_0)}{q(\bm{x}_{1:T}\vert \bm{x}_0)} \\ \label{eq:model_prob_2}
+        &amp;= \int d\bm{x}_{1:T}\,q(\bm{x}_{1:T}\vert \bm{x}_0) \frac{p(\bm{x}_{0:T})}{q(\bm{x}_{1:T}\vert \bm{x}_0)} \\ \label{eq:model_prob_3}
+        &amp;= \int d\bm{x}_{1:T}\,q(\bm{x}_{1:T}\vert \bm{x}_0) \cdot p(\bm{x}_T) \prod_{t=1}^T\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_t\vert \bm{x}_{t-1})}.
+    \end{align}\]
+
+<p>其中式 \eqref{eq:model_prob_3} 是把式 \eqref{eq:forward} 和 \eqref{eq:backward} 代入式 \eqref{eq:model_prob_2} 得到的.</p>
+
+<p>作者在这里说明了一下式 \eqref{eq:model_prob_3} 是易于处理的. 只需要计算 \(p(\bm{x}_T) \prod_{t=1}^T\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_t\vert \bm{x}_{t-1})}\), 然后在所有的前向过程的路径 \(q(\bm{x}_{1:T}\vert\bm{x}_0)\) 上求和 (相当于做积分) 即可. 特别地, 如果前向过程的步长 \(\beta\) 是个无穷小量, 那么给定 \(\bm{x}_0\) 只有一条确定的前向路径.</p>
+
+<h2 id="训练模型">训练模型</h2>
+
+<p>训练模型需要一个损失函数, 我们可以<u>极大化模型的对数似然 (log likelihood)</u>, 它相当于搜索能使得当前的观测样本出现概率最大的参数. \(N\) 个观测变量 \(\{\bm{x}^{(i)}\}_{i=1}^N\) 的对数似然计算方式如下:</p>
+
+\[\log \prod_{i=1}^N p_{\theta}(\bm{x}^{(i)}) = \sum_{i=1}^N\log  p_{\theta}(\bm{x}^{(i)})\]
+
+<p>假设我们可以采样从数据分布 \(q(\bm{x}_0)\) 采样到所有的值, 那么对数似然就是函数 \(\log p(\bm{x}_0)\) 的期望, 用积分可以写为</p>
+
+\[\begin{align}
+        L &amp;= \int d\bm{x}_0 q(\bm{x}_0) \log p(\bm{x}_0) \\ \label{eq:log_likelihood}
+        &amp;= \int d\bm{x}_0 q(\bm{x}_0)\cdot \underline{\log\left[\int d\bm{x}_{1:T}\,q(\bm{x}_{1:T}\vert \bm{x}_0) \cdot p(\bm{x}_T) \prod_{t=1}^T\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_t\vert \bm{x}_{t-1})}\right]}
+    \end{align}\]
+
+<p>到这里没法直接往下用等式推导了. 但是我们可以利用 <a href="https://en.wikipedia.org/wiki/Jensen%27s_inequality">琴生不等式 (Jensen’s inequality)</a> 把对数符号拿到第二个积分符号里面.</p>
+
+<div class="alert alert-info with-icon card" id="jensen_inequality">
+
+<i class="icon-info-sign"></i>
+<div class="zui-card-content">
+
+<div class="title"><strong>琴生不等式 (Jensen's inequality) <a href="#jensen_inequality">#</a></strong></div><hr />
+
+<div class="content">
+
+      <p><strong>一般陈述</strong>: 过一个凸函数上任意两点所作割线一定在这两点间的函数图象的上方，即：</p>
+
+\[f(tx_1 + (1 - t)x_2) \leq tf(x_1) + (1 - t)f(x_2).\]
+
+      <p>其中 \(f(\cdot)\) 为凸函数, 且 \(t\in[0, 1]\). 琴生不等式有多种表述形式.</p>
+
+      <p><strong>测度论下的概率形式的表述</strong>: 假设 \(f(x)\) 是个概率密度函数, 即满足 \(\int_{-\infty}^{\infty}f(x)dx=1\). 如果 \(g\) 是实值可测的函数, \(\phi\) 是 \(g\) 的值域上的一个<u>凸函数</u>, 那么有</p>
+
+\[\phi\left(\int_{\infty}^{\infty}dx f(x)g(x)\right) \leq \int_{\infty}^{\infty}dx f(x)\phi(g(x)).\]
+
+      <p>写成期望的形式为:</p>
+
+\[\phi\left(\mathbb{E}_{f(x)}[g(x)]\right) \leq \mathbb{E}_{f(x)}[\phi(g(x))]\]
+
+    </div>
+
+</div>
+</div>
+
+<p>我们对式 \eqref{eq:log_likelihood} 下划线的部分应用琴生不等式, 注意 \(\log\) 是凹函数, 因此不等号要反过来. 从而我们有</p>
+
+\[\begin{align}
+        L &amp;\geq \int d\bm{x}_0 q(\bm{x}_0)\cdot \underline{\int d\bm{x}_{1:T}\,q(\bm{x}_{1:T}\vert \bm{x}_0) \cdot \log\left[p(\bm{x}_T) \prod_{t=1}^T\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_t\vert \bm{x}_{t-1})}\right]} \\ \label{eq:lower_bound}
+        &amp;= \int d\bm{x}_{0:T}\,q(\bm{x}_{0:T}) \cdot \log\left[p(\bm{x}_T) \prod_{t=1}^T\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_t\vert \bm{x}_{t-1})}\right] \triangleq K.
+    \end{align}\]
+
+<p>这样式 \eqref{eq:lower_bound} 就是 \(L\) 的一个下界, 我们把这个下界记为 \(K\).</p>
+
+<p>为了让这个下界更容易计算, 原文对 \(K\) 做了一些拆解和变换 (论文附录 B). 首先<span style="color:red">论文中假定对于任意 \(t=1,\cdots,T\), (交叉)熵</span></p>
+
+\[\label{eq:assumption}\color{red}{
+    \int d\bm{x}_t q(\bm{x}_t)\log q(\bm{x}_t) = \int d\bm{x}_t q(\bm{x}_t)\log p(\bm{x}_t) = -\mathbb{H}_p(\bm{x}_T) 
+}\]
+
+<p><span style="color:red">是个常数. (为什么?)</span> 然后我们分别考虑 \(K\) 的三个部分,</p>
+
+<p><strong>第一部分: \(p(\bm{x}_T)\) 的处理</strong></p>
+
+<p>把 \(p(\bm{x}_T)\) 分离出来, 有</p>
+
+\[\begin{align} \label{eq:tmp1}
+        K &amp;= \int d\bm{x}_{0:T}\,q(\bm{x}_{0:T}) \sum_{t=1}^T\log\left[\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_t\vert \bm{x}_{t-1})}\right] + \int d\bm{x}_T q(\bm{x}_T)\log p(\bm{x}_T) \\ \label{eq:tmp2}
+        &amp;= \sum_{t=1}^T\int d\bm{x}_{0:T}\,q(\bm{x}_{0:T})\log\left[\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_t\vert \bm{x}_{t-1})}\right] - \mathbb{H}_p(\bm{x}_T)
+    \end{align}\]
+
+<p>根据反向过程最后的规定, 前向过程的边际分布 \(q(\bm{x}_T)\) 与反向过程的边际分布 \(p(\bm{x}_T)\) 是相同的分布, 那么式 \eqref{eq:tmp1} 的最后一项交叉熵就可以写为 \(p(\bm{x}_T)\) 的熵 \(\mathbb{H}_p(\bm{x}_T)\) .</p>
+
+<p><strong>第二部分: \(t=0\) 时的边缘效应</strong></p>
+
+<p>为了避免边缘效应 (具体是什么呢? 作者没有说), 我们定义反向过程的最后一步等于前向过程的第一步:</p>
+
+\[\begin{align}
+        &amp; p(\bm{x}_0, \bm{x}_1) = q(\bm{x}_0, \bm{x}_1) \\ \label{eq:item1}
+        \Rightarrow\quad &amp; \frac{p(\bm{x}_0\vert \bm{x}_1)}{q(\bm{x}_1\vert \bm{x}_0)} = \frac{q(\bm{x}_0)}{p(\bm{x}_1)}
+    \end{align}\]
+
+<p>然后我们可以把式 \eqref{eq:tmp2} 中 \(t=1\) 的项分离出来:</p>
+
+\[\begin{align}
+        &amp;\int d\bm{x}_0 d\bm{x}_1\,q(\bm{x}_0,\bm{x}_1)\log\left[\frac{p(\bm{x}_0\vert\bm{x}_1)}{q(\bm{x}_1\vert \bm{x}_0)}\right] \\
+        =&amp; \int d\bm{x}_0 d\bm{x}_1\,q(\bm{x}_0,\bm{x}_1)\log\left[\frac{q(\bm{x}_0)}{p(\bm{x}_1)}\right] &amp;  {\small 根据式 \eqref{eq:item1}} \\
+        =&amp; \int d\bm{x}_0\,q(\bm{x}_0)\log q(\bm{x}_0) - \int d\bm{x}_1\,q(\bm{x}_1)\log p(\bm{x}_1)  \\
+        =&amp; \mathbb{H}_p(\bm{x}_T) - \mathbb{H}_p(\bm{x}_T) &amp; {\small 根据式 \eqref{eq:assumption}} \\
+        =&amp; 0
+    \end{align}\]
+
+<p><strong>第三部分: 重写后验概率 \(q(\bm{x}_{t-1}\vert\bm{x}_0)\)</strong></p>
+
+<p>由于前向过程是马尔科夫过程, 所以可以把 \(\bm{x}_0\) 作为条件直接加入 \(q(\bm{x}_t\vert \bm{x}_{t-1})\), 我们有:</p>
+
+\[\begin{flalign}
+        K &amp;= \sum_{t=2}^T\int d\bm{x}_{0:T}\,q(\bm{x}_{0:T})\log\left[\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_t\vert \bm{x}_{t-1},\bm{x}_0)}\right] - \mathbb{H}_p(\bm{x}_T) \\
+        &amp;= \sum_{t=2}^T\int d\bm{x}_{0:T}\,q(\bm{x}_{0:T})\log\left[\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_{t-1}\vert \bm{x}_t,\bm{x}_0)}\frac{q(\bm{x}_{t-1}\vert\bm{x}_0)}{q(\bm{x}_t\vert\bm{x}_0)}\right] - \mathbb{H}_p(\boldsymbol{x}_T) &amp; {\small \text{Bayes }公式} \\
+        &amp;= \sum_{t=2}^T\int d\bm{x}_{0:T}\,q(\bm{x}_{0:T})\log\left[\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_{t-1}\vert \bm{x}_t,\bm{x}_0)}\right] + \sum_{t=2}^T[\mathbb{H}_q(\bm{x}_t\vert\bm{x}_0) - \mathbb{H}_q(\bm{x}_{t-1}\vert\bm{x}_0)] - \mathbb{H}_p(\boldsymbol{x}_T) \\
+        &amp;= \sum_{t=2}^T\int d\bm{x}_{0:T}\,q(\bm{x}_{0:T})\log\left[\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_{t-1}\vert \bm{x}_t,\bm{x}_0)}\right] + \mathbb{H}_q(\bm{x}_T\vert\bm{x}_0) - \mathbb{H}_q(\bm{x}_1\vert\bm{x}_0) - \mathbb{H}_p(\boldsymbol{x}_T) \\ \label{eq:before_final}
+        &amp;= \sum_{t=2}^T\int d\bm{x}_{0:T}\,q(\bm{x}_{0:T})\log\left[\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_{t-1}\vert \bm{x}_t,\bm{x}_0)}\right] + \mathbb{H}_q(\bm{x}_T\vert\bm{x}_0) - \mathbb{H}_q(\bm{x}_1\vert\bm{x}_0) - \mathbb{H}_p(\boldsymbol{x}_T)
+    \end{flalign}\]
+
+<p>我们对式 \eqref{eq:before_final} 的求和符号后单项的多元积分进行拆解, 有:</p>
+
+\[\begin{flalign}
+        &amp;\int d\bm{x}_{0:T}\,q(\bm{x}_{0:T})\log\left[\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_{t-1}\vert \bm{x}_t,\bm{x}_0)}\right] \\
+        =&amp; \int d\bm{x}_0 d\bm{x}_{t-1} d\bm{x}_t\,q(\bm{x}_0,\bm{x}_{t-1},\bm{x}_t)\log\left[\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_{t-1}\vert \bm{x}_t,\bm{x}_0)}\right] &amp; {\small 除 \bm{x}_0, \bm{x}_{t-1}, \bm{x}_t 以外的变量积分为 1 } \\
+        =&amp; \int d\bm{x}_0 d\bm{x}_t\,q(\bm{x}_0,\bm{x}_t) \underbrace{\int d\bm{x}_{t-1}\,q(\bm{x}_{t-1}\vert \bm{x}_t,\bm{x}_0) \log\left[\frac{p(\bm{x}_{t-1}\vert\bm{x}_t)}{q(\bm{x}_{t-1}\vert \bm{x}_t,\bm{x}_0)}\right]}_{\text{负 KL 散度}} &amp; {\small 条件概率} \\
+    \end{flalign}\]
+
+<p>所以式 \eqref{eq:before_final} 可以变为:</p>
+
+\[\begin{multline} \label{eq:final}
+    K = -\sum_{t=2}^T\int d\bm{x}_0 d\bm{x}_t\,q(\bm{x}_0,\bm{x}_t)\mathbb{KL}\left(q(\bm{x}_{t-1}\vert\bm{x}_t,\bm{x}_0)\Vert p(\bm{x}_{t-1}\vert \bm{x}_t)\right) \\
+     + \mathbb{H}_q(\bm{x}_T\vert\bm{x}_0) - \mathbb{H}_q(\bm{x}_1\vert\bm{x}_0) - \mathbb{H}_p(\boldsymbol{x}_T)
+    \end{multline}\]
+
+<p>现在式 \eqref{eq:final} 的每一项交叉熵和 KL 散度都是易处理的. 具体的处理方法我们将会在 <a href="/2022/11/28/Diffusion-Model-4/">《生成扩散模型(四): 扩散模型和得分匹配》</a> 中给出.</p>
+
+<p>在训练时, 作者把扩散步长 \(\beta_{2:T}\) 作为可学习的参数, 并固定了第一步的步长 \(\beta_1\) 为一个很小的数来避免过拟合. 从 \(q(\bm{x}_{1:T}\vert\bm{x}_0)\) 中采样的样本对于 \(\beta_{1:T}\) 的依赖可以使用 <a href="https://arxiv.org/abs/1312.6114">《变分自编码器 (VAE)》</a> 中的重参数化技巧作为额外的随机变量来计算.</p>
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2022/09/17/SSH-Keygen/">SSH 工具教程 (Tutorial of SSH tools)</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2022/11/29/Diffusion-Model-4/">生成扩散模型(四): 扩散模型和得分匹配 (Generative Diffusion Model: Diffusion Matching and Score Matching)</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

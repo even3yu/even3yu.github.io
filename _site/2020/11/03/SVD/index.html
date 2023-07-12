@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>SVD 分解 (SVD Decomposition)</title>
+    <meta name="description" content="">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2020/11/03/SVD/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
+    processEscapes: true,
+    tags: "all",
+    macros: {
+      bm: ["{\\boldsymbol #1}",1]
+    },
+    packages: {'[+]': ['noerrors']}
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['input/asciimath', '[tex]/noerrors']
+  }
+};
+</script>
+<script async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
+</script>
+<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>SVD 分解 (SVD Decomposition)</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2020-11-03
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#数学" title="Category: 数学" rel="category">数学</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-奇异向量" id="markdown-toc-1-奇异向量">1. 奇异向量</a></li>
+  <li><a href="#2-奇异值分解" id="markdown-toc-2-奇异值分解">2. 奇异值分解</a></li>
+  <li><a href="#3-最优秩-k-近似" id="markdown-toc-3-最优秩-k-近似">3. 最优秩 \(k\) 近似</a></li>
+</ul>
+
+<blockquote>
+  <p>奇异值分解（singular value decomposition）是线性代数中一种重要的矩阵分解，在信号处理、统计学等领域有重要应用。奇异值分解在某些方面与对称矩阵或厄米矩阵基于特征向量的对角化类似。然而这两种矩阵分解尽管有其相关性，但还是有明显的不同。对称阵特征向量分解的基础是谱分析，而奇异值分解则是谱分析理论在任意矩阵上的推广。</p>
+</blockquote>
+
+<p>一个矩阵 \(A\) 的 <strong>SVD 分解 (Singular Value Decomposition)</strong> 指的是把 \(A\) 分解为三个矩阵的乘积</p>
+
+\[A=UDV^T,\]
+
+<p>其中 \(U\) 和 \(V\) 各自的列向量是正交的, 而 \(D\) 是对角矩阵, 其元素都是正实数. SVD 分解有很多应用. 比如, <u>寻找一个矩阵的最优低秩近似矩阵</u>, 实际上对于任意给定的秩, SVD 分解都可以给出最优近似; 不像特征分解只能用于方阵, <u>SVD 分解对于所有的矩阵都是良好定义的</u>(包括长方形的和正方形的矩阵). 特征分解要想获得正交的特征向量, 往往需要对待分解的矩阵做一定的约束, 如对称性. 而 SVD 分解的矩阵 \(V\) 的列向量(也称为右奇异向量)总是正交的. \(U\) 的列称为左奇异向量, 也是正交的. 正交性的一个很简单的结果就是: 如果矩阵 \(A\) 是方阵且可逆, 那么 \(A\) 的逆矩阵为</p>
+
+\[A^{-1} = VD^{-1}U^T.\]
+
+<p>为了更直观的理解 SVD, 我们把一个尺寸为 \(n\times d\) 的矩阵 \(A\) 看成 \(d\)-维空间中的 \(n\) 个点.</p>
+
+\[A=
+\left(
+\begin{matrix}
+x_{11} &amp; x_{12} &amp; x_{13} &amp; \cdots &amp; x_{1d} \\ 
+x_{21} &amp; x_{22} &amp; x_{23} &amp; \cdots &amp; x_{2d} \\ 
+x_{31} &amp; x_{32} &amp; x_{33} &amp; \cdots &amp; x_{3d} \\ 
+\vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\ 
+x_{n1} &amp; x_{n2} &amp; x_{n3} &amp; \cdots &amp; x_{nd} \\ 
+\end{matrix}
+\right)
+=\left(
+\begin{matrix}
+\mathbf{x}_1 \\ \mathbf{x}_2 \\ \mathbf{x}_3 \\ \vdots \\ \mathbf{x}_n
+\end{matrix}
+\right)\]
+
+<p>考虑寻找最优 \(k\)-维子空间的问题. 这里的<u>最优</u>指的是极小化 \(n\) 个点到子空间垂直距离的平方和. 我们首先考虑最简单的 \(1\)-维子空间, 即通过原点的一条直线. 后面我们会说明对于更高维 \((k&gt;1)\) 子空间的情况只需要把直线的结论应用于 \(k\) 个正交的方向上即可. 寻找最优拟合直线就是寻找一族点 \({\mathbf{x}_i\vert 1\leq i\leq n}\) 到过原点的直线的最短距离平方和, 这个问题称为<strong>最优最小二乘拟合(best least squares fit, BLSF)</strong>.</p>
+
+<div class="alert alert-info with-icon card">
+
+<i class="icon-info-sign"></i>
+<div class="zui-card-content">
+
+<div class="title"><strong>提示</strong></div><hr />
+
+<div class="content">
+      <p>另一种最小二乘拟合问题指的是寻找一族点的最优拟合函数, 不要求该函数过原点, 也不要求函数为直线.</p>
+    </div>
+
+</div>
+</div>
+
+<p>下图给出了 \(d=2, n=2, k=1\) 的情况.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/11/SVD-1.png" data-caption="点 x 在 v 方向上的投影" />
+    
+        
+        <div class="container">
+            <p>图 1. 点 x 在 v 方向上的投影</p>
+        </div>
+    
+</div>
+
+<p>根据勾股定理, 我们有</p>
+
+\[\sum_{j=1}^d x_{ij}^2=\underbrace{\sum_{j=1}^d \alpha_j^2}_{距离平方和} + \underbrace{\sum_{j=1}^d\beta_j^2}_{投影平方和}.\]
+
+<p>我们的目标是极小化 \(\sum_{j=1}^d \alpha_j^2\), 而 \(\sum_{j=1}^d x_{ij}^2\) 是固定值, 因此等价于极大化 \(\sum_{j=1}^d\beta_j^2\). 因此我们可以把极小化到子空间距离平方和的目标等价地变成极大化子空间上的投影平方和.</p>
+
+<div class="alert alert-info with-icon card">
+
+<i class="icon-info-sign"></i>
+<div class="zui-card-content">
+
+<div class="title"><strong>提示</strong></div><hr />
+
+<div class="content">
+      <p>我们优化什么目标函数是可以有多种选择的, 这里选择的是<u>距离平方和</u>, 是因为二次函数有很好的性质, 并且我们可以通过勾股定理对目标函数做一定的转化从而有利于后续推导.</p>
+    </div>
+
+</div>
+</div>
+
+<h2 id="1-奇异向量">1. 奇异向量</h2>
+
+<p>我们在这一节定义矩阵 \(A\in\mathbb{R}^{n\times d}\) 的奇异向量(singular vector). 考虑过原点的最优拟合直线(见图1), 定义其单位方向向量为 \(\mathbf{v}\). 那么 \(\mathbf{x}_i\) 的投影长度为 \(\vert\mathbf{x}_i\cdot\mathbf{v}\vert\). 所以投影平方和为 \(\vert A\mathbf{v}\vert^2\). 所以最优拟合直线就是极大化 \(\vert A\mathbf{v}\vert^2\) 的那一条直线(同时极小化了距离平方和).</p>
+
+<p>我们把<u>第一奇异向量</u>(列向量) \(\mathbf{v}_1\) 定义为</p>
+
+\[\mathbf{v}_1 = \underset{\vert\mathbf{v}\vert=1}{\arg\max}\vert A\mathbf{v}\vert.\]
+
+<p>对应的值 \(\sigma_1(A)=\vert A\mathbf{v}\vert\) 称为 \(A\) 的<u>第一奇异值</u>. 注意 \(\sigma_1^2\) 就是所有点到第一奇异向量的投影平方和.</p>
+
+<p>接下来我们可以通过贪婪法寻找矩阵 \(A\) 的最优 \(2\)-维子空间, 即使用 \(\mathbf{v}_1\) 作为该子空间的第一个基向量, 寻找包含 \(\mathbf{v}_1\) 的最优 \(2\)-维子空间. 注意到我们使用的是平方距离, 所以对于每个包含 \(\mathbf{v}_1\) 的 \(2\)-维子空间, 投影平方和等于在 \(\mathbf{v}_1\) 上的投影平方和加上在与其垂直方向的投影平方和(根据勾股定理). 我们记这个垂直方向的单位向量为 \(\mathbf{v}_2\). 那么只需要寻找垂直于 \(\mathbf{v}_1\) 且极大化 \(\vert A\mathbf{v}\vert^2\) 的单位向量. 如此, 第二奇异向量定义为:</p>
+
+\[\mathbf{v}_2 = \underset{\mathbf{v}\perp\mathbf{v}_1,\;\vert\mathbf{v}\vert=1}{\arg\max}\vert A\mathbf{v}\vert.\]
+
+<p>类似的, 第三奇异向量定义为:</p>
+
+\[\mathbf{v}_3 = \underset{\mathbf{v}\perp\mathbf{v}_1,\mathbf{v}_2\;\vert\mathbf{v}\vert=1}{\arg\max}\vert A\mathbf{v}\vert.\]
+
+<p>这样的过程一直做下去, 直到找到</p>
+
+\[\mathbf{v}_1,\;\mathbf{v}_2,\;\dots,\;\mathbf{v}_r\]
+
+<p>使得</p>
+
+\[\underset{\mathbf{v}\perp\mathbf{v}_1,\mathbf{v}_2,\dots\mathbf{v}_r,\;\vert\mathbf{v}\vert=1}{\arg\max}\vert A\mathbf{v}\vert = 0.\]
+
+<p>可以证明, 通过这样的贪婪算法找到的是每个维度的最优子空间. 证明略(见<a href="https://www.cs.cmu.edu/~venkatg/teaching/CStheory-infoage/book-chapter-4.pdf">原文</a>).</p>
+
+<p>注意到 \(n\)-维向量 \(A\mathbf{v}_i\) 实际上是 \(A\) 的行向量在 \(\mathbf{v}_i\) 上投影的长度组成的向量(带符号). 把 \(\vert A\mathbf{v}_i\vert=\sigma_i(A)\) 看做矩阵 \(A\) 沿着 \(\mathbf{v}_i\) 的”成分”, 那么按照这个说法, 我们希望每个方向的”成分”的平方和恰好等于矩阵 \(A\) 的总量. 下面我们证明这个结论.</p>
+
+<p>因为 \(\mathbf{v}_1,\;\mathbf{v}_2,\;\dots,\mathbf{v}_r\) 张成了矩阵 \(A\) 的行空间, 而对于任意垂直于 \(\mathbf{v}_1,\;\mathbf{v}_2,\;\dots,\mathbf{v}_r\) 的向量 \(\mathbf{v}\), 都有 \(\mathbf{x}_i\cdot\mathbf{v}=0\). 因此, 对于每个行向量 \(\mathbf{x}_j\), 都有 \(\sum_{i=1}^r(\mathbf{x}_j\cdot\mathbf{v}_i)^2=\vert\mathbf{x}_j\vert^2\). 把所有的行加起来, 得到</p>
+
+\[\begin{align} \nonumber
+\sum_{j=1}^n\vert\mathbf{x}_i\vert^2 &amp;=\sum_{j=1}^n\sum_{i=1}^r(\mathbf{x}_i\cdot\mathbf{v}_i)^2 \\
+&amp;=\sum_{i=1}^r\sum_{j=1}^n(\mathbf{x}_i\cdot\mathbf{v}_i)^2=\sum_{i=1}^r\vert A\mathbf{v}_i\vert^2=\sum_{i=1}^r\sigma_i^2(A).
+\end{align}\]
+
+<p>又有 \(\sum_{j=1}^n\vert\mathbf{x}_i\vert^2=\sum_{j=1}^n\sum_{k=1}^dx_{jk}^2\), 所以 \(A\) 的奇异值的平方和的确是 \(A\) 的”总量”, 所有元素的平方和, 后者通常称为 Frobenius 范数(模), 记为:</p>
+
+\[\Vert A\Vert_F=\sqrt{\sum_{i=1}^n\sum_{j=1}^dx_{ij}^2}\]
+
+<p>于是我们得到如下的引理.</p>
+
+<div class="alert card">
+
+
+<div class="title"><strong>引理 1</strong></div><hr />
+
+<div class="content">
+    <p>对于任意矩阵 \(A\), 其奇异值的平方和等于其 Frobenius 范数的平方. 即 \(\sum\sigma_i^2(A)=\Vert A\Vert_F^2.\)</p>
+  </div>
+
+<hr /><div>证明略.</div>
+
+</div>
+
+<p>矩阵 \(A\) 可以完全用它是如何变换向量 \(\mathbf{v}_i\) 的来描述. 任意向量 \(\mathbf{v}\) 可以写成 \(\mathbf{v}_1,\;\mathbf{v}_2,\;\dots,\mathbf{v}_r\) 和一个与他们垂直的向量的线性组合. 所以可以推出 \(A\mathbf{v}\) 是 \(A\mathbf{v}_1,\;A\mathbf{v}_2,\;\dots,A\mathbf{v}_r\) 的线性组合. 因此后者就形成了一族与 \(A\) 所关联的向量的基. 我们把他们做一个标准化:</p>
+
+\[\label{eq:left}
+\mathbf{u}_i=\frac1{\sigma_i(A)}A\mathbf{v}_i.\]
+
+<p>向量 \(\mathbf{u}_1,\;\mathbf{u}_2,\;\dots,\mathbf{u}_r\) 称为 \(A\) 的左奇异向量. 而 \(\mathbf{v}_i\) 称为右奇异向量.</p>
+
+<p>根据定义, 我们知道右奇异向量是正交的, 接下来我们证明左奇异向量也是正交的, 并且 \(A=\sum_{i=1}^r\sigma_i\mathbf{u}_i\mathbf{v}_i^T\).</p>
+
+<div class="alert card">
+
+
+<div class="title"><strong>定理 1</strong></div><hr />
+
+<div class="content">
+    <p>令 \(A\) 是一个秩为 \(r\) 的矩阵, 那么 \(A\) 的左奇异向量 \(\mathbf{u}_1,\;\mathbf{u}_2,\;\dots,\mathbf{u}_r\) 是正交的.</p>
+  </div>
+
+<hr /><div>证明略.</div>
+
+</div>
+
+<h2 id="2-奇异值分解">2. 奇异值分解</h2>
+
+<p>令 \(A\) 是一个 \(n\times d\) 的矩阵, 奇异向量为 \(\mathbf{v}_1,\;\mathbf{v}_2,\;\dots,\mathbf{v}_r\), 对应的奇异值为 \(\sigma_1,\;\sigma_2,\;\dots,\sigma_r\). 根据定理1, 左奇异向量为 \(\mathbf{u}_1,\;\mathbf{u}_2,\;\dots,\mathbf{u}_r\). 那么, 矩阵 \(A\) 可以分解为如下秩为1的矩阵之和:</p>
+
+\[\label{eq:svd}
+A = \sum_{i=1}^r\sigma_i\mathbf{u}_i\mathbf{v}_i^T.\]
+
+<p>我们有如下引理:</p>
+
+<div class="alert card">
+
+
+<div class="title"><strong>引理 2</strong></div><hr />
+
+<div class="content">
+    <p>矩阵 \(A\) 和矩阵 \(B\) 是相等的, 当且仅当对于任意向量 \(\mathbf{v}\), 有 \(A\mathbf{v}=B\mathbf{v}\).</p>
+  </div>
+
+<hr /><div>证明略.</div>
+
+</div>
+
+<p>根据该引理, 我们可以得到奇异值分解定理:</p>
+
+<div class="alert card">
+
+
+<div class="title"><strong>定理 2 (奇异值分解)</strong></div><hr />
+
+<div class="content">
+    <p>令 \(A\in\mathbb{R}^{n\times d}\), 右奇异向量为 \(\mathbf{v}_1,\;\mathbf{v}_2,\;\dots,\mathbf{v}_r\), 左奇异向量为 \(\mathbf{u}_1,\;\mathbf{u}_2,\;\dots,\mathbf{u}_r\), 对应的奇异值为 \(\sigma_1,\;\sigma_2,\;\dots,\sigma_r\). 那么 \(A=\sum_{i=1}^r\sigma_i\mathbf{u}_i\mathbf{v}_i^T.\)</p>
+  </div>
+
+<hr /><div>证明略. (可以根据公式$$ \eqref{eq:left} $$和引理 2 证明.)</div>
+
+</div>
+
+<p>上面的分解称为 \(A\) 的奇异值分解, SVD. 用矩阵记号可以表示为 \(A=UDV^T\), 其中 \(U\) 和 \(V\) 的列向量是左右奇异向量, \(D\) 是对角矩阵, 对角元为奇异值.</p>
+
+<p>对于任意矩阵 \(A\), 奇异值序列都是唯一的. 如果所有奇异值都不同, 那么所有的奇异向量也是唯一的; 反之, 奇异值相同的奇异向量就可以张成子空间, 子空间里任意的正交单位向量都可以作为奇异向量.</p>
+
+<div class="polaraid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/11/SVD-2.png" data-caption="SVD 分解" />
+    
+        
+        <div class="container">
+            <p>图 2. SVD 分解</p>
+        </div>
+    
+</div>
+
+<h2 id="3-最优秩-k-近似">3. 最优秩 \(k\) 近似</h2>
+
+<p>矩阵的 Forbenius 范数和 \(2\)-范数分别记为 \(\Vert A\Vert_F\) 和 \(\Vert A\Vert_2\). 其中 \(2\)-范数</p>
+
+\[\max_{\vert\mathbf{v}\vert=1}\vert A\mathbf{v}\vert\]
+
+<p>等于矩阵最大的奇异值. 如果把 \(A\) 的行向量看做 \(d\)-维空间的点, 那么</p>
+
+<ul>
+  <li>Frobenius 范数等于这些点到原点的欧氏距离之和的平方根.</li>
+  <li>\(2\)-范数等于这些点<u>在任意给定方向上的投影点</u>到原点的欧氏距离之和的平方根的<u>最大值</u>.</li>
+</ul>
+
+<p>考虑式 \(\eqref{eq:svd}\), 对于 \(k\in\{1,2,\dots,r\}\), 令</p>
+
+\[A_k = \sum_{i=1}^k\sigma_i\mathbf{u}_i\mathbf{v}_i^T\]
+
+<p>是截断的前 \(k\) 项. 显然 \(A_k\) 的秩为 \(k\). 进一步, \(A_k\) Frobenius 范数和 \(2\)-范数的度量下 \(A\) 的最优秩 \(k\) 的近似. 我们通过两个引理和两个定理来陈述该事实. 首先讨论 Frobenius 范数:</p>
+
+<div class="alert card">
+
+
+<div class="title"><strong>引理 3</strong></div><hr />
+
+<div class="content">
+    <p>\(A_k\) 的行向量是 \(A\) 的行向量在子空间 \(V_k\) 上的投影, 其中 \(V_k\) 由 \(A\) 的前 \(k\) 个奇异向量张成的.</p>
+  </div>
+
+<hr /><div>证明略.</div>
+
+</div>
+
+<p>然后我们有定理:</p>
+
+<div class="alert card">
+
+
+<div class="title"><strong>定理 3</strong></div><hr />
+
+<div class="content">
+    <p>对于任意秩至多为 \(k\) 的矩阵 \(B\), 有 \(\Vert A-A_k\Vert_F\leq\Vert A-B\Vert_F.\)</p>
+  </div>
+
+<hr /><div>证明略.</div>
+
+</div>
+
+<p>接下来给出 \(2\)-范数的结论:</p>
+
+<div class="alert card">
+
+
+<div class="title"><strong>引理 4</strong></div><hr />
+
+<div class="content">
+    <p>\(\Vert A-A_k\Vert_2^2=\sigma_{k+1}^2.\)</p>
+  </div>
+
+<hr /><div>证明略.</div>
+
+</div>
+
+<div class="alert card">
+
+
+<div class="title"><strong>定理 4</strong></div><hr />
+
+<div class="content">
+    <p>假设 \(A\in\mathcal{R}^{n\times k}\). 对任意秩至多为 \(k\) 的矩阵 \(B\), 有 \(\Vert A-A_k\Vert_2\leq\Vert A-B\Vert_2.\)</p>
+  </div>
+
+<hr /><div>证明略.</div>
+
+</div>
+
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2020/09/06/Thinking-About-FSL/">关于少样本学习的思考 (一) (Thinking About FSL 1)</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2020/11/06/Ubuntu-1804-bionic-settings/">Ubuntu 18.04/20.04/22.04 教程 (Ubuntu 18.04/20.04/22.04 Tutorials)</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

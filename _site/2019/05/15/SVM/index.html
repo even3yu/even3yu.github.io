@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>支持向量机 (Suppoert Vector Machine)</title>
+    <meta name="description" content="">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2019/05/15/SVM/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
+    processEscapes: true,
+    tags: "all",
+    macros: {
+      bm: ["{\\boldsymbol #1}",1]
+    },
+    packages: {'[+]': ['noerrors']}
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['input/asciimath', '[tex]/noerrors']
+  }
+};
+</script>
+<script async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
+</script>
+<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>支持向量机 (Suppoert Vector Machine)</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2019-05-15
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#机器学习" title="Category: 机器学习" rel="category">机器学习</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-线性可分-svm-问题构建" id="markdown-toc-1-线性可分-svm-问题构建">1. 线性可分 SVM 问题构建</a>    <ul>
+      <li><a href="#11-几何间距" id="markdown-toc-11-几何间距">1.1 几何间距</a></li>
+      <li><a href="#12-硬间隔最大化" id="markdown-toc-12-硬间隔最大化">1.2 硬间隔最大化</a></li>
+      <li><a href="#13-问题的求解" id="markdown-toc-13-问题的求解">1.3 问题的求解</a></li>
+      <li><a href="#14-求解对偶问题" id="markdown-toc-14-求解对偶问题">1.4 求解对偶问题</a></li>
+      <li><a href="#15-构造分类器" id="markdown-toc-15-构造分类器">1.5 构造分类器</a></li>
+      <li><a href="#16-支持向量" id="markdown-toc-16-支持向量">1.6 支持向量</a></li>
+    </ul>
+  </li>
+  <li><a href="#2-线性不可分-svm-与软间隔最大化" id="markdown-toc-2-线性不可分-svm-与软间隔最大化">2. 线性不可分 SVM 与软间隔最大化</a>    <ul>
+      <li><a href="#21-软间隔最大化" id="markdown-toc-21-软间隔最大化">2.1 软间隔最大化</a></li>
+      <li><a href="#22-求解对偶问题" id="markdown-toc-22-求解对偶问题">2.2 求解对偶问题</a></li>
+      <li><a href="#23-构造分类器" id="markdown-toc-23-构造分类器">2.3 构造分类器</a></li>
+      <li><a href="#24-支持向量" id="markdown-toc-24-支持向量">2.4 支持向量</a></li>
+      <li><a href="#25-合页损失函数-hinge-loss" id="markdown-toc-25-合页损失函数-hinge-loss">2.5 合页损失函数 (hinge loss)</a></li>
+    </ul>
+  </li>
+  <li><a href="#3-svm-的核方法" id="markdown-toc-3-svm-的核方法">3. SVM 的核方法</a>    <ul>
+      <li><a href="#31-核函数" id="markdown-toc-31-核函数">3.1 核函数</a></li>
+      <li><a href="#32-c---支持向量分类机" id="markdown-toc-32-c---支持向量分类机">3.2 C - 支持向量分类机</a></li>
+    </ul>
+  </li>
+  <li><a href="#4-appendix" id="markdown-toc-4-appendix">4. Appendix*</a></li>
+  <li><a href="#5-reference" id="markdown-toc-5-reference">5. Reference</a></li>
+</ul>
+
+<blockquote>
+  <p>支持向量机 (support vector machine, SVM) 是一类有监督地对二元数据分类的广义线性分类器, 其决策边界是对学习样本求解的最大间隔超平面.</p>
+</blockquote>
+
+<p>问题来源: 超平面 (hyperplane) 分类器的<strong>不唯一性</strong>.</p>
+
+<div class="polaroid-script-less">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/05/SVM-0.png" data-caption="超平面分类器的不唯一性" />
+    
+        
+        <div class="container">
+            <p>图 1. 超平面分类器的不唯一性</p>
+        </div>
+    
+</div>
+
+<p>因此需要给定一个<strong>准则</strong>来选择一个<strong>最优</strong>的超平面.</p>
+<p hidden=""> $$ \def\xx{\mathbf{x}} \def\ww{\mathbf{w}} \def\vw{\lVert\ww\rVert} \def\sui{\sum_{i=1}^n} \def\suj{\sum_{j=1}^n} $$ </p>
+<h2 id="1-线性可分-svm-问题构建">1. 线性可分 SVM 问题构建</h2>
+
+<p><strong>线性</strong> SVM 的意思是使用一次函数作为 SVM 分类器, <strong>可分</strong>的意思是当前的数据是可以使用分类器完全划分开的, 即可以使用一条直线(二维情况)把数据的两个类别完全分隔开<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>.</p>
+
+<h3 id="11-几何间距">1.1 几何间距</h3>
+
+<p>令 \(\gamma\) 表示空间一点 \(\xx\) 到超平面</p>
+
+\[\ww^T\xx+b=0 \label{eq:hyperplane}\]
+
+<p>的距离, \(\ww\) 为超平面的法向. 设 \(\xx\) 正投影到超平面的点为 \(\xx_0\) , 则有</p>
+
+\[\xx=\xx_0+y\cdot\gamma\frac{\ww}{\vw}.\]
+
+<p>其中 \(y\) 取值为 \(1\) 或 \(-1\), 表示 \(\xx\) 在超平面的上方/下方. 如下图所示.</p>
+
+<div class="polaroid-script-less">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/05/SVM-1.png" data-caption="几何距离" />
+    
+        
+        <div class="container">
+            <p>图 2. 几何距离</p>
+        </div>
+    
+</div>
+
+<h3 id="12-硬间隔最大化">1.2 硬间隔最大化</h3>
+
+<p>因为 \(\xx_0\) 落在超平面上, 所以代入公式 \(\eqref{eq:hyperplane}\) 得到</p>
+
+\[\ww^T(\xx-y\cdot\gamma\frac{\ww}{\vw})+b=0.\]
+
+<p>解得</p>
+
+\[\gamma = y\frac{\ww^T\xx+b}{\vw}.\]
+
+<p>当超平面在小范围内改变时, 超平面附近点的分类可能会发生变化, 而离超平面远的点的分类不会发生变化. 因此我们要寻找一个尽可能在两类点”中间”的一个超平面(即既要把两类点分开, 还要离两类点尽可能的远), 如下图中红色的线. 这种准则称为最大化间隔 (maximum margin).</p>
+
+<div class="polaroid-script-less">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/05/SVM-2.png" data-caption="最大化间隔" />
+    
+        
+        <div class="container">
+            <p>图 3. 最大化间隔</p>
+        </div>
+    
+</div>
+
+<p>注: 这里是<strong>硬</strong>间隔最大化, 因为数据点是线性可分的, 因此强制要求该超平面距离两类点尽可能地远..</p>
+
+<p>由此我们可以得到一个最大化间隔的分类器:</p>
+
+\[\max_{\ww, b}\gamma=\max_{\ww,b}\frac{y(\ww^T\xx+b)}{\vw}\quad s.t., \gamma_i\geq\gamma,\quad i\in \{1,\cdots, n\},\]
+
+<p>其中 \(\gamma_i\) 表示训练集中第 \(i\) 个点到超平面的距离. 由于分子项 \(y(\ww^T\xx + b)\) 可以在不改变超平面的前提下任意变大, 因此为了方便我们固定 \(\gamma\vw=y(\ww^T\xx + b)=1\) . 从而这个问题就变为了</p>
+
+\[\max_{\ww, b}\frac1{\vw},\quad s.t. \gamma_i=\frac{y_i(\ww^T\xx_i+b)}{\vw}\geq\gamma\quad i\in \{1,\cdots, n\}.\]
+
+<p>即</p>
+
+\[\min_{\ww,b}\vw,\quad s.t.~y_i(\ww^T\xx_i+b)\geq\gamma\vw=1.\]
+
+<blockquote>
+  <p>注: 对于直线 \(y=ax+3\) , 其对应的 \(\ww=(a, -1)^T, b=3\) . 我们同时把 \(\ww\) 和 \(b\) 乘以同样的系数 \(2\), 则 \(\ww=(2a, -2)^T, b=6\) 直线方程变为 \(2y=2ax+6\) 和原来的方程等价. 因此在表示同一个超平面的情况下 \(\ww\) 和 \(b\) 可以成比例的缩放.</p>
+</blockquote>
+
+<p>最后我们的分类器可以表示为:</p>
+
+\[\begin{align}\nonumber
+\min_{\ww,b}\quad &amp; \frac12\vw^2, \\ \label{eq:classifier}
+s.t.\quad &amp; y_i(\ww^T\xx_i+b)\geq1\quad i=1,\cdots,n,
+\end{align}\]
+
+<p>其中目标函数增加 \(1/2\) 和平方是为了优化的方便, 其最小值不会因此而改变. 注意到公式 \(\eqref{eq:classifier}\) 中的不等式约束, 离目标超平面远的点的约束其实是不必要的, 因为他们会被离超平面更近点的约束所包含, 因此实际起作用的约束所对应的点是我们关心的, 这些点称为<strong>支持向量 (support vector)</strong>, 如下图所示, 蓝色圈中的点为支持向量, 这三个点对应的不等式约束是实际起作用的.</p>
+
+<div class="polaroid-script-less">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/05/SVM-3.png" data-caption="支持向量" />
+    
+        
+        <div class="container">
+            <p>图 4. 支持向量</p>
+        </div>
+    
+</div>
+
+<h3 id="13-问题的求解">1.3 问题的求解</h3>
+
+<p>直接求解原问题是一个带不等式约束的<strong>凸二次规划问题(convex quadratic programming)</strong>, 可以使用凸优化算法求解.</p>
+
+<ul>
+  <li>Python 上的凸优化包 <a href="http://cvxopt.org">CVXOPT</a></li>
+</ul>
+
+<h3 id="14-求解对偶问题">1.4 求解对偶问题</h3>
+
+<p>带不等式约束的优化问题可以转为对偶问题求解. 使用 Lagrange 乘子法, 优化问题 \(\eqref{eq:classifier}\) 可以变为</p>
+
+\[L(\ww, b, \boldsymbol\alpha)=\frac12\vw^2 - \sui\alpha_i(y_i(\ww^T\xx_i+b) - 1),\]
+
+<p>其中 \(\boldsymbol\alpha=(\alpha_1,\cdots,\alpha_n)^T\) 为 Lagrange 乘子向量.</p>
+
+<blockquote>
+  <p><strong>定理:</strong> 最优化问题
+\(\begin{align}\nonumber
+\max_{\alpha} &amp;\quad-\frac12\sui\suj y_iy_j\cdot\xx_i^T\xx_j\cdot\alpha_i\alpha_j+\suj\alpha_j, \\
+\text{s.t.} &amp;\quad\sui y_i\alpha_i=0,\\ \nonumber
+&amp;\quad\alpha_i\geq0,\;i=1,\cdots, n
+\end{align}\)</p>
+
+  <p>是原始问题 \(\eqref{eq:classifier}\) 的对偶问题. 这里可以用极小化代替目标函数的负数的极大化.</p>
+</blockquote>
+
+<p>把原问题转化为对偶问题求解有两个好处:</p>
+
+<ul>
+  <li>对偶问题一般来说更容易求解</li>
+  <li>在对偶问题中仅包含了关于数据点 \(i, j\) 的内积 \(\xx_i^T\xx_j\) 的形式, 从而通过引入<strong>核方法(kernel method)</strong> 可以把 SVM 泛化为更加复杂的分类器.</li>
+</ul>
+
+<h3 id="15-构造分类器">1.5 构造分类器</h3>
+
+<p>最后可以根据对偶问题的解 \(\boldsymbol\alpha^*\) 计算原始问题的解:</p>
+
+\[\ww^* = \sui\alpha_i^*y_i\xx_i,\]
+
+<p>选择 \(\boldsymbol\alpha^*\) 的一个满足 \(\alpha_i^*&gt;0\) 的分量计算 (注意这里要选择严格正的分量):</p>
+
+\[b^* = y_j - \sui\alpha^*_iy_i\xx_i^T\xx_j.\]
+
+<p>得到分类器:</p>
+
+\[f(\xx) = \text{sign}(\ww^{*T}\xx+b^*).\]
+
+<h3 id="16-支持向量">1.6 支持向量</h3>
+
+<p>根据对偶问题的解 \(\boldsymbol\alpha^*\) , 我们把分量 \(\alpha_i^*\) 对应的样本点 \(\xx_i\) 称为支持向量. 根据 <a href="[https://en.wikipedia.org/wiki/Karush%E2%80%93Kuhn%E2%80%93Tucker_conditions](https://en.wikipedia.org/wiki/Karush–Kuhn–Tucker_conditions)">KKT 互补条件</a> 可知</p>
+
+\[\alpha_i^*(y_i(\ww^T\xx_i+b)-1)=0,\quad i=1,2,\cdots, n.\]
+
+<p>那么对于 \(\alpha_i^*&gt;0\) 的样本点, 必然有 \(y_i(\ww^T\xx_i+b)=1\), 从而得到 \(\ww^T\xx_i+b=\pm1\) , 那么点 \(\xx_i\) 一定在间隔边界上. 这与我们在前面给出的支持向量的定义是吻合的.</p>
+
+<h2 id="2-线性不可分-svm-与软间隔最大化">2. 线性不可分 SVM 与软间隔最大化</h2>
+
+<h3 id="21-软间隔最大化">2.1 软间隔最大化</h3>
+
+<p>线性可分 SVM 对于线性不可分的数据是不适用的, 因为上述不等式约束对于部分数据点无法满足. 此时需要修改原来的不等式约束(硬间隔最大化)为<strong>软</strong>间隔最大化<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup>.</p>
+
+<p>原来硬间隔最大化可以满足 \(y_i\ww^T\xx_i+b\geq1\) , 线性不可分问题的数据点不一定可以满足该公式, 因此引入松弛变量 \(\xi_i&gt;0\) 加到函数间隔上即可使其满足:</p>
+
+\[\begin{align}\label{eq:soft}
+&amp; y_i(\ww^T\xx_i+b)\geq 1-\xi_i.
+\end{align}\]
+
+<p>对于每个松弛变量我们发现取到正无穷大也会满足约束, 但这样就相当于没有了约束, 因此我们同时要求松弛变量尽可能小, 需要在代价函数增加一项作为惩罚:</p>
+
+\[\frac12\vw^2 + C\sui\xi_i,\]
+
+<p>其中 \(C&gt;0\) 为超参数, \(C\) 越大, 对误分类的数据点惩罚越大.</p>
+
+<p>那么线性不可分 SVM 的目标函数变为如下的凸二次规划</p>
+
+\[\begin{align}\nonumber
+\min_{\ww,b,\xi}\quad &amp;\frac12\vw^2+C\sui\xi_i \\ \nonumber
+s.t. \quad &amp; y_i(\ww^T\xx_i+b)\geq 1-\xi_i,\;i=1,2,\cdots,n \\ \label{eq:cla2}
+&amp; \xi_i\geq 0,\;i=1,2,\cdots,n
+\end{align}\]
+
+<p>注意, 这里的问题关于 \((\ww, b, \xi)\)  的解是存在的, 其中 \(\ww\) 的解唯一, 但 \(b\) 的解可能不唯一, 而是存在于一个区间.</p>
+
+<h3 id="22-求解对偶问题">2.2 求解对偶问题</h3>
+
+<p>使用 Language 乘子法, 带松弛变量的优化问题 \(\eqref{eq:cla2}\) 可以变为</p>
+
+\[L(\ww, b, \xi, \boldsymbol\alpha, \boldsymbol\beta)=\frac12\vw^2 + C\sui\xi_i - \sui\alpha_i(y_i(\ww^T\xx_i+b) - 1 + \xi_i) - \sui\beta_i\xi_i,\]
+
+<p>其中 \(\boldsymbol\alpha=(\alpha_1,\cdots,\alpha_n)^T,~\boldsymbol\beta=(\beta_1,\cdots,\beta_n)^T\) 均为 Lagrange 乘子向量.</p>
+
+<blockquote>
+  <p><strong>定理:</strong> 最优化问题
+\(\begin{align} \nonumber
+\max_{\alpha}\quad &amp;-\frac12\sui\suj y_iy_j\cdot\xx_i^T\xx_j\cdot\alpha_i\alpha_j+\suj\alpha_j, \\ \nonumber
+\text{s.t.}\quad &amp;\sui y_i\alpha_i=0,\\ \nonumber
+&amp;C - \alpha_i - \beta_i = 0,~i = 1,\cdots, n, \\  \nonumber
+&amp;\alpha_i\geq0,\;i=1,\cdots, n, \\ \nonumber
+&amp;\beta_i\geq0,\;i=1,\cdots, n \\
+\end{align}\)</p>
+
+  <p>是原始问题 \(\eqref{eq:cla2}\) 的对偶问题.</p>
+</blockquote>
+
+<p>上面的定理可以消去 \(\boldsymbol\beta\) 而简化为</p>
+
+\[\begin{align} \nonumber
+\min_{\alpha}\quad &amp;\frac12\sui\suj y_iy_j\cdot\xx_i^T\xx_j\cdot\alpha_i\alpha_j-\suj\alpha_j, \\ \nonumber
+\text{s.t.}\quad &amp;\sui y_i\alpha_i=0,\\ \label{eq:cla2_dual}
+&amp;0\leq\alpha_i\leq C,~i=1,\cdots, n. \\
+\end{align}\]
+
+<h3 id="23-构造分类器">2.3 构造分类器</h3>
+
+<p>线性不可分 SVM 最终构造分类器的公式与<a href="#15-构造分类器">可分 SVM</a> 的相同, 求出 \(\ww^\*\) 和 \(b^\*\) 即可, 计算 \(b^\*\) 的时候选择的 \(\boldsymbol\alpha^\*\) 的分量应当满足 \(0&lt;\alpha_i^*&lt;C\) , 类似的这里不能取等号.</p>
+
+<h3 id="24-支持向量">2.4 支持向量</h3>
+
+<p>在线性不可分的情况下, 把对偶问题 \(\eqref{eq:cla2_dual}\) 的解 \(\boldsymbol\alpha^\*=(\alpha_1^\*,\alpha_2^\*,\cdots,\alpha_n^\*)^T\) 中对应于 \(\alpha_i^*&gt;0\) 的数据点 \(\xx_i\) 称为(软间隔的)支持向量. 如下图所示.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/05/SVM-6.png" data-caption="软间隔支持向量机分类超平面, 存在误分的数据点" />
+    
+        
+        <div class="container">
+            <p>图 5. 软间隔支持向量机分类超平面, 存在误分的数据点</p>
+        </div>
+    
+</div>
+
+<p>软间隔的支持向量可能落在 (1) 间隔边界上 (2) 间隔边界到分离超平面之间 (3) 分离超平面误分的一侧:</p>
+
+<ul>
+  <li>若 \(\alpha_i^*=0\), 则 \(\xi_i=0\), 数据点为间隔边界两侧的点</li>
+  <li>若 \(0&lt;\alpha_i^* &lt; C\) , 则 \(\xi_i=0\), 数据点落在间隔边界上, 是支持向量</li>
+  <li>若 \(\alpha_i^*=C\) 且 \(0&lt;\xi_i&lt;1\) , 则数据点落在间隔边界到分离超平面之间</li>
+  <li>若 \(\alpha_i^*=C\) 且 \(\xi_i=1\) , 则数据点落在分离超平面上</li>
+  <li>若 \(\alpha_i^*=C\) 且 \(\xi_i&gt;1\) , 则数据点落在分离超平面误分的一侧</li>
+</ul>
+
+<p>后三条结论可以根据公式 \(\eqref{eq:soft}\) 得出.</p>
+
+<h3 id="25-合页损失函数-hinge-loss">2.5 合页损失函数 (hinge loss)</h3>
+
+<p>线性 SVM 由以下几部分组成:</p>
+
+<ol>
+  <li>模型: 分离超平面 \(\ww^{\*T}\xx+b^*=0\)</li>
+  <li>决策函数: \(f(\xx)=\text{sign}(\ww^{\*T}\xx+b^*)\)</li>
+  <li>学习策略: 软间隔最大化</li>
+  <li>求解算法: 凸二次规划</li>
+</ol>
+
+<p>根据最初对线性 SVM 的期望, 其损失函数也可以按如下方式构造:</p>
+
+\[\begin{align} \label{eq:hinge}
+&amp; \min_{\ww, b}\quad\sui[1-y_i(\ww^T\xx_i+b)]_++\lambda\vw^2,
+\end{align}\]
+
+<p>其中第一项为经验损失, \(L[x]=[1-x]_+=\text{Relu}(1-x)\) 称为合页损失函数(hinge loss), 当样本点的分类 \(y_i(\ww^T\xx_i+b)&gt;1\) 时, 损失为0, 反之损失线性递增. 目标函数的第二项为正则化项. 可以证明优化问题 \(\eqref{eq:hinge}\) 与优化问题 \(\eqref{eq:cla2}\) 等价. 合页损失函数的图像如下图所示.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/05/SVM-5.png" data-caption="合页损失函数与感知机损失, 0-1损失对比" />
+    
+        
+        <div class="container">
+            <p>图 6. 合页损失函数与感知机损失, 0-1损失对比</p>
+        </div>
+    
+</div>
+
+<h2 id="3-svm-的核方法">3. SVM 的核方法</h2>
+
+<p>核方法可以把普通的线性 SVM 推广到非线性. 核方法的直观来自于数据点升维. 如下图中二维的点.</p>
+
+<div class="polaroid-script-less">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/05/SVM-4.png" data-caption="非线性分类器" />
+    
+        
+        <div class="container">
+            <p>图 7. 非线性分类器</p>
+        </div>
+    
+</div>
+
+<p>线性分类器无法得到圆形的分类边界, 但是如果通过某个函数 \(\Phi(\cdot)\) 把点映射到三维空间(比如映射成锥形, 中间点的值较小, 周围点的值较大), 那么就可以找到一个三维空间中的二维平面把两类点分开.  如此我们只需要把第1节和第2节中所有的 \(\xx\) 替换为 \(\Phi(\xx)\) , 其他保持不变即可得到非线性 SVM 对应的推导.</p>
+
+<h3 id="31-核函数">3.1 核函数</h3>
+
+<p>可以发现在求解对偶问题时, \(\Phi(\xx_i)\cdot\Phi(\xx_j)\) 总是以内积的形式出现, 因此我们可以把这样的形式定义为一个关于 \(\xx_i\) 和 \(\xx_j\) 的二元函数 \(K(\cdot,\cdot)\)</p>
+
+\[K(\xx_i,\xx_j) = \Phi(\xx_i)\cdot\Phi(\xx_j),\]
+
+<p>这样我们仍然可以得到相同的决策函数而简化了计算方式以及 \(\Phi(\cdot)\) 函数的构造.</p>
+
+<p>核函数的种类 \(\def\kk{K(x_1,x_2)}\):</p>
+
+<ul>
+  <li>\(\kk = (x_1\cdot x_2)\) 是核函数</li>
+  <li>\(f(\cdot)\) 是定义在 \(R^n\) 上的实值函数, 则 \(\kk = f(x_1)f(x_2)\) 是核函数</li>
+  <li>核函数的和与积都是核函数</li>
+  <li>若 \(K_1(x_1, x_2)\) 是 \(R^m\times R^m\) 上的核函数, \(\theta(x)\) 是从 \(R^n\) 到 \(R^m\) 上的映射, 则 \(K_2(x_1, x_2) = K_1(\theta(x_1), \theta(x_2))\) 是 \(R^n\) 到 \(R^n\) 上的核函数. 特别的, 若矩阵 \(B\) 半正定, 则 \(\kk = x_1^TBx_2\) 是 \(R^n\) 到 \(R^n\) 上的核函数.</li>
+</ul>
+
+<p>常用的核函数:</p>
+
+<ul>
+  <li>多项式核函数 \(\kk = (x_1\cdot x_2)^d\) 和 \(\kk = (x_1\cdot x_2 + 1)^d\)</li>
+  <li>Gauss 径向基函数 \(\kk = \exp\left(\frac{-\lVert x_1-x_2\rVert^2}{\sigma^2}\right)\)</li>
+</ul>
+
+<h3 id="32-c---支持向量分类机">3.2 C - 支持向量分类机</h3>
+
+<p>使用步骤:</p>
+
+<ol>
+  <li>
+    <p>选择核函数 \(K(\cdot,\cdot)\) 和惩罚参数 \(C\geq0\)</p>
+  </li>
+  <li>
+    <p>求解优化问题:</p>
+
+\[\begin{align}
+\min_{\alpha}\quad &amp;\frac12 \sui \suj y_iy_j\cdot K(\xx_i,\xx_j)\cdot\alpha_i\alpha_j- \suj \alpha_j, \\
+\text{s.t.}\quad &amp; \sui y_i\alpha_i=0, \\
+&amp;0\leq\alpha_i\leq C,~i=1,\cdots,n,
+\end{align}\]
+
+    <p>的解为 \(\boldsymbol\alpha^\*=(\alpha_1^\*,\cdots,\alpha^\*_n)\) .</p>
+  </li>
+  <li>
+    <p>计算 \(b^\*\) , 选择位于区间 \((0, C)\) 的 \(\alpha^\*\) 的分量 \(\alpha^\*_j\) , 据此计算</p>
+
+\[b^* = y_j - \sui y_i\alpha_i^*K(\xx_i, \xx_j);\]
+  </li>
+  <li>
+    <p>构造决策函数</p>
+
+\[f(\xx) = sign(\sui y_i\alpha_i^\*K(\xx_i, \xx) + b^*).\]
+  </li>
+  <li>
+    <p>获得支持向量* : 支持向量为 \(\{(\xx_j, y_j)\lvert \alpha^*_j=0\}\) .</p>
+  </li>
+</ol>
+
+<h2 id="4-appendix">4. Appendix*</h2>
+
+<ul>
+  <li>SVM 函数库: <a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm/">LibSVM</a></li>
+</ul>
+
+<h2 id="5-reference">5. Reference</h2>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+
+      <p><strong>支持向量机——理论、算法与拓展</strong><br />
+邓乃扬， 田英杰 <br />
+No Link. In 2009, 科学出版社 <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+
+      <p><strong>统计学习方法</strong><br />
+李航 <br />
+No Link. In 2012, 清华大学出版社 <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2019/05/01/Graph-Cuts-for-Segmentation/">Graph Cuts for Segmentation</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2019/06/06/Convolution-Guide/">Convolution Arithmetic for Deep Learning</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

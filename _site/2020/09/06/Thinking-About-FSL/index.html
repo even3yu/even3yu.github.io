@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>关于少样本学习的思考 (一) (Thinking About FSL 1)</title>
+    <meta name="description" content="">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2020/09/06/Thinking-About-FSL/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
+    processEscapes: true,
+    tags: "all",
+    macros: {
+      bm: ["{\\boldsymbol #1}",1]
+    },
+    packages: {'[+]': ['noerrors']}
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['input/asciimath', '[tex]/noerrors']
+  }
+};
+</script>
+<script async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
+</script>
+<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>关于少样本学习的思考 (一) (Thinking About FSL 1)</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2020-09-06
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#少样本学习" title="Category: 少样本学习" rel="category">少样本学习</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-少样本学习仍然是一种过拟合-跨域学习更为重要" id="markdown-toc-1-少样本学习仍然是一种过拟合-跨域学习更为重要">1. 少样本学习仍然是一种过拟合, 跨域学习更为重要</a>    <ul>
+      <li><a href="#11-概述" id="markdown-toc-11-概述">1.1 概述</a></li>
+      <li><a href="#12-少样本分类算法" id="markdown-toc-12-少样本分类算法">1.2 少样本分类算法</a>        <ul>
+          <li><a href="#121-baseline" id="markdown-toc-121-baseline">1.2.1 Baseline</a></li>
+          <li><a href="#122-baseline" id="markdown-toc-122-baseline">1.2.2 Baseline++</a></li>
+          <li><a href="#123-meta-learning" id="markdown-toc-123-meta-learning">1.2.3 Meta-learning</a></li>
+        </ul>
+      </li>
+      <li><a href="#13-实验" id="markdown-toc-13-实验">1.3 实验</a>        <ul>
+          <li><a href="#131-数据集" id="markdown-toc-131-数据集">1.3.1 数据集</a></li>
+          <li><a href="#132-标准配置的实验结果" id="markdown-toc-132-标准配置的实验结果">1.3.2 标准配置的实验结果</a></li>
+          <li><a href="#133-增加网络深度的影响" id="markdown-toc-133-增加网络深度的影响">1.3.3. 增加网络深度的影响</a></li>
+          <li><a href="#134-域漂移的影响" id="markdown-toc-134-域漂移的影响">1.3.4 域漂移的影响</a></li>
+          <li><a href="#135-微调元学习方法" id="markdown-toc-135-微调元学习方法">1.3.5 微调元学习方法</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
+</ul>
+
+<h2 id="1-少样本学习仍然是一种过拟合-跨域学习更为重要">1. 少样本学习仍然是一种过拟合, 跨域学习更为重要</h2>
+
+<p>原始论文: A Closer Look at Few-Shot Classification<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup></p>
+
+<h3 id="11-概述">1.1 概述</h3>
+
+<p>少样本学习 (few-shot learning, FSL) 是针对数据缺乏时充分利用先验信息来实现机器学习任务的一类方法. 少样本分类是使用有限的带标签样本训练分类器, 使其可以识别新类别 (unseen classes) 的方法. 目前的方法虽然取得了显著的成效, 但随着网络设计, 元学习算法的复杂化, 以及大量各不相同的实现细节使得已有方法难以公平比较.</p>
+
+<p>本文贡献:</p>
+<ol>
+  <li>当数据集中不同类别的差异不大时 (如 CUB 鸟类数据集), 网络模型越深, 不同算法的差距就越小</li>
+  <li>提出一个基于距离分类器的 baseline 模型, 在 mini-Imagenet 和 CUB 数据集上达到了元学习 (meta-learning) state-of-the-art (SOTA) 的水平</li>
+  <li>提出了跨域 (cross domain) 少样本学习. 并指出当前的 FSL 方法在这样的问题上表现很差, 甚至不如 baseline 方法.</li>
+</ol>
+
+<p>注: 不如 baseline 方法就意味着已有 FSL 方法仍然对测试集有严重的过拟合, 这实际上偏离了元学习方法的初衷 (大部分 FSL 方法都是元学习方法的应用).</p>
+
+<p>目前 FSL 中存在的问题:</p>
+<ul>
+  <li>不同 FSL 算法实现细节的差异导致无法清楚的考察算法实际的提升效果. Baseline 算法的效果没有被充分挖掘, 比如没有使用数据增广</li>
+  <li>尽管现有 FSL 算法可以识别新的类别, 但新的类别和训练的类别来自于<strong>同一个数据集</strong>. 域漂移 (domain shift) 的缺失导致这样的算法实际上远离实际情况.</li>
+</ul>
+
+<h3 id="12-少样本分类算法">1.2 少样本分类算法</h3>
+
+<p>本文考察了两种 baseline 模型和四种 FSL 模型.</p>
+
+<h4 id="121-baseline">1.2.1 Baseline</h4>
+
+<p>这是一个基于迁移学习 (transfer learning) 的方法. \(\newcommand{\wb}{\mathbf{W}_b} \newcommand{\wn}{\mathbf{W}_n} \newcommand{\x}{\mathbf{x}} \newcommand{\X}{\mathbf{X}} \newcommand{\w}{\mathbf{w}}\)</p>
+
+<p><strong>训练阶段:</strong> 从头训练特征提取器 \(f_{\theta}\) 和分类器 \(C(\cdot\vert\wb)\) , 使用交叉熵损失 \(L_{pred}\) 和基类数据 \(\x_i\in\X_b\) . 这里记编码后的特征维度为 \(d\) , 输出类别为 \(c\) . 那么分类器的权重有 \(\wb\in\mathbb{R}^{d\times c}\) , 且 
+\(C(\cdot\vert\wb)=\sigma(\wb^Tf_{\theta}(\x_i))\)</p>
+
+<p>其中 \(\sigma\) 是 softmax 函数.</p>
+
+<p><strong>微调阶段:</strong> 通过微调模型使其可以识别新的类别. 固定与训练参数 \(\theta\) , 使用新类的标注数据 (即支撑集 \(\X_n\)) 训练新的分类器 \(C(\cdot\vert\wn)\) .</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/09/FSL-1.png" data-caption="Baseline 和 Baseline++ 模型" />
+    
+        
+        <div class="container">
+            <p>图 1. Baseline 和 Baseline++ 模型</p>
+        </div>
+    
+</div>
+
+<h4 id="122-baseline">1.2.2 Baseline++</h4>
+
+<p>本文提出了一种在训练时减小类内方差 (intra-class variation) 的模型. 和 Baseline 模型整体上是类似的, Baseline++ 在分类器的地方使用了余弦距离:
+\(s_{i,j}=\frac{f_{\theta}(\x_i)^T\w_j}{\Vert f_{\theta}(\x_i)\Vert\Vert\w_j\Vert}\)
+其中 \(\wb=[\w_1,\w_2,\dots,\w_c]\) . 使用基于距离的分类器训练模型明显地可以减小类内方差. 直观地, 学到的权重 \([\w_1,\w_2,\dots,\w_c]\) 可以看作类别的<strong>原型 (prototypes)</strong> , 而分类是基于判断特征到原型的距离来进行的. Baseline++ 的结构如图 1 所示.</p>
+
+<h4 id="123-meta-learning">1.2.3 Meta-learning</h4>
+
+<p>本文另外评估了四种基于元学习的 FSL 方法:</p>
+
+<ul>
+  <li>MatchingNet</li>
+  <li>ProtoNet</li>
+  <li>RelationNet</li>
+  <li>MAML</li>
+</ul>
+
+<p>元学习的流程如下图所示.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/09/FSL-2.png" data-caption="Meta-learning 模型" />
+    
+        
+        <div class="container">
+            <p>图 2. Meta-learning 模型</p>
+        </div>
+    
+</div>
+
+<h3 id="13-实验">1.3 实验</h3>
+
+<h4 id="131-数据集">1.3.1 数据集</h4>
+
+<ul>
+  <li>mini-ImageNet: (常规分类) 100 个类别, 每个类别 600 个样本. 64 base 类, 16 validation 类, 20 novel 类.</li>
+  <li>CUB-200-2011: (细粒度分类) 200 个类别, 共 11788 个样本. 100 base 类, 50 validation 类, 50 novel 类.</li>
+  <li>mini-ImageNet –&gt; CUB: (跨域分类)</li>
+</ul>
+
+<p>数据增广方法: random crop, left-right flip, color jitter</p>
+
+<p>优化: Adam, lr=1e-3</p>
+
+<h4 id="132-标准配置的实验结果">1.3.2 标准配置的实验结果</h4>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/09/FSL-3.png" data-caption="Baseline 和 FSL 方法在相同配置下的重实现" />
+    
+        
+        <div class="container">
+            <p>图 3. Baseline 和 FSL 方法在相同配置下的重实现</p>
+        </div>
+    
+</div>
+
+<p>整体上, 重实现的结果比原始论文报告的结果低两个点不到. 其中,</p>
+
+<ul>
+  <li>
+    <p>Baseline 的方法增加了数据增广后, 远远高于论文的结果, 这说明</p>
+
+    <blockquote>
+      <p>The performance of the Baseline method is severely underestimated</p>
+
+      <p>原始论文的结果过于低估</p>
+    </blockquote>
+  </li>
+  <li>
+    <p>MatchingNet 通过调整 softmax 层数据的尺度 (乘一个系数), 精度有一个显著的提升. (这一点的原因本文没有分析, 但 NeurIPS 2018 的一篇论文 <a href="https://www.jarvis73.com/2020/07/09/FSL-Metrics/#1-tadam-task-dependent-adaptive-metric">TADAM</a><sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup> 中有详细分析.)</p>
+  </li>
+  <li>
+    <p>尽管 ProtoNet# 要差于 ProtoNet, 但论文中提到使用更深的 backbone 可以解决该问题.</p>
+  </li>
+</ul>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/09/FSL-4.png" data-caption="同配置下不同方法的比较" />
+    
+        
+        <div class="container">
+            <p>图 4. 同配置下不同方法的比较</p>
+        </div>
+    
+</div>
+
+<p>这两组实验最显著结果就是:</p>
+
+<ul>
+  <li>
+    <p>Baseline++ (即微调+余弦距离) 效果特别好, 打平甚至超过一众元学习方法. 这说明</p>
+
+    <blockquote>
+      <p>Reducing intra-class variation is an important factor in the current few-shot classification problem setting</p>
+
+      <p>减小类内方差是 FSL 的一个关键因素</p>
+    </blockquote>
+  </li>
+</ul>
+
+<h4 id="133-增加网络深度的影响">1.3.3. 增加网络深度的影响</h4>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/09/FSL-5.png" data-caption="增加网络深度的影响" />
+    
+        
+        <div class="container">
+            <p>图 5. 增加网络深度的影响</p>
+        </div>
+    
+</div>
+
+<p>增加网络深度后训练得到的特征拥有更小的类内方差. 这个结论是论文附录 A6 通过实验来说明的, 其中使用到了 Davies-Bouldin 指数<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup>来衡量类内方差. 本文使用了五种深度的网络 Conv-4, Conv-6, ResNet-10, ResNet-18, ResNet-34. 图 5 的结果显示,</p>
+
+<ul>
+  <li>
+    <p>在 CUB 数据集上, 网络越深, 不同方法的差距越小.</p>
+
+    <blockquote>
+      <p>In the CUB dataset, the gap among existing methods would be reduced if their intra-class variation are all reduced by a deeper backbone</p>
+
+      <p>在 CUB 数据集上, 如果更深的 backbone 可以减小类内方差, 那么这些方法的差距也会减小.</p>
+    </blockquote>
+  </li>
+  <li>
+    <p>在 mini-ImageNet 数据集上, 上一条结论不成立.</p>
+
+    <blockquote>
+      <p>FSL 问题中数据集的选择也很重要.</p>
+    </blockquote>
+  </li>
+</ul>
+
+<p>CUB 和 mini-ImageNet 最大的差别就是前者是细粒度的图像分类, 后者的类间方差更大.</p>
+
+<h4 id="134-域漂移的影响">1.3.4 域漂移的影响</h4>
+
+<p>本文进行了 cross-domain 的实验: mini-ImageNet –&gt; CUB, 使用 ResNet-18 作为 backbone. 实验结果如下左图.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/09/FSL-6.png" data-caption="跨域 FSL 的结果分析" />
+    
+        
+        <div class="container">
+            <p>图 6. 跨域 FSL 的结果分析</p>
+        </div>
+    
+</div>
+
+<ul>
+  <li>
+    <p>Baseline 方法超过了其他所有的方法. 这说明现有的 FSL 方法对跨域 FSL 效果比微调要差. 而上右图的对比表明,</p>
+
+    <blockquote>
+      <p>As the domain difference grows larger, the adaptation based on a few novel class instances becomes more important</p>
+
+      <p>随着 base 和 novel 域差距的扩大, 基于支撑集的域适应变得越来越重要</p>
+    </blockquote>
+  </li>
+</ul>
+
+<h4 id="135-微调元学习方法">1.3.5 微调元学习方法</h4>
+
+<p>为了使元学习方法像 Baseline 方法那样适应, 本文尝试对输入 softmax 层的特征进行微调. MatchingNet 和 ProtoNet 可以直接进行微调; MAML 方法本来就需要在支撑集上训练, 所以把迭代次数提高到与 Baseline 方法一致即可; RelationNet 的特征是二维特征图, 不方便改为 softmax 层, 所以本文随机把支撑集划分为 3 个支撑和 2 个查询数据来微调关系模块. 结果如下图.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/09/FSL-7.png" data-caption="元学习方法进一步微调" />
+    
+        
+        <div class="container">
+            <p>图 7. 元学习方法进一步微调</p>
+        </div>
+    
+</div>
+
+<p>我们发现</p>
+
+<ul>
+  <li>
+    <p>MatchingNet 和 MAML 方法在微调后精度显著上升, 其中 mini-ImageNet –&gt; CUB 最为明显. 这说明元学习方法差于 Baseline 方法的一个原因就是没有微调.</p>
+  </li>
+  <li>
+    <p>ProtoNet 在非跨域的情况下微调会损害精度</p>
+
+    <blockquote>
+      <p>Learning to learn adaptation in the meta-training stage would be an important direction for future meta-learning research in few-shot classification</p>
+
+      <p>在基于元学习的 FSL 研究中, 实现元适应 (learning to learn adaptation, meta adaptation) 是元训练阶段的研究重点.</p>
+    </blockquote>
+  </li>
+</ul>
+
+<h2 id="参考文献">参考文献</h2>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+
+      <p><strong>A closer look at few-shot classification</strong><br />
+Wei-Yu Chen, Yen-Cheng Liu, Zsolt Kira, Yu-Chiang Frank Wang, Jia-Bin Huang<br />
+<a href="https://openreview.net/forum?id=HkxLXnAcFQ">[html]</a>, <a href="https://openreview.net/pdf?id=HkxLXnAcFQ">[pdf]</a> <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+
+      <p><strong>TADAM: Task dependent adaptive metric for improved few-shot learning</strong><br />
+Boris N. Oreshkin, Pau Rodriguez, Alexandre Lacoste <br />
+<a href="http://papers.nips.cc/paper/7352-tadam-task-dependent-adaptive-metric-for-improved-few-shot-learning">[html]</a>, <a href="http://papers.nips.cc/paper/7352-tadam-task-dependent-adaptive-metric-for-improved-few-shot-learning.pdf">[PDF]</a>. In NeurIPS 2018. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:3" role="doc-endnote">
+
+      <p><strong>A cluster separation measure</strong><br />
+Davies D L, Bouldin D W <br />
+<a href="https://ieeexplore.ieee.org/abstract/document/4766909">html</a>, In IEEE PAMI, 1979 (2): 224-227. <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2020/08/24/t-SNE/">t-SNE 高维数据可视化 (t-SNE: High-Dimensional Data Visualization)</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2020/11/03/SVD/">SVD 分解 (SVD Decomposition)</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

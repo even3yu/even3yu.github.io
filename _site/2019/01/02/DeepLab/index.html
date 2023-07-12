@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>DeepLab: Segmentation Network</title>
+    <meta name="description" content="">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2019/01/02/DeepLab/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
+    processEscapes: true,
+    tags: "all",
+    macros: {
+      bm: ["{\\boldsymbol #1}",1]
+    },
+    packages: {'[+]': ['noerrors']}
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['input/asciimath', '[tex]/noerrors']
+  }
+};
+</script>
+<script async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
+</script>
+<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>DeepLab: Segmentation Network</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2019-01-02
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#图像分割" title="Category: 图像分割" rel="category">图像分割</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-iclr-2015-semantic-image-segmentation-with-deep-convolutional-nets-and-fully-connected-crfs" id="markdown-toc-1-iclr-2015-semantic-image-segmentation-with-deep-convolutional-nets-and-fully-connected-crfs">1. (ICLR 2015) Semantic Image Segmentation with Deep Convolutional Nets and Fully Connected CRFs</a>    <ul>
+      <li><a href="#膨胀卷积" id="markdown-toc-膨胀卷积">膨胀卷积</a></li>
+      <li><a href="#crfs-恢复边界细节" id="markdown-toc-crfs-恢复边界细节">CRFs 恢复边界细节</a></li>
+      <li><a href="#实验结果" id="markdown-toc-实验结果">实验结果</a></li>
+    </ul>
+  </li>
+  <li><a href="#2-tpami-2017-deeplab-semantic-image-segmentation-with-deep-convolutional-nets-atrous-convolution-and-fully-connected-crfs" id="markdown-toc-2-tpami-2017-deeplab-semantic-image-segmentation-with-deep-convolutional-nets-atrous-convolution-and-fully-connected-crfs">2. TPAMI 2017: DeepLab: Semantic Image Segmentation with Deep Convolutional Nets, Atrous Convolution, and Fully Connected CRFs</a>    <ul>
+      <li><a href="#多尺度图像表示" id="markdown-toc-多尺度图像表示">多尺度图像表示</a></li>
+      <li><a href="#实验结果-1" id="markdown-toc-实验结果-1">实验结果</a></li>
+    </ul>
+  </li>
+  <li><a href="#3-arxiv-1706-rethinking-atrous-convolution-for-semantic-image-segmentation" id="markdown-toc-3-arxiv-1706-rethinking-atrous-convolution-for-semantic-image-segmentation">3. arXiv 1706: Rethinking Atrous Convolution for Semantic Image Segmentation</a>    <ul>
+      <li><a href="#在更深的层使用膨胀卷积" id="markdown-toc-在更深的层使用膨胀卷积">在更深的层使用膨胀卷积</a></li>
+      <li><a href="#aspp-再思考" id="markdown-toc-aspp-再思考">ASPP 再思考</a></li>
+      <li><a href="#实验细节和实验结果" id="markdown-toc-实验细节和实验结果">实验细节和实验结果</a></li>
+    </ul>
+  </li>
+  <li><a href="#4-eccv-2018-encoder-decoder-with-atrous-separable-convolution-for-semantic-image-segmentation" id="markdown-toc-4-eccv-2018-encoder-decoder-with-atrous-separable-convolution-for-semantic-image-segmentation">4. ECCV 2018: Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation</a>    <ul>
+      <li><a href="#深度可分离卷积" id="markdown-toc-深度可分离卷积">深度可分离卷积</a></li>
+      <li><a href="#编码-解码器设计" id="markdown-toc-编码-解码器设计">编码-解码器设计</a></li>
+      <li><a href="#xception-结构的递进修改" id="markdown-toc-xception-结构的递进修改">Xception 结构的递进修改</a></li>
+      <li><a href="#实验结果-2" id="markdown-toc-实验结果-2">实验结果</a></li>
+    </ul>
+  </li>
+  <li><a href="#reference" id="markdown-toc-reference">Reference</a></li>
+</ul>
+
+<p><strong>2020-11-20 更新</strong></p>
+
+<h2 id="1-iclr-2015-semantic-image-segmentation-with-deep-convolutional-nets-and-fully-connected-crfs">1. (ICLR 2015) Semantic Image Segmentation with Deep Convolutional Nets and Fully Connected CRFs<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup></h2>
+
+<p><strong>作者</strong>: Liang-Chieh Chen(UCLA), George Papandreou(Google Inc.), Iasonas Kokkinos(CentraleSuplec and INRIA), Kevin Murphy(Google Inc.), Alan L. Yuille(UCLA)</p>
+
+<p><code class="language-plaintext highlighter-rouge">DeepLab V1</code> 贡献:</p>
+<ul>
+  <li>速度: 引入膨胀卷积(<code class="language-plaintext highlighter-rouge">atrous</code> 卷积)提高处理速度(8fps)</li>
+  <li>准确度: PASCAL VOC-2012 分割任务上取得 start-or-the-art (test set: 71.6%), 超过第二名7.2%</li>
+  <li>简单性: 仅包含 (1) DCNN (2) CRFs 两个步骤</li>
+</ul>
+
+<h3 id="膨胀卷积">膨胀卷积</h3>
+
+<p>在 VGG-16 模型中原始图像共下采样 5 次, 缩小为输入图像的 \(1/32\). 本文目标是语义分割, 而缩小 32 倍的图像无法准确的定位分割的各部分, 而直接减少 VGG-16 的两个 block 又会影响特征的提取, 因此引入膨胀卷积既能增大感受野, 也能减少下采样的次数. 一维的膨胀卷积如下图所示.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/01/DeepLabv1-1.jpg" data-caption="Atrous Convolution" />
+    
+        
+        <div class="container">
+            <p>图 1. Atrous Convolution</p>
+        </div>
+    
+</div>
+
+<p>其卷积方式就是在卷积核中引入”空洞”, 使得不增加卷积核参数的情况下能够扩大卷积核的感受野, 用公式表示为(二维情况)</p>
+
+\[y(i, j) = \sum_{m = 1}^M\sum_{n = 1}^Nx(i + dm, j + dn)w(m, n),\]
+
+<p>其中 \(M, N\) 是卷积核两个维度上的长度, \(d &gt; 1\) 时为膨胀卷积, \(d = 1\) 时为普通卷积.</p>
+
+<p>代码实现中 VGG-16 最后两个 MaxPooling 层步长改为 1, 最后三个卷积层改为 \(2\times\) 膨胀卷积, 第一个全连接层改为 \(4\times\) 膨胀卷积, 使用 \(4\times4\) 的卷积核(在精度略微损失(损失了0.5)的前提下相比原来 \(7\times7\) 的卷积核速度翻倍).</p>
+
+<h3 id="crfs-恢复边界细节">CRFs 恢复边界细节</h3>
+
+<p>在分类精度和定位精度上有一个自然的 trade-off, 网络越深, 下采样的次数越多, 分类的精度就越高, 同时损失的位置信息也越多. 目前文献中针对该问题有三类主流的方法:</p>
+<ol>
+  <li>利用多个网络层的信息</li>
+  <li>采用超像素表示</li>
+  <li>全连接 CRFs<sup id="fnref:5" role="doc-noteref"><a href="#fn:5" class="footnote" rel="footnote">2</a></sup> (这也是本文使用的方法)</li>
+</ol>
+
+<h3 id="实验结果">实验结果</h3>
+
+<p>最终实验中最好的配置 <code class="language-plaintext highlighter-rouge">DeepLab-CRF-LargeFOV</code> (val set: mIOU = 67.64%)为 \(3\times3\) 的卷积核, \(12\times\) 的膨胀卷积, 参数量最少, 精度与 \(7\times7\) 的卷积核相同, 速度接近前者的 3.5 倍. 此外本文实验中还引入了 multi-scale 的策略(FCN 的做法, 把多个层次的特征图上采样后), 也提升了一定的精度(<code class="language-plaintext highlighter-rouge">DeepLab-MSc-CRF-LargeFOV</code> val set: mIOU=68.70%).</p>
+
+<h2 id="2-tpami-2017-deeplab-semantic-image-segmentation-with-deep-convolutional-nets-atrous-convolution-and-fully-connected-crfs">2. TPAMI 2017: DeepLab: Semantic Image Segmentation with Deep Convolutional Nets, Atrous Convolution, and Fully Connected CRFs<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">3</a></sup></h2>
+
+<p><strong>作者</strong>: Liang-Chieh Chen, George Papandreou, Iasonas Kokkinos, Kevin Murphy, Alan L. Yuille</p>
+
+<p><code class="language-plaintext highlighter-rouge">DeepLab V2</code> 主要贡献:</p>
+<ul>
+  <li>提出膨胀空间金字塔池化(atrous spatial pyramid pooling, ASPP)</li>
+</ul>
+
+<h3 id="多尺度图像表示">多尺度图像表示</h3>
+
+<p>多尺度是目前针对同时有大目标和小目标物体的一种比较流行的策略.</p>
+
+<p>利用多尺度图像特征的方法有很多种:</p>
+<ol>
+  <li>相当于标准的多尺度处理</li>
+  <li>编码-解码器</li>
+  <li>膨胀卷积代替下采样</li>
+  <li>ASPP 结构</li>
+</ol>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/01/DeepLabv3-1.jpg" data-caption="Alternative architectures to capture multi-scale context" />
+    
+        
+        <div class="container">
+            <p>图 2. Alternative architectures to capture multi-scale context</p>
+        </div>
+    
+</div>
+
+<p>本文试验了第 1 种和第 4 种.</p>
+
+<p><strong>标准的多尺度处理</strong>: 并行输入多个尺度的图像(经过缩放的), 并行的 DCNN 之间共享参数. 为了产生最终的结果, 多个尺度的输出经过双线性插值为原始图像的大小, 然后进行融合, 融合的方式选择 <code class="language-plaintext highlighter-rouge">max()</code> 函数.</p>
+
+<p><strong>ASPP</strong>: 结构如下图所示, 使用不同的膨胀率使得网络提取到不同尺度的信息.</p>
+
+<div class="polaroid-small">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/01/DeepLabv2-2.jpg" data-caption="ASPP 结构" />
+    
+        
+        <div class="container">
+            <p>图 3. ASPP 结构</p>
+        </div>
+    
+</div>
+
+<p>使用了 ASPP 结构的 DeepLab 网络称为 <code class="language-plaintext highlighter-rouge">DeepLab-ASPP</code>, 其中 ASPP 结构增加在了最后一个池化层(已修改步长为 1)之后, 如下图(d)所示.</p>
+
+<div class="polaroid-small">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/01/DeepLabv2-3.jpg" data-caption="DeepLab-ASPP" />
+    
+        
+        <div class="container">
+            <p>图 4. DeepLab-ASPP</p>
+        </div>
+    
+</div>
+
+<h3 id="实验结果-1">实验结果</h3>
+
+<p>仍然在最后增加 CRFs 修整边界, 以 Resnet-101 作为主干网络, <code class="language-plaintext highlighter-rouge">DeepLab-ASPP-CRFs</code> 达到了 mIOU=79.7% 的精度.</p>
+
+<h2 id="3-arxiv-1706-rethinking-atrous-convolution-for-semantic-image-segmentation">3. arXiv 1706: Rethinking Atrous Convolution for Semantic Image Segmentation<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">4</a></sup></h2>
+
+<p><strong>作者</strong>: Liang-Chieh Chen, George Papandreou, Florian Schroff, Hartwig Adam</p>
+
+<p><code class="language-plaintext highlighter-rouge">DeepLab V3</code> 贡献:</p>
+<ul>
+  <li>把 image-level 的特征整合到 ASPP 模块中</li>
+  <li>给出较为详细的实现细节和训练经验</li>
+</ul>
+
+<h3 id="在更深的层使用膨胀卷积">在更深的层使用膨胀卷积</h3>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/01/DeepLabv3-2.jpg" data-caption="使用膨胀卷积的级联结构" />
+    
+        
+        <div class="container">
+            <p>图 5. 使用膨胀卷积的级联结构</p>
+        </div>
+    
+</div>
+
+<p>这一节主要对比了深度网络模型中使用和不使用膨胀卷积, 并说明了膨胀卷积的优势. 主干网络选择了 ResNet, 使用膨胀卷积的 ResNet 把 Block4 到 Block7 的卷积替换为膨胀卷积(按照 DeepLabv1 相应的池化也应当改为步长为 1 避免减少图像分辨率), 如上图所示. 由于每个 ResBlock 中包含 3 个卷积, 本文采用了 Multigrid 的策略, 每个 ResBlock 设置一个基准膨胀率 \(Baserate\) (即上图中的 rate), 给定一个长度等于 3 的网格 \(Multigrid\) (就是每个 ResBlock 中卷积层的数目), 那么每个卷积层的膨胀率就可以通过公式计算</p>
+
+\[rate = Baserate * Multigrid.\]
+
+<p>举个例子, block4 的基准膨胀率是 2, 给定网格 \(Multigrid = (1, 2, 4)\), 那么最终 block4 的三个卷积层的膨胀率依次为 \(rates = 2 * (1, 2, 4) = (2, 4, 8)\).</p>
+
+<h3 id="aspp-再思考">ASPP 再思考</h3>
+
+<p>DeepLab V2 中的 ASPP 直接接在了网络头部, 那么特征图大小和卷积核大小不变时, 随着膨胀率的增大, 有效的卷积核权重会越来越少. 极端情况下比如 \(3\times3\) 的卷积核仅有中间的一个值有效(其他值都作用在填充的 0 上了), 那么 \(3\times3\) 的卷积核就退化成了 \(1\times1\) 的卷积核. 所以本文加入了 image-level 的信息, 对最后一个特征图应用全局平均池化, 然后使用 \(1\times1\) 的 256 个卷积核和批正则化, 然后上采样到需要的大小和其他三种膨胀率的卷积分支融合. 具体如下图所示.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/01/DeepLabv3-3.jpg" data-caption="ASPP 的平行结构, 使用 image-level 的特征做增广" />
+    
+        
+        <div class="container">
+            <p>图 6. ASPP 的平行结构, 使用 image-level 的特征做增广</p>
+        </div>
+    
+</div>
+
+<h3 id="实验细节和实验结果">实验细节和实验结果</h3>
+
+<ul>
+  <li><strong>学习率策略</strong>: 多项式学习率, \((1 - \frac{iter}{max_iter})^{power}\), 其中 \(power=0.9\).</li>
+  <li><strong>裁剪大小</strong>: 为了使大的膨胀率仍然有效, 增大裁剪大小到 513 像素.</li>
+  <li><strong>批正则化</strong>: 本文增加在 ResNet 头部的模块均包含批正则化结构. 首先使用 <code class="language-plaintext highlighter-rouge">output_stride=16, batch_size=16, decay=0.9997, learning_rate=0.007</code> 在增广的 <code class="language-plaintext highlighter-rouge">trainaug</code> 数据集上训练 30K 步, 然后固定 BN 层, 使用 <code class="language-plaintext highlighter-rouge">output_stride=8, batch_size=8, learning_rate=0.001</code> 在 PASVAL VOC 2012 数据集 <code class="language-plaintext highlighter-rouge">trainval</code> 上训练 30K 步. 先用输出步长 16 训练的好处是输出图片小, 可以加快训练速度, 然后再用步长为 8 的图片训练, 提高定位精度.</li>
+  <li><strong>上采样 logits</strong>: 由于网络输出的大小缩小为 groundtruth 的 \(1/8\), 因此需要对齐, 本文发现训练时对输出上采样到原始图像大小要比把 groundtruth 下采样到 \(1/8\) 更好.</li>
+  <li><strong>数据增广</strong>: 放缩(\(0.5~2.0\)), 随机左右翻转.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">DeepLab V3</code> 在 PASVAL VOC 2012 测试集上达到 85.7% 的精度, 接近当时最好的水平. 如果使用在 ImageNet 和 JFT-300M 数据集上预训练的 ResNet-101 作为主干网络, 则可以达到 86.9% 的精度.</p>
+
+<h2 id="4-eccv-2018-encoder-decoder-with-atrous-separable-convolution-for-semantic-image-segmentation">4. ECCV 2018: Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation<sup id="fnref:4" role="doc-noteref"><a href="#fn:4" class="footnote" rel="footnote">5</a></sup></h2>
+
+<p><strong>作者</strong>: Liang-Chieh Chen, Yukun Zhu, George Papandreou, Florian Schroff, Hartwig Adam</p>
+
+<p><code class="language-plaintext highlighter-rouge">DeepLab V3+</code> 贡献:</p>
+<ul>
+  <li>提出一个编码-解码结构, 采用 DeepLab V3 作为编码器</li>
+  <li>在编码器中(提取特征), 可以利用膨胀卷积任意的控制精度和速度的平衡</li>
+  <li>采用 Xception 模型用于分割任务, 并把 depthwise-separable convolution 应用到 ASPP 和解码器结构中, 使得速度更快, 更强大.</li>
+  <li>在 PASVAL VOC 2012 数据集和 Cityscapes 数据集上成为了新的 state-of-the-art.</li>
+</ul>
+
+<h3 id="深度可分离卷积">深度可分离卷积</h3>
+
+<p><code class="language-plaintext highlighter-rouge">Depthwise separable convolution</code> 就是把一个标准的卷积分解成一个 <code class="language-plaintext highlighter-rouge">depthwise convolution</code>(不同通道应用不同的) 和一个 <code class="language-plaintext highlighter-rouge">point-wise convolution</code>(\(1\times1\) 卷积), 大幅减少计算量. (<code class="language-plaintext highlighter-rouge">Tensorflow&gt;=1.8</code> 中的 <code class="language-plaintext highlighter-rouge">nn</code> 模块已经实现了第一个分步的 <code class="language-plaintext highlighter-rouge">tf.nn.depthwise_convolution()</code> 和总的分解 <code class="language-plaintext highlighter-rouge">tf.nn.separable_convolution()</code>).</p>
+
+<h3 id="编码-解码器设计">编码-解码器设计</h3>
+
+<p><code class="language-plaintext highlighter-rouge">DeepLab V3</code> 去掉计算 logits 的层后作为 Encoder. 由于 <code class="language-plaintext highlighter-rouge">DeepLab V3</code> 结构最后输出的  <code class="language-plaintext highlighter-rouge">output_stride=16</code>, 因此需要 16 倍的上采样. 考虑到直接上采样 16 倍仍然会使网络丢失过多信息而在细节上不够精确, 因此 Decoder 把这个上采样分成两部分:</p>
+<ol>
+  <li>把 <code class="language-plaintext highlighter-rouge">DeepLab V3</code> 的输出双线性上采样 4 倍后与低层特征拼接</li>
+  <li>低层特征可能有过多的通道数(256 或 512)而把 Encoder 中的特征掩盖掉(有 256 个通道), 因此低层特征首先要经过一个 \(1\times1\) 的卷积调整通道数, 然后再拼接</li>
+  <li>拼接的特征经过几层 \(3\times3\) 卷积融合特征, 最后再次双线性上采样 4 倍.</li>
+</ol>
+
+<p>整个网络结构如下图所示.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/01/DeepLabv3+-1.jpg" data-caption="DeepLab V3+ 结构" />
+    
+        
+        <div class="container">
+            <p>图 7. DeepLab V3+ 结构</p>
+        </div>
+    
+</div>
+
+<h3 id="xception-结构的递进修改">Xception 结构的递进修改</h3>
+<ol>
+  <li>原始: Xception</li>
+  <li>MSRA的修改: Aligned Xception</li>
+  <li>本文的修改: (1) 继承 Aligned Xception, 但不修改所有的层 (2) 所有最大池化替换为 <code class="language-plaintext highlighter-rouge">depthwise separable convolution</code> (3) 添加额外的 BN 层和激活函数层.</li>
+</ol>
+
+<p>修改后的结构如下图所示.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2019/01/DeepLabv3+-2.jpg" data-caption="改进的 Xception" />
+    
+        
+        <div class="container">
+            <p>图 8. 改进的 Xception</p>
+        </div>
+    
+</div>
+
+<h3 id="实验结果-2">实验结果</h3>
+
+<p><code class="language-plaintext highlighter-rouge">DeepLab V3+ (Xception)</code> 在 PASCAL VOC 2012 测试集上获得 mIOU=87.8% 的精度. <code class="language-plaintext highlighter-rouge">DeepLab V3+ (Xception-JFT)</code> 获得 mIOU=89% 的精度.</p>
+
+<h2 id="reference">Reference</h2>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+
+      <p><strong>Semantic Image Segmentation with Deep Convolutional Nets and Fully Connected CRFs</strong><br />
+Liang-Chieh Chen, George Papandreou, Iasonas Kokkinos, Kevin Murphy, Alan L. Yuille. <br />
+<a href="https://arxiv.org/abs/1412.7062">[html]</a>. In ICLR, 2015. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:5" role="doc-endnote">
+
+      <p><strong>Efficient Inference in Fully Connected CRFs with Gaussian Edge Potentials</strong><br />
+Philipp Krähenbüh, Vladlen Koltun. <br />
+<a href="https://arxiv.org/abs/1210.5644">[html]</a> <a href="#fnref:5" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+
+      <p><strong>DeepLab: Semantic Image Segmentation with Deep Convolutional Nets, Atrous Convolution, and Fully  Connected CRFs</strong> <br />
+Liang-Chieh Chen, George Papandreou, Iasonas Kokkinos, Kevin Murphy, and Alan L Yuille. <br />
+<a href="http://arxiv.org/abs/1606.00915">[html]</a>. TPAMI 2017. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:3" role="doc-endnote">
+
+      <p><strong>Rethinking Atrous Convolution for Semantic Image Segmentation</strong><br />
+Liang-Chieh Chen, George Papandreou, Florian Schroff, Hartwig Adam.<br />
+<a href="http://arxiv.org/abs/1706.05587">[html]</a>. arXiv: 1706.05587, 2017. <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:4" role="doc-endnote">
+
+      <p><strong>Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation</strong><br />
+Liang-Chieh Chen, Yukun Zhu, George Papandreou, Florian Schroff, Hartwig Adam.<br />
+<a href="https://arxiv.org/abs/1802.02611">[html]</a>. In ECCV, 2018. <a href="#fnref:4" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2018/12/26/Basis-of-Machine-Learning/">机器学习: 12个提示</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2019/03/07/Graph-Neural-Network/">GNNs: Graph Neural Networks</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

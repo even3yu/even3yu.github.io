@@ -1,0 +1,118 @@
+{% if include.type == "primary" %}
+{% if include.id != null %}
+<div class="alert alert-primary with-icon card" id="{{ include.id }}">
+{% else %}
+<div class="alert alert-primary with-icon card">
+{% endif %}
+<i class="icon-star"></i>
+<div class="zui-card-content notitle">
+{% if include.title != null %}
+<div class="title"><strong>{{ include.title }}</strong></div><hr>
+{% endif %}
+<div class="content" markdown="1">
+{{ include.content }}
+</div>
+{% if include.tail != null %}
+<hr><div>{{ include.tail }}</div>
+{% endif %}
+</div>
+</div>
+{% elsif include.type == "danger" %}
+{% if include.id != null %}
+<div class="alert alert-danger with-icon card" id="{{ include.id }}">
+{% else %}
+<div class="alert alert-danger with-icon card">
+{% endif %}
+<i class="icon-remove-sign"></i>
+<div class="zui-card-content">
+{% if include.title != null %}
+<div class="title"><strong>{{ include.title }}</strong></div><hr>
+{% else %}
+<div class="title"><strong>错误</strong></div><hr>
+{% endif %}
+<div class="content" markdown="1">
+{{ include.content }}
+</div>
+{% if include.tail != null %}
+<hr><div>{{ include.tail }}</div>
+{% endif %}
+</div>
+</div>
+{% elsif include.type == "success" %}
+{% if include.id != null %}
+<div class="alert alert-success with-icon card" id="{{ include.id }}">
+{% else %}
+<div class="alert alert-success with-icon card">
+{% endif %}
+<i class="icon-ok-sign"></i>
+<div class="zui-card-content">
+{% if include.title != null %}
+<div class="title"><strong>{{ include.title }}</strong></div><hr>
+{% endif %}
+<div class="content" markdown="1">
+{{ include.content }}
+</div>
+{% if include.tail != null %}
+<hr><div>{{ include.tail }}</div>
+{% endif %}
+</div>
+</div>
+{% elsif include.type == "warning" %}
+{% if include.id != null %}
+<div class="alert alert-warning with-icon card" id="{{ include.id }}">
+{% else %}
+<div class="alert alert-warning with-icon card">
+{% endif %}
+<i class="icon-warning-sign"></i>
+<div class="zui-card-content">
+{% if include.title != null %}
+<div class="title"><strong>{{ include.title }}</strong></div><hr>
+{% else %}
+<div class="title"><strong>警告</strong></div><hr>
+{% endif %}
+<div class="content" markdown="1">
+{{ include.content }}
+</div>
+{% if include.tail != null %}
+<hr><div>{{ include.tail }}</div>
+{% endif %}
+</div>
+</div>
+{% elsif include.type == "info" %}
+{% if include.id != null %}
+<div class="alert alert-info with-icon card" id="{{ include.id }}">
+{% else %}
+<div class="alert alert-info with-icon card">
+{% endif %}
+<i class="icon-info-sign"></i>
+<div class="zui-card-content">
+{% if include.title != null %}
+<div class="title"><strong>{{ include.title }}</strong></div><hr>
+{% else %}
+<div class="title"><strong>提示</strong></div><hr>
+{% endif %}
+<div class="content" markdown="1">
+{{ include.content }}
+</div>
+{% if include.tail != null %}
+<hr><div>{{ include.tail }}</div>
+{% endif %}
+</div>
+</div>
+{% else %}
+{% if include.id != null %}
+<div class="alert card" id="{{ include.id }}">
+{% else %}
+<div class="alert card">
+{% endif %}
+{% if include.title != null %}
+<div class="title"><strong>{{ include.title }}</strong></div><hr>
+{% endif %}
+<div class="content" markdown="1">
+{{ include.content }}
+</div>
+{% if include.tail != null %}
+<hr><div>{{ include.tail }}</div>
+{% endif %}
+</div>
+{% endif %}

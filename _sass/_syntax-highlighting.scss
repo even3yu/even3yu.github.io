@@ -1,0 +1,194 @@
+/**
+ * Syntax highlighting styles
+ */
+ code {
+  padding: 1px 4px;
+  margin: 0 2px;
+  font-size: 90%;
+  border-radius: 3px;
+  color: rgb(0, 0, 0);
+  // background-color: rgba(0, 0, 0, 0.02);
+  border: 1px solid #d7d0d2;
+  font-family: "Droid Sans Mono", Monaco, Menlo, "Microsoft YaHei Mono",
+    Consolas, "Courier New", monospace, sans-serif;
+  vertical-align: middle;
+}
+
+.codeHeader {
+  border: 1px solid #e3e3e3;
+  background-color: #f2f2f2;
+  flex-direction: row;
+  display: flex;
+  margin-bottom: -1px;
+  font-size: 14px;
+  // justify-content: space-between;
+  // height: 36px;
+
+  .language {
+    padding: 5px 0 5px 18px;
+    flex-grow: 1;
+  }
+
+  .btnContainer {
+    position: relative;
+    border: 1px solid #e3e3e3;
+    margin: -1px;
+    cursor: pointer;
+    width: 84px;
+  
+    .btn-copy {
+      color: #171717;
+      background-color: #f2f2f2;
+      position: absolute;
+      z-index: 1;
+      padding: 0 14px;
+      height: 32px;
+      word-break: keep-all;
+      white-space: nowrap;
+    
+      &:hover {
+        background-color: #fafafa;
+      }
+    }
+  
+    .btn-copy-success {
+      color: #eeeeee;
+      background-color: #aaa5f1;
+      position: absolute;
+      z-index: 2;
+      visibility: hidden;
+      padding: 0 12px;
+      height: 32px;
+      width: 100%;
+    }
+
+    .show {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .hide {
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.5s linear;
+    }
+  }
+}
+
+
+div > pre {
+  border: 1px solid #e3e3e3;
+  overflow-x: auto;
+}
+
+td > pre {
+  padding: 0px 4px;
+  // word-wrap: break-word;      /* IE 5.5-7 */
+  // white-space: -moz-pre-wrap; /* Firefox 1.0-2.0 */
+  white-space: pre; /* current browsers */
+  word-break: normal;
+  font-size: 14px;
+  line-height: 150%;
+  display: block;
+  border: 1px;
+  background-color: #fafafa;
+  border-radius: 0;
+  > code {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    border: 0;
+    background-color: #fafafa; // Code background
+  }
+}
+
+::-webkit-scrollbar
+{
+    height:8px;
+}
+
+div.highlight {
+  position: relative;
+}
+
+.highlight {
+  color: #eee;
+  background-color: #fafafa;
+  border-radius: 0;
+
+  table {
+    border: 0;
+    margin: 0;
+  }
+  table td.rouge-gutter {
+    border-right: 1px solid #cccccc;
+  }
+
+  table td.rouge-code {
+    background-color: #fafafa;
+  }
+}
+
+// rougify style xxx > syntax.css 的结果放到下面来替换样式
+.highlight table td {
+  padding: 5px;
+}
+.highlight table pre {
+  margin: 0;
+}
+.highlight,
+.highlight .w {
+  color: #444444;
+}
+.highlight .cp {
+  color: #cc00a3;
+}
+.highlight .cs {
+  color: #cc00a3;
+}
+.highlight .c,
+.highlight .ch,
+.highlight .cd,
+.highlight .cm,
+.highlight .cpf,
+.highlight .c1 {
+  color: #7f848d;
+}
+.highlight .kc {
+  color: #c34e00;
+}
+.highlight .kd {
+  color: #0000ff;
+}
+.highlight .kr {
+  color: #007575;
+}
+.highlight .k,
+.highlight .kn,
+.highlight .kp,
+.highlight .kt,
+.highlight .kv {
+  color: #0000ff;
+}
+.highlight .s,
+.highlight .sb,
+.highlight .sc,
+.highlight .dl,
+.highlight .sd,
+.highlight .s2,
+.highlight .se,
+.highlight .sh,
+.highlight .si,
+.highlight .sx,
+.highlight .sr,
+.highlight .s1,
+.highlight .ss {
+  color: #009c00;
+}
+.highlight .sa {
+  color: #0000ff;
+}
+.highlight .nb,
+.highlight .bp {
+  color: #c34e00;
+}

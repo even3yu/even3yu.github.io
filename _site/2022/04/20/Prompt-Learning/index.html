@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Prompt 学习和微调 (Prompt Learning and Tuning)</title>
+    <meta name="description" content="Self-Attention 和 Transformer 自从问世就成为了自然语言处理领域的新星. 得益于全局的注意力机制和并行化的训练, 基于 Transformer 的自然语言模型能够方便的编码长距离依赖关系, 同时在大规模自然语言数据集上并行训练成为可能. 但由于自然语言任务种类繁多, 且任务之间的差别不太...">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2022/04/20/Prompt-Learning/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
+    processEscapes: true,
+    tags: "all",
+    macros: {
+      bm: ["{\\boldsymbol #1}",1]
+    },
+    packages: {'[+]': ['noerrors']}
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['input/asciimath', '[tex]/noerrors']
+  }
+};
+</script>
+<script async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
+</script>
+<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>Prompt 学习和微调 (Prompt Learning and Tuning)</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2022-04-20
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#表示学习" title="Category: 表示学习" rel="category">表示学习</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-nlp-模型的发展" id="markdown-toc-1-nlp-模型的发展">1. NLP 模型的发展</a></li>
+  <li><a href="#2-prompt-learning" id="markdown-toc-2-prompt-learning">2. Prompt Learning</a>    <ul>
+      <li><a href="#21-什么是-prompt-" id="markdown-toc-21-什么是-prompt-">2.1 什么是 Prompt ?</a></li>
+      <li><a href="#22-有哪些预训练模型" id="markdown-toc-22-有哪些预训练模型">2.2 有哪些预训练模型?</a></li>
+      <li><a href="#23-有哪些-prompt-learning-的方法" id="markdown-toc-23-有哪些-prompt-learning-的方法">2.3 有哪些 Prompt Learning 的方法?</a></li>
+    </ul>
+  </li>
+  <li><a href="#3-prompt-tuning" id="markdown-toc-3-prompt-tuning">3. Prompt Tuning</a>    <ul>
+      <li><a href="#31-fine-tune-的策略" id="markdown-toc-31-fine-tune-的策略">3.1 Fine-tune 的策略</a></li>
+      <li><a href="#32-nlp-中-基于-prompt-的-fine-tune" id="markdown-toc-32-nlp-中-基于-prompt-的-fine-tune">3.2 NLP 中 基于 Prompt 的 fine-tune</a></li>
+      <li><a href="#33-cv-中-基于-prompt-的-fine-tuning" id="markdown-toc-33-cv-中-基于-prompt-的-fine-tuning">3.3 CV 中 基于 Prompt 的 fine-tuning</a>        <ul>
+          <li><a href="#331-分类" id="markdown-toc-331-分类">3.3.1 分类</a></li>
+          <li><a href="#332-持续学习" id="markdown-toc-332-持续学习">3.3.2 持续学习</a></li>
+          <li><a href="#333-多模态模型" id="markdown-toc-333-多模态模型">3.3.3 多模态模型</a></li>
+          <li><a href="#334-域适应" id="markdown-toc-334-域适应">3.3.4 域适应</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#reference" id="markdown-toc-reference">Reference</a></li>
+</ul>
+
+<p>Self-Attention 和 Transformer 自从问世就成为了自然语言处理领域的新星. 得益于全局的注意力机制和并行化的训练, 基于 Transformer 的自然语言模型能够方便的编码长距离依赖关系, 同时在大规模自然语言数据集上并行训练成为可能. 但由于自然语言任务种类繁多, 且任务之间的差别不太大, 所以为每个任务单独微调一份大模型很不划算. 在 CV 中, 不同的图像识别任务往往也需要微调整个大模型, 也显得不够经济. Prompt Learning 的提出给这个问题提供了一个很好的方向.</p>
+
+<p>本文关于 NLP 的部分主要参考综述<sup id="fnref:Liu2021Pretrain" role="doc-noteref"><a href="#fn:Liu2021Pretrain" class="footnote" rel="footnote">1</a></sup>.</p>
+
+<h2 id="1-nlp-模型的发展">1. NLP 模型的发展</h2>
+
+<p>过去许多机器学习方法是基于<strong>全监督学习 (fully supervised learning)</strong> 的.</p>
+
+<p>由于监督学习需要大量的数据学习性能优异的模型, 而在 NLP 中大规模训练数据(指为特定任务而标注好的数据)是不足的, 因此在深度学习出现之前研究者通常聚焦于<strong>特征工程 (feature engineering)</strong>, 即利用领域知识从数据中提取好的特征;</p>
+
+<p>在深度学习出现之后, 由于特征可以从数据中习得, 因此研究者转向了<strong>结构工程 (architecture engineering)</strong>, 即通过通过设计一个合适的网络结构来把归纳偏置 (inductive bias) 引入模型中, 从而有利于学习好的特征.</p>
+
+<p>在 2017-2019 年, NLP 模型开始转向一个新的模式 (BERT), 即<strong>预训练 + 微调 (pre-train and fine-tune)</strong>. 在这个模式中, 先用一个固定的结构预训练一个<strong>语言模型 (language model, LM)</strong>, 预训练的方式就是让模型补全上下文 (比如完形填空).</p>
+
+<p>由于预训练不需要专家知识, 因此可以在网络上搜集的大规模文本上直接进行训练. 然后这个 LM 通过引入额外的参数或微调来适应到下游任务上. 此时研究者转向了 <strong>目标工程 (objective engineering)</strong>, 即为预训练任务和微调任务设计更好的目标函数.</p>
+
+<h2 id="2-prompt-learning">2. Prompt Learning</h2>
+
+<h3 id="21-什么是-prompt-">2.1 什么是 Prompt ?</h3>
+
+<p>在做 objective engineering 的过程中, 研究者发现让下游任务的目标与预训练的目标对齐是有好的. 因此下游任务通过引入<strong>文本提示符 (textual prompt)</strong>, 把原来的任务目标重构为与预训练模型一致的填空题.</p>
+
+<p>比如一个输入 “I missed the bus today.” 的重构:</p>
+
+<ul>
+  <li><strong>情感预测任务.</strong> 输入: “I missed the bus today. <font color="red">I felt so</font> ___.” 其中 “I felt so” 就是<strong>提示词 (prompt)</strong>, 然后使用 LM 用一个表示情感的词填空.</li>
+  <li><strong>翻译任务.</strong> 输入: “<font color="red">English:</font> I missed the bus today. <font color="red">French:</font> ___.” 其中 “English:” 和 “French:” 就是提示词, 然后使用 LM 应该再空位填入相应的法语句子.</li>
+</ul>
+
+<p>我们发现用不同的 prompt 加到相同的输入上, 就能实现不同的任务, 从而使得下游任务可以很好的对齐到预训练任务上, 实现更好的预测效果.</p>
+
+<p>后来研究者发现, 在同一个任务上使用不同的 prompt, 预测效果也会有显著差异, 因此现在有许多研究开始聚焦于 prompt engineering.</p>
+
+<h3 id="22-有哪些预训练模型">2.2 有哪些预训练模型?</h3>
+
+<ul>
+  <li>Left-to-Right LM: GPT, GPT-2, GPT-3</li>
+  <li>Masked LM: BERT, RoBERTa</li>
+  <li>Prefix LM: UniLM1, UniLM2</li>
+  <li>Encoder-Decoder: T5, MASS, BART</li>
+</ul>
+
+<h3 id="23-有哪些-prompt-learning-的方法">2.3 有哪些 Prompt Learning 的方法?</h3>
+
+<ul>
+  <li>按照 prompt 的形状划分: 完形填空式, 前缀式.</li>
+  <li>按照人的参与与否: 人工设计的, 自动的(离散的, 连续的)</li>
+</ul>
+
+<div class="polaroid-small">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/04/prompt-1.png" data-caption="人工设计的 Prompt" />
+    
+        
+        <div class="container">
+            <p>图 1. 人工设计的 Prompt</p>
+        </div>
+    
+</div>
+
+<h2 id="3-prompt-tuning">3. Prompt Tuning</h2>
+
+<h3 id="31-fine-tune-的策略">3.1 Fine-tune 的策略</h3>
+
+<p>在下游任务上微调大规模预训练模型已经成为大量 NLP 和 CV 任务常用的训练模式. 然而, 随着模型尺寸和任务数量越来越多, 微调整个模型的方法会储存每个微调任务的模型副本, 消耗大量的储存空间. 尤其是在边缘设备上存储空间和网络速度有限的情况下, 共享参数就变得尤为重要.</p>
+
+<p>一个比较直接的共享参数的方法是只微调部分参数, 或者向预训练模型中加入少量额外的参数. 比如, 对于分类任务:</p>
+
+<ul>
+  <li>Linear: 只微调分类器 (一个线性层), 冻结整个骨干网络.</li>
+  <li>Partial-k: 只微调骨干网络最后的 k 层, 冻结其他层<sup id="fnref:Yosinski2014HowTransferable" role="doc-noteref"><a href="#fn:Yosinski2014HowTransferable" class="footnote" rel="footnote">2</a></sup> <sup id="fnref:He2021Masked" role="doc-noteref"><a href="#fn:He2021Masked" class="footnote" rel="footnote">3</a></sup>.</li>
+  <li>MLP-k: 增加一个 k 层的 MLP 作为分类器.</li>
+  <li>Side-tuning<sup id="fnref:Zhang2020Sidetuning" role="doc-noteref"><a href="#fn:Zhang2020Sidetuning" class="footnote" rel="footnote">4</a></sup>: 训练一个 “side” 网络, 然后融合预训练特征和 “site” 网络的特征后输入分类器.</li>
+  <li>Bias: 只微调预训练网络的 bias 参数<sup id="fnref:Zaken2022Bitfit" role="doc-noteref"><a href="#fn:Zaken2022Bitfit" class="footnote" rel="footnote">5</a></sup> <sup id="fnref:Cai2020TinyTL" role="doc-noteref"><a href="#fn:Cai2020TinyTL" class="footnote" rel="footnote">6</a></sup>.</li>
+  <li>Adapter<sup id="fnref:Houlsby2019Parameter" role="doc-noteref"><a href="#fn:Houlsby2019Parameter" class="footnote" rel="footnote">7</a></sup>: 通过残差结构, 把额外的 MLP 模块插入 Transformer.</li>
+</ul>
+
+<p>近年来, Transformer 模型在 NLP 和 CV 上大放异彩. 基于 Transformer 的模型在大量 CV 任务上已经比肩甚至超过基于卷积的模型.</p>
+
+<div class="alert alert-info with-icon card">
+
+<i class="icon-info-sign"></i>
+<div class="zui-card-content">
+
+<div class="title"><strong>Transformer 与 ConvNet 比较</strong></div><hr />
+
+<div class="content">
+
+      <p>Transformer 相比于 ConvNet 的一个显著的特点是: 它们在对于空间(时间)维度的操作是不同的.</p>
+      <ul>
+        <li>ConvNet: 卷积核在空间维度上执行卷积操作, 因此空间内不同位置的特征通过卷积(可学习的)操作融合信息, 且只在局部区域融合.</li>
+        <li>Transformer: 空间(时间)维度内不同位置的特征通过 Attention (非学习的) 操作融合信息, 且在全局上融合.</li>
+      </ul>
+
+      <p>Transformer 在特征融合时非学习的策略使得其很容易的通过增加额外的 feature 来扩展模型.</p>
+
+    </div>
+
+</div>
+</div>
+
+<h3 id="32-nlp-中-基于-prompt-的-fine-tune">3.2 NLP 中 基于 Prompt 的 fine-tune</h3>
+
+<ul>
+  <li>Prefix-Tuning</li>
+  <li>Prompt-Tuning</li>
+  <li>P-Tuning</li>
+  <li>P-Tuning-v2</li>
+</ul>
+
+<h3 id="33-cv-中-基于-prompt-的-fine-tuning">3.3 CV 中 基于 Prompt 的 fine-tuning</h3>
+
+<h4 id="331-分类">3.3.1 分类</h4>
+
+<p>Visual Prompt Tuning<sup id="fnref:vpt" role="doc-noteref"><a href="#fn:vpt" class="footnote" rel="footnote">8</a></sup></p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/04/vpt.png" data-caption="Visual Prompt Tuning" />
+    
+        
+        <div class="container">
+            <p>图 2. Visual Prompt Tuning</p>
+        </div>
+    
+</div>
+
+<ul>
+  <li>VPT-Shallow</li>
+</ul>
+
+\[\begin{align}
+[\mathbf{x}_1, \mathbf{Z}_1, \mathbf{E}_1] &amp;= \textcolor{RoyalBlue}{L_1}([\mathbf{x}_0, \textcolor{Red}{\mathbf{P}}, \mathbf{E}_0]) \\
+[\mathbf{x}_i, \mathbf{Z}_i, \mathbf{E}_i] &amp;= \textcolor{RoyalBlue}{L_i}([\mathbf{x}_{i-1}, \mathbf{Z}_{i-1}, \mathbf{E}_{i-1}]) \qquad i=2,3,\dots,N \\
+y &amp;= \textcolor{Red}{\text{Head}}(x_N) \\
+\end{align}\]
+
+<ul>
+  <li>VPT-Deep</li>
+</ul>
+
+\[\begin{align}
+[\mathbf{x}_i, \_, \mathbf{E}_i] &amp;= \textcolor{RoyalBlue}{L_i}([\mathbf{x}_{i-1}, \textcolor{Red}{\mathbf{P}_{i-1}}, \mathbf{E}_{i-1}]) \qquad i=1,2,\dots,N \\
+y &amp;= \textcolor{Red}{\text{Head}}(x_N)
+\end{align}\]
+
+<div class="polaroid-small">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/04/vpt_results.png" data-caption="VPT Results" />
+    
+        
+        <div class="container">
+            <p>图 3. VPT Results</p>
+        </div>
+    
+</div>
+
+<h4 id="332-持续学习">3.3.2 持续学习</h4>
+
+<p>Learning to Prompt for Continue Learning<sup id="fnref:continuelearning" role="doc-noteref"><a href="#fn:continuelearning" class="footnote" rel="footnote">9</a></sup></p>
+
+<p>引入一个 prompt pool, 对每个 input, 从 pool 中取出与其最近的 N 个 prompts 加入 image tokens. input 和 prompts 距离的度量通过计算 input feature 和每个 prompt 的 key 的距离来得到, 这些 key 通过梯度随分类目标一起优化.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/04/continuelearning.png" data-caption="L2P" />
+    
+        
+        <div class="container">
+            <p>图 4. L2P</p>
+        </div>
+    
+</div>
+
+\[\text{min}_{\mathbf{P, K}, \phi} \mathcal{L}(g_{\phi}(f_r^{avg}(\mathbf{x}_p)), y) + \lambda\sum_{\mathbf{K}_{\mathbf{x}}}\gamma(q(\mathbf{x}), \mathbf{k}_{s_i})\]
+
+<p>注意, 最后使用 prompt 来分类.</p>
+
+<h4 id="333-多模态模型">3.3.3 多模态模型</h4>
+
+<p>Vision-Language Model: Context Optimization (CoOp)<sup id="fnref:coop" role="doc-noteref"><a href="#fn:coop" class="footnote" rel="footnote">10</a></sup></p>
+
+<p>多模态学习的预训练模型. 比如 CLIP, 通过对比学习对齐文本和图像的特征空间.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/04/clip.png" data-caption="CLIP" />
+    
+        
+        <div class="container">
+            <p>图 5. CLIP</p>
+        </div>
+    
+</div>
+
+<p>选择不同的文本 prompt 对于精度影响较大.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/04/coop_engineering.png" data-caption="Prompt engineering vs Context Optimization (CoOp)" />
+    
+        
+        <div class="container">
+            <p>图 6. Prompt engineering vs Context Optimization (CoOp)</p>
+        </div>
+    
+</div>
+
+<p>把人工设定的 prompt 替换为 learnable 的 prompt:</p>
+
+<ul>
+  <li>[CLASS] 放在后面: \(t = [\text{V}]_1[\text{V}]_2\dots[\text{V}]_M[\text{CLASS}]\)</li>
+  <li>[CLASS] 放在中间: \(t = [\text{V}]_1\dots[\text{V}]_{\frac{M}{2}}[\text{CLASS}][\text{V}]_{\frac{M}{2}+1}\dots[\text{V}]_M\)</li>
+</ul>
+
+<p>Prompt 可以在不同类之间公用, 也可以为每个类使用不同的 prompts (对于细粒度分类任务更有效).</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/04/coop.png" data-caption="Learning to Prompt for Vision-Language Model" />
+    
+        
+        <div class="container">
+            <p>图 7. Learning to Prompt for Vision-Language Model</p>
+        </div>
+    
+</div>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/04/coop_results.png" data-caption="Learning to Prompt for Vision-Language Model" />
+    
+        
+        <div class="container">
+            <p>图 8. Learning to Prompt for Vision-Language Model</p>
+        </div>
+    
+</div>
+
+<p>Conditional Prompt Learning for Vision-Language Models<sup id="fnref:cocoop" role="doc-noteref"><a href="#fn:cocoop" class="footnote" rel="footnote">11</a></sup></p>
+
+<p>CoOp 在泛化到新的类别上时性能不好.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/04/cocoop_prefix.png" data-caption="To learn generalizable prompts" />
+    
+        
+        <div class="container">
+            <p>图 9. To learn generalizable prompts</p>
+        </div>
+    
+</div>
+
+<p>所以把 prompt 设计为 instance-conditional 的.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/04/cocoop.png" data-caption="To learn generalizable prompts" />
+    
+        
+        <div class="container">
+            <p>图 10. To learn generalizable prompts</p>
+        </div>
+    
+</div>
+
+<p>为 prompt 加上一个跟当前图像相关的特征以提高泛化性能. 具体来说, 先用 Image Encoder 计算当前图像的 feature, 然后通过一个 Meta-Net 把 feature 映射到 prompt 的特征空间, 加到 prompt 上面.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/04/cocoop_results.png" data-caption="To learn generalizable prompts" />
+    
+        
+        <div class="container">
+            <p>图 11. To learn generalizable prompts</p>
+        </div>
+    
+</div>
+
+<h4 id="334-域适应">3.3.4 域适应</h4>
+
+<p>Domain Adaptation via Prompt Learning<sup id="fnref:DAPL" role="doc-noteref"><a href="#fn:DAPL" class="footnote" rel="footnote">12</a></sup></p>
+
+<p>用 prompt 来标识 domain 的信息.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/04/DAPL_prefix.png" data-caption="Example prompt structure" />
+    
+        
+        <div class="container">
+            <p>图 12. Example prompt structure</p>
+        </div>
+    
+</div>
+
+<p>通过对比学习解耦 representation 中的 class 和 domain 的表示.</p>
+
+\[P(\hat{y}_i^s=k|\mathbf{x}_i^s) = \frac{\exp(\langle g(\mathbf{t}_k^s), f(\mathbf{x}_i^s)\rangle/T)}{\sum_{d\in\{s,u\}}\sum_{j=1}^K\exp(\langle g(\mathbf{t}_j^s), f(\mathbf{x}_i^s)\rangle/T)}\]
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/04/DAPL.png" data-caption="Domain Adaptation with Prompt Learning" />
+    
+        
+        <div class="container">
+            <p>图 13. Domain Adaptation with Prompt Learning</p>
+        </div>
+    
+</div>
+
+<h2 id="reference">Reference</h2>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:Liu2021Pretrain" role="doc-endnote">
+
+      <p><strong>Pre-train, Prompt, and Predict: A Systematic Survey of Prompting Methods in Natural Language Processing</strong> <br />
+Pengfei Liu, Weizhe Yuan, Jinlan Fu, Zhengbao Jiang, Hiroaki Hayashi, Graham Neubig <br />
+<a href="https://arxiv.org/abs/2107.13586">[html]</a> In arXiv 2021 <a href="#fnref:Liu2021Pretrain" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:Yosinski2014HowTransferable" role="doc-endnote">
+
+      <p><strong>How transferable are features in deep neural networks?</strong> <br />
+Jason Yosinski, Jeff Clune, Yoshua Bengio, Hod Lipson <br />
+<a href="https://proceedings.neurips.cc/paper/2014/hash/375c71349b295fbe2dcdca9206f20a06-Abstract.html">[html]</a> In NeruIPS 2014 <a href="#fnref:Yosinski2014HowTransferable" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:He2021Masked" role="doc-endnote">
+
+      <p><strong>Masked autoencoders are scalable vision learners</strong> <br />
+Kaiming He, Xinlei Chen, Saining Xie, Yanghao Li, Piotr Dollár, Ross Girshick <br />
+<a href="https://arxiv.org/abs/2111.06377">[html]</a> In arXiv 2021 <a href="#fnref:He2021Masked" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:Zhang2020Sidetuning" role="doc-endnote">
+
+      <p><strong>Side-tuning: a baseline for network adaptation via additive side networks</strong> <br />
+Jeffrey O. Zhang, Alexander Sax, Amir Zamir, Leonidas Guibas, Jitendra Malik  <br />
+<a href="https://link.springer.com/chapter/10.1007/978-3-030-58580-8_41">[html]</a> In ECCV 2020 <a href="#fnref:Zhang2020Sidetuning" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:Zaken2022Bitfit" role="doc-endnote">
+
+      <p><strong>Bitfit: Simple parameter-efficient fine-tuning for transformer-based masked language-models.</strong> <br />
+Elad Ben Zaken, Shauli Ravfogel, Yoav Goldberg <br />
+<a href="https://arxiv.org/abs/2106.10199">[html]</a> In ACL 2022 <a href="#fnref:Zaken2022Bitfit" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:Cai2020TinyTL" role="doc-endnote">
+
+      <p><strong>TinyTL: Reduce memory, not parameters for efficient on-device learning</strong> <br />
+Han Cai, Chuang Gan, Ligeng Zhu, Song Han <br />
+<a href="https://proceedings.neurips.cc/paper/2020/hash/81f7acabd411274fcf65ce2070ed568a-Abstract.html">[html]</a> In NeurIPS 2020 <a href="#fnref:Cai2020TinyTL" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:Houlsby2019Parameter" role="doc-endnote">
+
+      <p><strong>Parameter-efficient transfer learning for nlp</strong> <br />
+Neil Houlsby, Andrei Giurgiu, Stanislaw Jastrzebski, Bruna Morrone, Quentin De Laroussilhe, Andrea Gesmundo, Mona Attariyan, Sylvain Gelly <br />
+<a href="http://proceedings.mlr.press/v97/houlsby19a.html">[html]</a> In ICML 2019 <a href="#fnref:Houlsby2019Parameter" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:vpt" role="doc-endnote">
+
+      <p><strong>Visual Prompt Tuning</strong> <br />
+Menglin Jia, Luming Tang, Bor-Chun Chen, Claire Cardie, Serge Belongie, Bharath Hariharan, Ser-Nam Lim <br />
+<a href="https://arxiv.org/abs/2203.12119">[html]</a> In arXiv 2022 <a href="#fnref:vpt" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:continuelearning" role="doc-endnote">
+
+      <p><strong>Learning to Prompt for Continual Learning</strong> <br />
+Zifeng Wang, Zizhao Zhang, Chen-Yu Lee, Han Zhang, Ruoxi Sun, Xiaoqi Ren, Guolong Su, Vincent Perot, Jennifer Dy, Tomas Pfister <br />
+<a href="https://arxiv.org/abs/2112.08654">[html]</a> In CVPR 2022 <a href="#fnref:continuelearning" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:coop" role="doc-endnote">
+
+      <p><strong>Learning to Prompt for Vision-Language Models</strong> <br />
+Kaiyang Zhou, Jingkang Yang, Chen Change Loy, Ziwei Liu <br />
+<a href="https://arxiv.org/abs/2109.01134">[html]</a> In arXiv 2021 <a href="#fnref:coop" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:cocoop" role="doc-endnote">
+
+      <p><strong>Conditional Prompt Learning for Vision-Language Models</strong> <br />
+Kaiyang Zhou, Jingkang Yang, Chen Change Loy, Ziwei Liu <br />
+<a href="https://arxiv.org/abs/2203.05557">[html]</a> In CVPR 2022 <a href="#fnref:cocoop" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:DAPL" role="doc-endnote">
+
+      <p><strong>Domain Adaptation via Prompt Learning</strong> <br />
+Chunjiang Ge, Rui Huang, Mixue Xie, Zihang Lai, Shiji Song, Shuang Li, Gao Huang <br />
+<a href="https://arxiv.org/abs/2202.06687">[html]</a> In arXiv 2022 <a href="#fnref:DAPL" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2022/03/29/Attention-and-Transformer/">注意力机制和 Transformer (Attention and Transformer)</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2022/05/21/Latex-2/">Latex 字体</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

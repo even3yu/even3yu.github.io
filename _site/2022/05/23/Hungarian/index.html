@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>匈牙利算法 (Hungarian Algorithm)</title>
+    <meta name="description" content="最近在看 DETR 和 MaskFormer 的时候, 遇到两个集合最优匹配的问题. 其中用到的算法便是匈牙利算法.匈牙利算法(Hungarian Algorithm) 是一种在多项式时间内求解的分配问题的组合优化算法, 由 Harold Kuhn 在1955年完善并发表. 算法的命名是因为该算法很大程度上是基于...">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2022/05/23/Hungarian/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
+    processEscapes: true,
+    tags: "all",
+    macros: {
+      bm: ["{\\boldsymbol #1}",1]
+    },
+    packages: {'[+]': ['noerrors']}
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['input/asciimath', '[tex]/noerrors']
+  }
+};
+</script>
+<script async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
+</script>
+<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>匈牙利算法 (Hungarian Algorithm)</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2022-05-23
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#数学" title="Category: 数学" rel="category">数学</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-引子" id="markdown-toc-1-引子">1. 引子</a></li>
+  <li><a href="#2-匈牙利算法" id="markdown-toc-2-匈牙利算法">2. 匈牙利算法</a></li>
+  <li><a href="#3-一个稍复杂的例子" id="markdown-toc-3-一个稍复杂的例子">3. 一个稍复杂的例子</a></li>
+</ul>
+
+<p>最近在看 DETR 和 MaskFormer 的时候, 遇到两个集合最优匹配的问题. 其中用到的算法便是匈牙利算法.</p>
+
+<p><strong>匈牙利算法(Hungarian Algorithm)</strong> 是一种在多项式时间内求解的分配问题的组合优化算法, 由 Harold Kuhn 在1955年完善并发表. 算法的命名是因为该算法很大程度上是基于两位匈牙利数学家 Dénes Kőnig and Jenő Egerváry 的工作而来的. James Munkres 在 1957 年证明了该算法的复杂度是(强)多项式时间的, 此后该算法也被称为 <strong>Kuhn-Munkres 算法</strong>或 <strong>Munkres 分配算法</strong>. 原始算法的时间复杂度为 \(O(n^4)\),  Edmonds 和 Karp, 以及 Tomizawa 发现该算法可以优化到 \(O(n^3)\).</p>
+
+<h2 id="1-引子">1. 引子</h2>
+
+<p>匈牙利算法的一个典型场景是任务分配. 举个例子:</p>
+
+<p>现在有三名工人张三, 李四和王五以及三份工作扫地, 浇花和擦窗户. 每名工人做不同工作要求的工资是不同的, 如下表所示</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"> </th>
+      <th style="text-align: center">扫地</th>
+      <th style="text-align: center">浇花</th>
+      <th style="text-align: center">擦窗户</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">张三</td>
+      <td style="text-align: center">2</td>
+      <td style="text-align: center">1</td>
+      <td style="text-align: center">3</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">李四</td>
+      <td style="text-align: center">3</td>
+      <td style="text-align: center">3</td>
+      <td style="text-align: center">4</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">王五</td>
+      <td style="text-align: center">3</td>
+      <td style="text-align: center">3</td>
+      <td style="text-align: center">2</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>每名工人分配一份工作, 问如何分配可以使得所付工资总和最少?</p>
+
+<p>在上面这个例子中我们很容易观察出 <code class="language-plaintext highlighter-rouge">张三-浇花, 李四-扫地, 王五-擦窗户</code> 的成本最低. 但当工人数量和工作数量较大时, 寻找最优分配就变得不这么直观了.</p>
+
+<h2 id="2-匈牙利算法">2. 匈牙利算法</h2>
+
+<p>我们发现这类分配问题可以用一个矩阵表示(称为效益矩阵), 记为 \(\mathbf{C}\). 算法如下:</p>
+
+<ol>
+  <li>效益矩阵初始化
+    <ul>
+      <li>(1.1) 将矩阵 \(\mathbf{C}\) 每行减去该行的最小元素, 得新矩阵 \(\mathbf{C}'\);</li>
+      <li>(1.2) 将矩阵 \(\mathbf{C}'\) 每列减去该列的最小元素, 得新矩阵 \(\mathbf{C}''\), 以下操作对 \(\mathbf{C}''\) 进行;</li>
+    </ul>
+  </li>
+  <li>对当前效益矩阵求可行解
+    <ul>
+      <li>(2.1) 从含零最少的行(或列)开始, 圈出矩阵中的一个 “0”, 并划去其所在的行和列;</li>
+      <li>(2.2) 重复步骤 (2.1) 直至矩阵中所有的 “0” 均被划去或圈出为止;</li>
+      <li>(2.3) 若已圈出 \(n\) 个 “0”, 它们即对应一最优解, 如不然转步骤 3.</li>
+    </ul>
+  </li>
+  <li>求覆盖当前效益矩阵中所有 “0” 的最少条数直线
+    <ul>
+      <li>(3.1) 对没有圈出 “0” 的行打 \(\checkmark\), 对打 \(\checkmark\) 行上所有 “0” 所在的列打 \(\checkmark\), 再对打 \(\checkmark\) 的列上所有有 “0” 被圈出的行打 \(\checkmark\), 直至打不出 \(\checkmark\) 为止;</li>
+      <li>(3.2) 将没有打 \(\checkmark\) 的行和打 \(\checkmark\) 的列划上直线, 这些直线即为所求.</li>
+    </ul>
+  </li>
+  <li>调整效益矩阵
+    <ul>
+      <li>(4.1) 找出没有被直线覆盖的所有元素中最小的数 \(\bar{c}\);</li>
+      <li>(4.2) 将打 \(\checkmark\) 的行上每个元素减去 \(\bar{c}\), 打 \(\checkmark\) 的列上每个元素加上 \(\bar{c}\), 得到新的效益矩阵. 返回步骤 2.</li>
+    </ul>
+  </li>
+</ol>
+
+<h2 id="3-一个稍复杂的例子">3. 一个稍复杂的例子</h2>
+
+<p>一个 \(n=5\) 的例子如下图所示.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2022/05/Hungarian.jpg" data-caption="匈牙利算法例子" />
+    
+        
+        <div class="container">
+            <p>图 1. 匈牙利算法例子</p>
+        </div>
+    
+</div>
+
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2022/05/21/Latex-2/">Latex 字体</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2022/06/28/Windows-Disk-Type/">GPT 分区设置</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

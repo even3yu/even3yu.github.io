@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>少样本学习中的度量函数 (Metrics in FSL)</title>
+    <meta name="description" content="">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2020/07/09/FSL-Metrics/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
+    processEscapes: true,
+    tags: "all",
+    macros: {
+      bm: ["{\\boldsymbol #1}",1]
+    },
+    packages: {'[+]': ['noerrors']}
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['input/asciimath', '[tex]/noerrors']
+  }
+};
+</script>
+<script async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
+</script>
+<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>少样本学习中的度量函数 (Metrics in FSL)</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2020-07-09
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#少样本学习" title="Category: 少样本学习" rel="category">少样本学习</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-tadam-task-dependent-adaptive-metric" id="markdown-toc-1-tadam-task-dependent-adaptive-metric">1. TADAM: Task dependent adaptive metric</a>    <ul>
+      <li><a href="#11-metric-scaling" id="markdown-toc-11-metric-scaling">1.1 Metric Scaling</a></li>
+      <li><a href="#12-task-conditioning" id="markdown-toc-12-task-conditioning">1.2 Task Conditioning</a></li>
+    </ul>
+  </li>
+  <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
+</ul>
+
+<h2 id="1-tadam-task-dependent-adaptive-metric">1. TADAM<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>: Task dependent adaptive metric</h2>
+
+<p>本文提出了 metric scaling 和 metric task conditioning 来优化少样本学习的性能.</p>
+
+<h3 id="11-metric-scaling">1.1 Metric Scaling</h3>
+
+<p>通常在 FSL 中, 分类器定义如下:</p>
+
+\[p_{\phi}(y=k\vert x) = \text{softmax}(-d(\mathbf{z}, \mathbf{c}_k)),\]
+
+<p>其中 \(z\) 是查询样本的特征, \(\mathbf{c}_k\) 是第 \(k\) 个类别上支撑样本的特征, \(d\) 是一个距离函数, 通常用欧氏距离或余弦距离. 本文提出的 metric scaling 就是对 \(d\) 进行一个缩放, 如下式:</p>
+
+\[p_{\phi, \alpha}(y=k\vert x) = \text{softmax}(-\alpha d(\mathbf{z}, \mathbf{c}_k)),\]
+
+<p>其中 \(\alpha\) 是一个可学习的参数. 在 multi-shot 的情形下有一个点的精度提升, one-shot 略有提升. 文章对 \(\alpha\) 的作用进行了详细的分析. 首先给出第 \(k\) 个类别的交叉熵损失:</p>
+
+\[J_k(\phi, \alpha) = \sum_{x_i\in \mathcal{Q}_k,} \left[ \alpha d(\mathbf{z}, \mathbf{c}_k) + \log\sum_j\exp(-\alpha d(\mathbf{z}, \mathbf{c}_j)) \right], \quad z=f_{\phi}(x_i),\]
+
+<p>其中 \(\mathcal{Q}_k,=\{ (x_i, y_i)\in Q \vert y_i=k \}\) 是查询集中第 \(k\) 个类别的集合. 损失函数 \(J_k\) 的梯度为:</p>
+
+\[\frac{\partial}{\partial\phi}J_k(\phi, \alpha) = \alpha\sum_{x_i\in \mathcal{Q}_k,}\left[ \frac{\partial}{\partial\phi}d(\mathbf{z}, \mathbf{c}_k) - \frac{\sum_j\exp(-\alpha d(\mathbf{z}, \mathbf{c}_j))\frac{\partial}{\partial\phi}d(\mathbf{z}, \mathbf{c}_j)}{\sum_j\exp(-\alpha d(\mathbf{z}, \mathbf{c}_j))} \right].\]
+
+<p>首先, \(\alpha\) 是对整体梯度的一个缩放因子. 其次, \(\alpha\) 是指数内的一个平滑因子. 文章主要分析了 \(\alpha\) 趋于 \(0\) 和 \(\infty\) 的情况下梯度变化的趋势.</p>
+
+<hr />
+<p><strong>引理</strong> 如果如下假设成立的话:</p>
+
+\[\mathcal{A}_1:\; d(f_{\phi}(x), \mathbf{c}_k) \neq d(f_{\phi}(x'), \mathbf{c}_k), \forall k, x\neq x'\in \mathcal{Q}_k,; \quad \mathcal{A}_2:\; \left\vert \frac{\partial}{\partial\phi}d(f_{\phi}(x), c) \right\vert&lt;\infty, \forall x, c, \phi,\]
+
+<p>那么, 下列等式成立</p>
+
+\[\begin{align}
+\lim_{\alpha\rightarrow0}\frac1{\alpha}\frac{\partial}{\partial\phi}J_k(\phi, \alpha) &amp;= \sum_{x_i\in \mathcal{Q}_k,} \left[ \frac{K-1}{K}\frac{\partial}{\partial\phi}d(\mathbf{z}, \mathbf{c}_k) - \frac1K\sum_{j\neq k}\frac{\partial}{\partial\phi}d(\mathbf{z}, \mathbf{c}_j) \right], \\
+\lim_{\alpha\rightarrow\infty}\frac1{\alpha}\frac{\partial}{\partial\phi}J_k(\phi, \alpha) &amp;= \sum_{x_i\in \mathcal{Q}_k,} \left[ \frac{\partial}{\partial\phi}d(\mathbf{z}, \mathbf{c}_k) - \frac{\partial}{\partial\phi}d(\mathbf{z}, c_{j^*_i}) \right];
+\end{align}\]
+
+<p>其中 \(j^*_i=\arg\min_j d(\mathbf{z}, \mathbf{c}_j)\).</p>
+
+<hr />
+
+<p>第一个公式是 trivial 的, 第二个公式的证明过程如下.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/07/TADAM-1.png" data-caption="第二个公式的证明" />
+    
+        
+        <div class="container">
+            <p>图 1. 第二个公式的证明</p>
+        </div>
+    
+</div>
+
+<ul>
+  <li>
+    <p>当 \(\alpha\) 很小时, 第一个式子右侧第一项是使得极小化了查询样本 \(z\) 和对应类别的原型 \(\mathbf{c}_k\) 之间的距离, 第二项极大化了 \(z\) 和不同类别原型之间的距离.</p>
+  </li>
+  <li>
+    <p>当 \(\alpha\) 很大时, 第二个式子右侧第一项一样, 第二项极大化 \(z\) 和离 \(z\) 最近的不同类别原型之间的距离 (有点 maxmin 的感觉). 如果 \(j^*_i=k\), 则第二个式子值为 \(0\). 这表明在 \(\alpha\) 很大时, 模型主要从困难样本中学习 (maxmin 的体现).</p>
+  </li>
+</ul>
+
+<h3 id="12-task-conditioning">1.2 Task Conditioning</h3>
+
+<p>进行特征调整 (feature modulation), 引入一组 \(\gamma\) 和 \(\beta\) 参数对主干网络进行 task-specific 的调整, 从而把 task-agnostic 的主干网络变为 task-related 的主干网络. 老规矩, 插入 BN 层之后. 本文构造了个 task embedding network (TEN) 来生成 task-specific 的 \(\gamma\) 和 \(\beta\), 结构如下.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/07/TADAM-2.png" data-caption="TEN 的结构" />
+    
+        
+        <div class="container">
+            <p>图 2. TEN 的结构</p>
+        </div>
+    
+</div>
+
+<p>首先用一个网络提取支撑集样本的特征, 通过 Residual-FC 网络编码为相应的 task-related 的特征, 引入两个可学习的参数 \(\gamma_0\) 和 \(\beta_0\) 控制该层 TEN 模块的起作用程度. \(\gamma\) 后面加了个 \(1\), 表明 \(\gamma\) 学习的是增量, 有利于稳定训练. 由于支撑集特征需要先提取出来, 才能返回去嵌入网络, 因此最终模型训练包含一个循环结构, 如下图所示.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/07/TADAM.png" data-caption="本文提出的用于 FSL 网络结构" />
+    
+        
+        <div class="container">
+            <p>图 3. 本文提出的用于 FSL 网络结构</p>
+        </div>
+    
+</div>
+
+<p>然而, 通常来说网络中包含大规模循环结构的基本都训练不成, 或者精度反而下降了 (包含小循环的 RNN 都很难训练). 因此本文还得再对模型做一点修改: 加一个辅助的分类任务, 并应用退火的手段逐渐减弱辅助训练的影响, 最后才训练成功. 与其他方法的对比结果如下表.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/07/TADAM-3.png" data-caption="本文的结果与其他方法的比较" />
+    
+        
+        <div class="container">
+            <p>图 4. 本文的结果与其他方法的比较</p>
+        </div>
+    
+</div>
+
+<p>消融实验如下.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/07/TADAM-4.png" data-caption="消融实验" />
+    
+        
+        <div class="container">
+            <p>图 5. 消融实验</p>
+        </div>
+    
+</div>
+
+<h2 id="参考文献">参考文献</h2>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+
+      <p><strong>TADAM: Task dependent adaptive metric for improved few-shot learning</strong><br />
+Boris N. Oreshkin, Pau Rodriguez, Alexandre Lacoste <br />
+<a href="http://papers.nips.cc/paper/7352-tadam-task-dependent-adaptive-metric-for-improved-few-shot-learning">[html]</a>, <a href="http://papers.nips.cc/paper/7352-tadam-task-dependent-adaptive-metric-for-improved-few-shot-learning.pdf">[PDF]</a>. In NeurIPS 2018. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2020/07/09/FSL-Feature-Recitification/">少样本学习中的特征修正 (Feature Rectification in FSL)</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2020/07/09/Intelligent-Scissors/">智能剪刀 (Intelligent Scissors)</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

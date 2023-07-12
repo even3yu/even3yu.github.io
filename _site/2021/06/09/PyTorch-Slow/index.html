@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>PyTorch 训练慢的问题</title>
+    <meta name="description" content="本文记录了使用 PyTorch 训练模型时张量不连续导致速度极慢的问题.">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2021/06/09/PyTorch-Slow/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
+    processEscapes: true,
+    tags: "all",
+    macros: {
+      bm: ["{\\boldsymbol #1}",1]
+    },
+    packages: {'[+]': ['noerrors']}
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['input/asciimath', '[tex]/noerrors']
+  }
+};
+</script>
+<script async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
+</script>
+<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>PyTorch 训练慢的问题</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2021-06-09
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#Framework" title="Category: Framework" rel="category">Framework</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#张量不连续导致训练慢" id="markdown-toc-张量不连续导致训练慢">张量不连续导致训练慢</a></li>
+  <li><a href="#关于时间的测量" id="markdown-toc-关于时间的测量">关于时间的测量</a></li>
+</ul>
+
+<p>本文记录了使用 PyTorch 训练模型时张量不连续导致速度极慢的问题.</p>
+
+<h2 id="张量不连续导致训练慢">张量不连续导致训练慢</h2>
+
+<p>今天遇到的一个用 PyTorch 训练模型慢的原因是张量不连续的问题. 张量不连续时 PyTorch 有可能报如下的警告</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>Warning: Mixed memory format inputs detected while calling the operator. The operator will output channels_last tensor even if some of the inputs are not in channels_last format. (function operator())
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>但比较坑的是也可能不报, 这就导致在 debug 的时候一开始并没有注意到时张量不连续的问题. PyTorch 的张量像 numpy 数组一样支持在不改变底层数据存储的前提下, 改变张量的形状、提取子张量、改变轴的顺序等操作. 若数据存储的顺序和轴的顺序不一致时, 就可能会导致张量不连续的问题. 当然了这个问题并不总是会导致错误, 但仍然值得关注.</p>
+
+<p>拿这次遇到的问题来举例. 我们通常使用 PyTorch 自带的 <code class="language-plaintext highlighter-rouge">torch.utils.data.Dataset</code> 和 <code class="language-plaintext highlighter-rouge">torch.utils.data.DataLoader</code> 来构造数据加载器. 通过继承 <code class="language-plaintext highlighter-rouge">Dataset</code>, 自己实现 <code class="language-plaintext highlighter-rouge">__init__()</code>, <code class="language-plaintext highlighter-rouge">__len__()</code> 和 <code class="language-plaintext highlighter-rouge">__getitem__()</code> 即可. 在 <code class="language-plaintext highlighter-rouge">__getitem__()</code> 中, 通常会有这样的数据读取和预处理过程:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre></td><td class="rouge-code"><pre><span class="k">class</span> <span class="nc">MyDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data_list</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">data_list</span>
+	
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">files</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">files</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="n">image1</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">Image</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="n">image2</span> <span class="o">=</span> <span class="nf">augmentation</span><span class="p">(</span><span class="n">image1</span><span class="p">)</span>
+        <span class="n">image3</span> <span class="o">=</span> <span class="n">image2</span><span class="p">.</span><span class="nf">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>          <span class="c1"># (1)
+</span>        <span class="n">image</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">from_numpy</span><span class="p">(</span><span class="n">image3</span><span class="p">).</span><span class="nf">float</span><span class="p">()</span>    <span class="c1"># (2)
+</span>        <span class="k">return</span> <span class="n">image</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>上面的代码中:</p>
+
+<ul>
+  <li>(1) 处的轴重排是把 HWC 变为 CHW 以符合 PyTorch 轴的顺序, 注意<strong>此时 <code class="language-plaintext highlighter-rouge">image3</code> 已经是不连续数组了</strong>.</li>
+  <li>(2) 处的代码是把 <code class="language-plaintext highlighter-rouge">np.ndarray</code> 转为 <code class="language-plaintext highlighter-rouge">torch.Tensor</code>, 由于 <code class="language-plaintext highlighter-rouge">torch.from_numpy()</code> 输出的 <code class="language-plaintext highlighter-rouge">torch.Tensor</code> 和输入的 <code class="language-plaintext highlighter-rouge">np.ndarray</code> 是共享内存的, <strong>所以 <code class="language-plaintext highlighter-rouge">image</code> 是不连续张量</strong>.</li>
+</ul>
+
+<p>然后我们还会使用 <code class="language-plaintext highlighter-rouge">DataLoader</code> 来构造数据生成器, 且生成的是一个一个 batch 的数据,</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre><span class="n">dataset</span> <span class="o">=</span> <span class="nc">MyDataset</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="nc">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> 
+                        <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> 
+                        <span class="n">shuffle</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> 
+                        <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> 
+                        <span class="n">drop_last</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> 
+                        <span class="n">pin_memory</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="nf">train_step</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>                        <span class="c1"># (3)
+</span>    <span class="c1"># ......
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>(3) 处的 <code class="language-plaintext highlighter-rouge">image</code> 的是一个 batch 的数据, 尺寸为 <code class="language-plaintext highlighter-rouge">[B, 3, H, W]</code>. 注意, <strong>此处的 <code class="language-plaintext highlighter-rouge">image</code> 已经是一个连续的张量了</strong>, 所以应该是 <code class="language-plaintext highlighter-rouge">DataLoader</code> 对每一个图像做了重排, 所以正常情况下我们就可以拿 <code class="language-plaintext highlighter-rouge">image</code> 去训练了.</li>
+</ul>
+
+<p>今天遇到的问题是, 我在 <code class="language-plaintext highlighter-rouge">train_step()</code> 额外输入了其他的原始数据, 并且在 <code class="language-plaintext highlighter-rouge">train_step()</code> 中做了数据预处理, 其中包括了 <code class="language-plaintext highlighter-rouge">transpose</code> 操作, 导致数据不连续. 然后 <code class="language-plaintext highlighter-rouge">torch.from_numpy()</code> 转为张量后仍然是不连续的, 此时送入网络训练就特别慢了, 大约慢了 20 倍. 解决问题只需要把数据强制连续了就可以了,</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre><span class="c1"># Numpy 下操作
+</span><span class="nf">print</span><span class="p">(</span><span class="n">array</span><span class="p">.</span><span class="n">flags</span><span class="p">[</span><span class="sh">'</span><span class="s">C_CONTIGUOUS</span><span class="sh">'</span><span class="p">])</span>
+<span class="n">array_1</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">ascontiguousarray</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">array_1</span><span class="p">.</span><span class="n">flags</span><span class="p">[</span><span class="sh">'</span><span class="s">C_CONTIGUOUS</span><span class="sh">'</span><span class="p">])</span>
+
+<span class="c1"># PyTorch 下操作
+</span><span class="nf">print</span><span class="p">(</span><span class="n">tensor</span><span class="p">.</span><span class="nf">is_contiguous</span><span class="p">())</span>
+<span class="n">tensor_1</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">.</span><span class="nf">contiguous</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">tensor_1</span><span class="p">.</span><span class="nf">is_contiguous</span><span class="p">())</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>关于更详细的数据连续性的解释, 可以参考<a href="https://zhuanlan.zhihu.com/p/64551412">知乎文章</a>.</p>
+
+<h2 id="关于时间的测量">关于时间的测量</h2>
+
+<p>在 PyTorch 中测量时间时, 由于 CUDA 是并行跑的, 所以之间测量 <code class="language-plaintext highlighter-rouge">train_step()</code> 中的代码运行时间可能不准确, 需要在测量时间前后加一句 CUDA 同步.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="nf">synchronize</span><span class="p">()</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>可以使用我封装好的 <code class="language-plaintext highlighter-rouge">Timer</code> 类的实例来方便的测量时间(<a href="https://github.com/Jarvis73/Helper/blob/main/helper/timer.py">Github</a>). 使用方法如下,</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="n">timer</span> <span class="o">=</span> <span class="nc">Timer</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">timer</span><span class="p">.</span><span class="nf">start</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Elapse: </span><span class="si">{</span><span class="n">timer</span><span class="p">.</span><span class="n">diff</span><span class="si">:</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span><span class="si">}</span><span class="s">s</span><span class="sh">"</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2021/06/04/inspect/">Python 库函数 (四) inspect</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2021/08/07/Semi-Supervised-Learning/">半监督学习(Semi-Supervised Learning, SSL)</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

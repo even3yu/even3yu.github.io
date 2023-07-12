@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>GPT 分区设置</title>
+    <meta name="description" content="TL;DR 记录了 GPT 分区设置的常用命令, 以及 GPT 分区表类型和分区属性.">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2022/06/28/Windows-Disk-Type/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>GPT 分区设置</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2022-06-28
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Wiki_Windows  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#Config" title="Category: Config" rel="category">Config</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-查看硬盘和分区" id="markdown-toc-1-查看硬盘和分区">1. 查看硬盘和分区</a></li>
+  <li><a href="#2-gpt-分区表类型" id="markdown-toc-2-gpt-分区表类型">2. GPT 分区表类型</a></li>
+  <li><a href="#3-gpt-分区属性" id="markdown-toc-3-gpt-分区属性">3. GPT 分区属性</a></li>
+  <li><a href="#reference" id="markdown-toc-reference">Reference</a></li>
+</ul>
+
+<p><strong>TL;DR</strong> 记录了 GPT 分区设置的常用命令, 以及 GPT 分区表类型和分区属性.</p>
+
+<h2 id="1-查看硬盘和分区">1. 查看硬盘和分区</h2>
+
+<ul>
+  <li>使用 diskpart 工具</li>
+</ul>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre></td><td class="rouge-code"><pre><span class="c"># 使用管理员模式打开终端, 输入 diskpart 进入分区管理程序</span><span class="w">
+</span><span class="n">diskpart</span><span class="w">
+
+</span><span class="c"># 查看所有硬盘</span><span class="w">
+</span><span class="n">list</span><span class="w"> </span><span class="nx">disk</span><span class="w">
+
+</span><span class="c"># 选择硬盘编号</span><span class="w">
+</span><span class="n">select</span><span class="w"> </span><span class="nx">disk</span><span class="w"> </span><span class="nx">0</span><span class="w">
+
+</span><span class="c"># 查看当前硬盘所有分区</span><span class="w">
+</span><span class="n">list</span><span class="w"> </span><span class="nx">part</span><span class="w">
+
+</span><span class="c"># 选择硬盘分区</span><span class="w">
+</span><span class="n">select</span><span class="w"> </span><span class="nx">part</span><span class="w"> </span><span class="nx">1</span><span class="w">
+
+</span><span class="c"># 查看分区所有属性</span><span class="w">
+</span><span class="n">detail</span><span class="w"> </span><span class="nx">part</span><span class="w">
+
+</span><span class="c"># 修改分区属性, 属性值根据下面的表格自行判断</span><span class="w">
+</span><span class="n">gpt</span><span class="w"> </span><span class="nx">attributes</span><span class="o">=</span><span class="mi">0</span><span class="n">xXXXXXXXXXXXXXXXX</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="2-gpt-分区表类型">2. GPT 分区表类型<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup></h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Guid</th>
+      <th style="text-align: center">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">C12A7328-F81F-11D2-BA4B-00A0C93EC93B</td>
+      <td style="text-align: center">EFI系统分区</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">E3C9E316-0B5C-4DB8-817D-F92DF00215AE</td>
+      <td style="text-align: center">微软保留（MSR）分区</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">EBD0A0A2-B9E5-4433-87C0-68B6B72699C7</td>
+      <td style="text-align: center">基本数据分区</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">5808C8AA-7E8F-42E0-85D2-E1E90434CFB3</td>
+      <td style="text-align: center">逻辑软盘管理工具元数据分区</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">AF9B60A0-1431-4F62-BC68-3311714A69AD</td>
+      <td style="text-align: center">逻辑软盘管理工具数据分区</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">DE94BBA4-06D1-4D40-A16A-BFD50179D6AC</td>
+      <td style="text-align: center">微软恢复分区</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">BFBFAFE7-A34F-448A-9A5B-6213EB736C22</td>
+      <td style="text-align: center">Lenovo OEM分区（一键还原启动分区）<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup></td>
+    </tr>
+    <tr>
+      <td style="text-align: center">F4019732-066E-4E12-8273-346C5641494F</td>
+      <td style="text-align: center">Sony OEM分区（一键还原启动分区）<sup id="fnref:2:1" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="3-gpt-分区属性">3. GPT 分区属性<sup id="fnref:1:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup></h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">属性值</th>
+      <th style="text-align: center">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">0x0000000000000001</td>
+      <td style="text-align: center">将分区表示为必需分区</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">0x8000000000000000</td>
+      <td style="text-align: center">当硬盘被挂载到另一台电脑时（或电脑首次检测到硬盘时）默认不分配盘符</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">0x4000000000000000</td>
+      <td style="text-align: center">该分区无法被 Mount Manager 检测到, 也即无法被挂载</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">0x2000000000000000</td>
+      <td style="text-align: center">该分区是另一个分区的 shadow copy</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">0x1000000000000000</td>
+      <td style="text-align: center">该分区为只读</td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li>Windows下通常采用以下分区类型和分区属性组合：</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">分区</th>
+      <th style="text-align: center">Guid</th>
+      <th style="text-align: center">属性值</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">普通数据分区</td>
+      <td style="text-align: center">EBD0A0A2-B9E5-4433-87C0-68B6B72699C7</td>
+      <td style="text-align: center">0x0000000000000000</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">OEM分区</td>
+      <td style="text-align: center">无特定GUID值，OEM决定</td>
+      <td style="text-align: center">0x8000000000000001</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">WinRE分区</td>
+      <td style="text-align: center">DE94BBA4-06D1-4D40-A16A-BFD50179D6AC</td>
+      <td style="text-align: center">0x8000000000000001</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">EFI系统分区</td>
+      <td style="text-align: center">C12A7328-F81F-11D2-BA4B-00A0C93EC93B</td>
+      <td style="text-align: center">0x8000000000000001</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">MSR保留分区</td>
+      <td style="text-align: center">E3C9E316-0B5C-4DB8-817D-F92DF00215AE</td>
+      <td style="text-align: center">0x8000000000000000</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">恢复/备份分区</td>
+      <td style="text-align: center">DE94BBA4-06D1-4D40-A16A-BFD50179D6AC</td>
+      <td style="text-align: center">0x8000000000000001</td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li>用优启通制作的U盘安装系统后, 可能会启动后出现 Z 盘 (实际上是 EFI 系统分区), 默认属性值是 0x8000000000000000, 可以修改为 0x4000000000000000, 这样可以在系统启动时禁止挂载该分区. (直接移除盘符的话, 在重启系统后又会出现.)</li>
+</ul>
+
+<h2 id="reference">Reference</h2>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+
+      <p><a href="https://docs.microsoft.com/zh-cn/windows/win32/api/vds/ns-vds-create_partition_parameters?redirectedfrom=MSDN">MDSN: ns-vds-create_partition_parameters</a> <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a> <a href="#fnref:1:1" class="reversefootnote" role="doc-backlink">&#8617;<sup>2</sup></a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+
+      <p><a href="https://blog.csdn.net/Blaider/article/details/48340627">MBR&amp;GPT硬盘分区类型&amp;属性详解（Win下更改/设置OEM/恢复分区方法）</a> <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a> <a href="#fnref:2:1" class="reversefootnote" role="doc-backlink">&#8617;<sup>2</sup></a></p>
+    </li>
+  </ol>
+</div>
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2022/05/23/Hungarian/">匈牙利算法 (Hungarian Algorithm)</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2022/07/18/Systemd/">Linux 配置开机启动程序</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

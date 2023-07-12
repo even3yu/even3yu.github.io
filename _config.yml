@@ -1,0 +1,83 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely need to edit after that.
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'jekyll serve'. If you change this file, please restart the server process.
+
+# Site settings
+title: Jarvis' Blog (总有美丽的风景让人流连)
+brief-intro: 总有美丽的风景让人流连
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://www.jarvis73.com" # the base hostname & protocol for your site
+enforce_ssl: www.jarvis73.com
+
+permalink: /:year/:month/:day/:title/
+
+# other links
+twitter_username: 
+facebook_username: 
+github_username: jarvis73
+email: zjw.math@qq.com
+weibo_username: 
+zhihu_username: lin-xi-1-1
+linkedIn_username: 
+dribbble_username:
+
+# comments
+# two ways to comment, only choose one, and use your own short name
+# 两种评论插件，选一个就好了，使用自己的 short_name
+duoshuo_shortname: 
+disqus_shortname: 
+# gitment_id: 01d9221acf3b43e667f0
+# gitment_secret: f6899a32188afe9260ce0bfa293c7c51285463f2
+
+# statistic analysis 统计代码
+# 百度统计 id，将统计代码替换为自己的百度统计id，即
+# hm.src = "//hm.baidu.com/hm.js?xxxxxxxxxxxx";
+# xxxxx字符串
+baidu_tongji_id: b9d127980a49e998bbedb8aab536a81d
+google_analytics_id: UA-108096001-2 # google 分析追踪id
+
+# Build settings
+markdown: kramdown
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    # Rouge Options › https://github.com/jneen/rouge#full-options
+    css_class: 'highlight'
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
+
+# port
+# port: 1234
+
+# url
+category_dir: category/
+tag_dir: tag/
+wiki_dir: wiki/
+
+# wiki list
+wiki_list:
+  - Latex 
+  - Python
+  - Windows
+  - Ubuntu
+  - CUDA
+  - CMake
+
+# excerpt
+excerpt_separator: "\n\n\n\n"
+
+# paginate
+plugins:
+  - jekyll-paginate
+  - jekyll-sitemap
+paginate: 7
+
+timezone: Asia/Shanghai

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>GPU 编程 (一) -- CUDA 的安装和环境的配置</title>
+    <meta name="description" content="  简介  安装 Visual Studio 2017  安装 CUDA 9.2  运行示例代码          1. 下载 CUDA by Example      2. 创建 VS 项目      3. 修改项目属性以运行 CUDA 编译器        今天终于配好了台式, 装好了 NVIDIA 的显卡,...">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2018/09/25/CUDA-Computing/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>GPU 编程 (一) -- CUDA 的安装和环境的配置</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2018-09-25
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Wiki_CUDA  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#简介" id="markdown-toc-简介">简介</a></li>
+  <li><a href="#安装-visual-studio-2017" id="markdown-toc-安装-visual-studio-2017">安装 Visual Studio 2017</a></li>
+  <li><a href="#安装-cuda-92" id="markdown-toc-安装-cuda-92">安装 CUDA 9.2</a></li>
+  <li><a href="#运行示例代码" id="markdown-toc-运行示例代码">运行示例代码</a>    <ul>
+      <li><a href="#1-下载-cuda-by-example" id="markdown-toc-1-下载-cuda-by-example">1. 下载 <code class="language-plaintext highlighter-rouge">CUDA by Example</code></a></li>
+      <li><a href="#2-创建-vs-项目" id="markdown-toc-2-创建-vs-项目">2. 创建 VS 项目</a></li>
+      <li><a href="#3-修改项目属性以运行-cuda-编译器" id="markdown-toc-3-修改项目属性以运行-cuda-编译器">3. 修改项目属性以运行 CUDA 编译器</a></li>
+    </ul>
+  </li>
+</ul>
+
+<blockquote>
+  <p>今天终于配好了台式, 装好了 NVIDIA 的显卡, 然而没钱只能装个 GTX 1050Ti, 4G 显存, 对于 CUDA 入门(和打游戏)也差不多够用了. 穷人是不能有什么奢求的, 对! 虽然是前言, 但还是像多吐槽两句, 自己配台式是真心折腾, 甚至最后显示器不亮, 只能去找电脑店老板了……要了50块, 真地心痛, 然鹅最后老板还不告诉我哪里没装对, 我拆开机箱看了下只有内存条被移动到了第二个插槽(原来我装的第四个插槽). 唉, 不管了, 反正现在能用了, 穷人连个机械硬盘都买不起, 就先拿个 256G 的固态凑合几个月吧. 下面开始正文, 配置 CUDA+VS2017 环境.</p>
+</blockquote>
+
+<h2 id="简介">简介</h2>
+
+<p>我假设我们的电脑是全新的.</p>
+
+<ol>
+  <li>安装 Visual Studio 2017</li>
+  <li>安装 CUDA 9.2</li>
+  <li>运行示例代码</li>
+</ol>
+
+<p>这里要解释一下, 上面四步顺序不能换, 因为安装 CUDA SDK 时它会自动检测到 VS 并且安装相应的插件, 1-2两步反过来的话 VS 中就没有 CUDA 插件了. 另外现在 CUDA 10.0 已经发布了, 然而 2.1G 的文件我下了四五次都是在最后几秒钟被远程服务器中断了, 最终放弃, 改装 9.2.</p>
+
+<h2 id="安装-visual-studio-2017">安装 Visual Studio 2017</h2>
+
+<p>从 <a href="https://visualstudio.microsoft.com/zh-hans/downloads/?rr=https%3A%2F%2Fwww.google.com%2F">VS 官网</a> 下载安装包, 体积很小, 是一个在线安装包. 打开进入功能选择界面, 选择以下功能:</p>
+
+<ul>
+  <li>从<strong>工作负载</strong>标签下选择<code class="language-plaintext highlighter-rouge">使用C++的桌面开发</code></li>
+  <li>从<strong>单个组件</strong>标签下增加<code class="language-plaintext highlighter-rouge">Windows 8.1 SDK</code>(在SDK、库和框架这一堆里面). 增加该项是为了补充类似于 <code class="language-plaintext highlighter-rouge">stdio.h</code> 这类库函数, 在 Windows 10 SDK 中以 <code class="language-plaintext highlighter-rouge">.h</code> 结尾的 <code class="language-plaintext highlighter-rouge">C 库函数</code> 均被去除了.</li>
+</ul>
+
+<p>两项选择后总大小大约6~7G(实际上需要下载的大约2~3G), 然后选择边下边装即可, 网速好的话很快就装完了. 这里我们特地给出默认的安装路径以便将来寻找:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">项</th>
+      <th style="text-align: center">路径</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">Visual Studio IDE</td>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: center">下载缓存</td>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">C:\ProgramData\Microsoft\VisualStudio\Packages</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: center">共享组件、工具和SDK</td>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">C:\Program Files (x86)\Microsoft Visual Studio\Shared</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="安装-cuda-92">安装 CUDA 9.2</h2>
+
+<p>从 <a href="https://developer.nvidia.com/cuda-toolkit-archive">CUDA Toolkit Archive</a> 下载 9.2 版本的 CUDA 工具包, 大约 1.5G. 打开后一路下一步并安装完成, 其中可以留意一下针对 Visual Studio 的插件. 安装遇到错误自行 Google, 反正我没遇到(除了下载时网不好经常断).</p>
+
+<p>安装完成后安装程序会自动在<strong>系统环境变量</strong>中加入<code class="language-plaintext highlighter-rouge">CUDA_PATH</code>和<code class="language-plaintext highlighter-rouge">CUDA_PATH_V9_2</code>这两个环境变量. 然后我们也给出默认安装路径以备寻找: <code class="language-plaintext highlighter-rouge">C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2</code></p>
+
+<h2 id="运行示例代码">运行示例代码</h2>
+
+<h4 id="1-下载-cuda-by-example">1. 下载 <code class="language-plaintext highlighter-rouge">CUDA by Example</code></h4>
+
+<p>可以下载这本书和配套代码, <a href="https://developer.nvidia.com/cuda-example">链接附上</a>.</p>
+
+<div class="polaroid-tiny">
+    <img class="cool-img" src="/images/2018/09/0cuda_by_example.jpg" shannon="" />
+    <div class="container">
+        <p>NVIDIA 官方提供的入门书: CUDA by Example</p>
+    </div>
+</div>
+
+<h4 id="2-创建-vs-项目">2. 创建 VS 项目</h4>
+
+<p>打开 VS 2017, 新建空项目. 从菜单打开视图 –&gt; 属性管理器 –&gt; 右击项目 –&gt; 添加新项目属性表 –&gt; 取名, 确定 –&gt; 双击新建的属性表, 修改并填写以下属性:</p>
+
+<ul>
+  <li>VC++目录 –&gt; 可执行文件目录 –&gt; 添加 <code class="language-plaintext highlighter-rouge">$(CUDA_PATH)\bin</code></li>
+  <li>VC++目录 –&gt; 包含目录 –&gt; 添加 <code class="language-plaintext highlighter-rouge">$(CUDA_PATH)\include</code></li>
+  <li>VC++目录 –&gt; 库目录 –&gt; 添加 <code class="language-plaintext highlighter-rouge">$(CUDA_PATH)\lib</code></li>
+  <li>链接器 –&gt; 输入 –&gt; 附加依赖项 –&gt; 添加 <code class="language-plaintext highlighter-rouge">cudart.lib</code></li>
+  <li>连接器 –&gt; 系统 –&gt; 子系统 –&gt; 设为 <code class="language-plaintext highlighter-rouge">控制台(/SUBSYSTEM:CONSOLE)</code>. 该项使得控制台程序结束时停留, 而非一闪而过.</li>
+</ul>
+
+<p>最后确定保存. 以后新建 CUDA 项目后在相应平台(Win32/x64, Debug/Release)的属性文件夹下导入该属性表即可.</p>
+
+<h4 id="3-修改项目属性以运行-cuda-编译器">3. 修改项目属性以运行 CUDA 编译器</h4>
+
+<p>解决方案资源管理器中,</p>
+
+<ul>
+  <li>右击项目 –&gt; 生成依赖项 –&gt; 生成自定义 –&gt; 勾选 <code class="language-plaintext highlighter-rouge">CUDA 9.2(.targets, .props)</code>. 注意: 这里只有按照正确的顺序正确的安装了 CUDA 9.2 之后才会有该选项.</li>
+  <li>添加现有的 CUDA 源代码文件 <code class="language-plaintext highlighter-rouge">..cuda_by_example/chapter03/hello_world.cu</code></li>
+  <li>右击 <code class="language-plaintext highlighter-rouge">hello_world.cu</code> –&gt; 属性 –&gt; 常规 –&gt; 项类型 –&gt; 选择 <code class="language-plaintext highlighter-rouge">CUDA C/C++</code>. 注意: 只有第一步勾选了 <code class="language-plaintext highlighter-rouge">CUDA 9.2</code> 的生成自定义选项后这一步才有 <code class="language-plaintext highlighter-rouge">CUDA C/C++</code> 这个选项.</li>
+  <li>菜单 –&gt; 生成 –&gt; 生成解决方案. 注意: 这里可能会报错, 看下面的解决方案.</li>
+  <li>菜单 –&gt; 调试 –&gt; 开始执行(不调试)</li>
+</ul>
+
+<p>报错信息:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>unsupported Microsoft Visual Studio version! Only the versions 2012, 2013, 2015 and 2017 are supported!
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>这里是由于 VS 2017 在更新的时候修改了内部版本号, 当前的内部版本号是定义在宏 <code class="language-plaintext highlighter-rouge">_MSC_VER</code> 中的, 可以在 VS 中新建一个 VC++ 项目, 并新建 <code class="language-plaintext highlighter-rouge">cpp</code> 文件, 写个 <code class="language-plaintext highlighter-rouge">main</code> 函数, 输出即可 <code class="language-plaintext highlighter-rouge">std::cout &lt;&lt; _MSC_VER &lt;&lt; std::endl;</code> . 我输出的是 <code class="language-plaintext highlighter-rouge">1915</code>. 接下来我们查看 CUDA 源码(路径不重复写了)中的文件 <code class="language-plaintext highlighter-rouge">../CUDA/v9.2/include/crt/host_config.h</code>, 在第131行有一个判断 <code class="language-plaintext highlighter-rouge">#if _MSC_VER &lt; 1600 || _MSC_VER &gt; 1913</code>, 这里因为 <code class="language-plaintext highlighter-rouge">1913</code> 比我的 <code class="language-plaintext highlighter-rouge">VS 1915</code> 版本号低, 所以才会报错. 源码这里改为 <code class="language-plaintext highlighter-rouge">&gt; 1915</code> 即可.</p>
+
+<p>到此环境配置完成. 如有疏漏, 后续遇到了再补充.</p>
+
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2018/09/18/Information-Theory/">机器学习(一): 信息论初步</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2018/09/27/Generative-Models-for-discrete-data/">机器学习(二): 离散数据的生成式模型</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

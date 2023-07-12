@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Jarvis&apos; Blog (总有美丽的风景让人流连)</title>
+    <description></description>
+    <link>http://localhost:4000/</link>
+    <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Wed, 12 Jul 2023 14:08:29 +0800</pubDate>
+    <lastBuildDate>Wed, 12 Jul 2023 14:08:29 +0800</lastBuildDate>
+    <generator>Jekyll v4.3.2</generator>
+    
+      <item>
+        <title>ChatGPT 70 款插件测评 惊艳的开发过程与宏大的商业化愿景</title>
+        <description>
+我们对ChatGPT的插件商店中总共70款插件进行了评测。区别于Chrome，AppStore等平台的代码开发范式，开发者仅使用自然语言就可以开发ChatGPT插件，并由GPT模型自行决定在使用过程中是否调用插件。约八成插件集中于购物、餐饮、旅行、住房和求职场景，其余分布在教育、财经咨讯、内容社区和编程技术场景。商业分析、游戏、身体/心理健康、社交以及家庭和育儿场景是蓝海。约七成插件用于已有平台的商业导流，同质化严重；联网、实时信息获取和阅读网页/PDF功能是刚需。Wolfram（数学计算）、WebPilot（网页阅读）、Speak（专业翻译）、Prompt Perfect（提示词润色）、Diagram It（流程图绘制）、AskYourPDF（PDF阅读）、CreatiCode Scratch（少儿编程）、Chess（国际象棋游戏教练）、edX（公开课学习）、FiscalNote（政策咨询）等插件值得一试。
+</description>
+        <pubDate>Mon, 15 May 2023 10:57:00 +0800</pubDate>
+        <link>http://localhost:4000/2023/05/15/ChatGPT-Plugins/</link>
+        <guid isPermaLink="true">http://localhost:4000/2023/05/15/ChatGPT-Plugins/</guid>
+        
+        
+        <category>大模型</category>
+        
+      </item>
+    
+      <item>
+        <title>HTTPS 配置教程 (A Tutorial for HTTPS)</title>
+        <description>
+&lt;a href=&quot;https://developer.mozilla.org/zh-CN/docs/Web/HTTP&quot;&gt;HTTP&lt;/a&gt; 是一种用于分布式、协作式和超媒体信息系统的应用层协议, 它是一种发布和接收 HTML 页面的方法, 被用于在Web浏览器和网站服务器之间传递信息. HTTP 默认工作在 TCP 协议 80 端口, 但它&lt;span style=&quot;color:blue&quot;&gt;以明文方式发送内容, 不提供任何方式的数据加密&lt;/span&gt;, 因此不适合传输敏感信息.
+
+为了解决 HTTP 不安全的问题, &lt;a href=&quot;https://en.wikipedia.org/wiki/HTTPS&quot;&gt;HTTPS&lt;/a&gt; 应运而生. HTTPS 是一种透过计算机网络进行安全通信的传输协议, 它经由 HTTP进行通信, 但&lt;span style=&quot;color:blue&quot;&gt;利用 SSL/TLS 来加密数据包保证数据的机密性和完整性&lt;/span&gt;. HTTPS 默认工作在 TCP 协议 443 端口. HTTPS 比 HTTP 更加安全, 适合传输敏感信息.
+</description>
+        <pubDate>Wed, 26 Apr 2023 16:25:00 +0800</pubDate>
+        <link>http://localhost:4000/2023/04/26/Website-Services/</link>
+        <guid isPermaLink="true">http://localhost:4000/2023/04/26/Website-Services/</guid>
+        
+        
+        <category>Config</category>
+        
+      </item>
+    
+      <item>
+        <title>生成扩散模型(五): 采样加速 (Generative Diffusion Model: Sampling Acceleration)</title>
+        <description>
+扩散模型 DDPM 尽管生成效果不错, 但采样速度相比 GAN 要慢很多. GAN 采样只需要一次神经网络前馈, 而 DDPM 需要 \(T\) 步前馈, \(T\) 的典型取值为 1000. 因此 Nichol and Dhariwal 在 &lt;a href=&quot;https://proceedings.mlr.press/v139/nichol21a.html&quot;&gt;《Improved Denoising Diffusion Probabilistic Models》&lt;/a&gt; 提出 &lt;span style=&quot;color:blue&quot;&gt;improved DDPM&lt;/span&gt;, Song 等人在 &lt;a href=&quot;https://openreview.net/forum?id=St1giarCHLP&quot;&gt;《Denoising Diffusion Implicit Models》&lt;/a&gt; 中提出 &lt;span style=&quot;color:blue&quot;&gt;DDIM&lt;/span&gt; 用于加速扩散模型的采样.
+</description>
+        <pubDate>Sat, 24 Dec 2022 14:59:00 +0800</pubDate>
+        <link>http://localhost:4000/2022/12/24/Diffusion-Model-5/</link>
+        <guid isPermaLink="true">http://localhost:4000/2022/12/24/Diffusion-Model-5/</guid>
+        
+        
+        <category>深度学习</category>
+        
+        <category>生成模型</category>
+        
+      </item>
+    
+      <item>
+        <title>生成模型指标 (Metrics of Generative Models)</title>
+        <description>
+生成模型 (genrative model) 的生成结果通常没有直接的 ground truth 来计算样本的生成质量. 比如图像生成既要考虑生成图像的噪声要低, 清晰度要高, 同时生成的多样性要高. 我们可以直接找一些人来做图灵测试, 从而评估图像生成的效果, 但这样评估的成本显然是比较高的. 本文介绍几种论文中常用的近似指标 IS, FID, NLL. 既然是近似指标, 那么就说明, 这些指标好不代表生成的样本一定好, 它们仅仅是在一定程度上可以反映生成样本的质量.
+</description>
+        <pubDate>Fri, 09 Dec 2022 21:17:00 +0800</pubDate>
+        <link>http://localhost:4000/2022/12/09/Generative-Model-Metrics/</link>
+        <guid isPermaLink="true">http://localhost:4000/2022/12/09/Generative-Model-Metrics/</guid>
+        
+        
+        <category>深度学习</category>
+        
+        <category>生成模型</category>
+        
+      </item>
+    
+      <item>
+        <title>生成扩散模型(四): 扩散模型和得分匹配 (Generative Diffusion Model: Diffusion Matching and Score Matching)</title>
+        <description>
+我们在&lt;a href=&quot;/2022/11/27/Diffusion-Model-3/&quot;&gt;《生成扩散模型(三): 灵活性和易处理性》&lt;/a&gt;一文中讨论了生成扩散模型对前向过程和反向过程的建模, 以及训练模型时所使用的极大化似然函数的推导. 然而先前的扩散模型的生成效果仍然有限, Ho 等人在 &lt;span style=&quot;color:blue&quot;&gt;DDPM&lt;/span&gt; 一文 &lt;a href=&quot;https://arxiv.org/abs/2006.11239&quot;&gt;《Denoising Deffision Probabilistic Models》&lt;/a&gt; 中指出扩散模型实际上可以生成更高质量的样本. 同时, 扩散模型在选择特定超参数的情况下与 &lt;a href=&quot;&quot;&gt;去噪得分匹配 (denoising score matching)&lt;/a&gt; 的训练过程和基于 &lt;a href=&quot;&quot;&gt;退火的朗之万动力学(annealed Langevin dynamics)&lt;/a&gt; 的采样过程是等价的.
+</description>
+        <pubDate>Tue, 29 Nov 2022 14:01:00 +0800</pubDate>
+        <link>http://localhost:4000/2022/11/29/Diffusion-Model-4/</link>
+        <guid isPermaLink="true">http://localhost:4000/2022/11/29/Diffusion-Model-4/</guid>
+        
+        
+        <category>深度学习</category>
+        
+        <category>生成模型</category>
+        
+      </item>
+    
+      <item>
+        <title>生成扩散模型(三): 灵活性和易处理性 (Generative Diffusion Model: Flexibility and Tractability)</title>
+        <description>
+说起机器学习中使用概率模型建模复杂的数据集时, 要&lt;span style=&quot;color:blue&quot;&gt;同时满足概率模型的灵活性 (flexibility) 和易处理性 (tractability) 是一件十分困难的事情&lt;/span&gt;. 如果想要用复杂的模型 \(\phi(\bm{x})\) (比如深度神经网络) 提高建模的灵活性, 那么往往会牺牲易处理性, 因为为了获得数据的概率分布 \(p(\bm{x})=\frac{\phi(\bm{x})}{Z}\), 需要计算标准化常数 \(Z\), 然而这需要计算积分 \(Z=\int\phi(\bm{x})\text{d}x\), 导致计算难度陡增, 需要用蒙特卡洛 (Monte Carlo, MC) 等耗时耗力的方法. 反之, 如果使用易处理的模型 (比如高斯分布) 拟合数据, 那么这类模型又难以描述分布十分复杂的数据.
+</description>
+        <pubDate>Sun, 27 Nov 2022 15:07:00 +0800</pubDate>
+        <link>http://localhost:4000/2022/11/27/Diffusion-Model-3/</link>
+        <guid isPermaLink="true">http://localhost:4000/2022/11/27/Diffusion-Model-3/</guid>
+        
+        
+        <category>深度学习</category>
+        
+        <category>生成模型</category>
+        
+      </item>
+    
+      <item>
+        <title>SSH 工具教程 (Tutorial of SSH tools)</title>
+        <description>
+ssh 是远程连接的利器, 可以说凡是涉及到 linux 服务器, ssh 就是一个绕不开的话题. 本文作为一个教程, 尽可能详细的帮助读者设置 ssh, 并给出一些常用的 ssh 配置方法 (主要用于 linux 系统的远程登录和文件传输).
+</description>
+        <pubDate>Sat, 17 Sep 2022 21:33:00 +0800</pubDate>
+        <link>http://localhost:4000/2022/09/17/SSH-Keygen/</link>
+        <guid isPermaLink="true">http://localhost:4000/2022/09/17/SSH-Keygen/</guid>
+        
+        
+        <category>Tools</category>
+        
+      </item>
+    
+      <item>
+        <title>正态分布的若干结论 (Conclusions of Gaussian distributions)</title>
+        <description>
+本文记录一些遇到的有关正态分布的计算和结论.
+
+正态分布的形式, 正态分布的 KL 散度, 正态分布随机变量的和, 重参数化技巧
+</description>
+        <pubDate>Mon, 05 Sep 2022 17:03:00 +0800</pubDate>
+        <link>http://localhost:4000/2022/09/05/Normal-Distribution/</link>
+        <guid isPermaLink="true">http://localhost:4000/2022/09/05/Normal-Distribution/</guid>
+        
+        
+        <category>数学</category>
+        
+      </item>
+    
+      <item>
+        <title>Ubuntu 安装 NVIDIA 驱动和 CUDA</title>
+        <description>
+记录一下 Ubuntu Server 配置 Nvidia 驱动.
+</description>
+        <pubDate>Sun, 04 Sep 2022 14:56:00 +0800</pubDate>
+        <link>http://localhost:4000/2022/09/04/Nvidia-Driver/</link>
+        <guid isPermaLink="true">http://localhost:4000/2022/09/04/Nvidia-Driver/</guid>
+        
+        
+        <category>Config</category>
+        
+      </item>
+    
+      <item>
+        <title>生成扩散模型(二): VAE 观点 (Generative Diffusion Model: From the Perspective of VAE)</title>
+        <description>
+我们在前面一篇文章&lt;a href=&quot;/2022/08/08/Diffusion-Model-1/&quot;&gt;《生成扩散模型(一): 基础》&lt;/a&gt;中通过迭代式的图像加噪和去噪的角度分析了生成扩散模型, 并最终推导出了和 DDPM 论文中一样的损失函数. 如果我们把图像加噪的过程看作编码, 把去噪的过程看作解码, 那么这两个过程合起来就可以看作一个&lt;a href=&quot;https://en.wikipedia.org/wiki/Autoencoder&quot;&gt;自动编码器 (autoencoder)&lt;/a&gt;.
+</description>
+        <pubDate>Tue, 09 Aug 2022 18:11:00 +0800</pubDate>
+        <link>http://localhost:4000/2022/08/09/Diffusion-Model-2/</link>
+        <guid isPermaLink="true">http://localhost:4000/2022/08/09/Diffusion-Model-2/</guid>
+        
+        
+        <category>深度学习</category>
+        
+        <category>生成模型</category>
+        
+      </item>
+    
+  </channel>
+</rss>

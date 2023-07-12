@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>t-SNE 高维数据可视化 (t-SNE: High-Dimensional Data Visualization)</title>
+    <meta name="description" content="">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2020/08/24/t-SNE/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
+    processEscapes: true,
+    tags: "all",
+    macros: {
+      bm: ["{\\boldsymbol #1}",1]
+    },
+    packages: {'[+]': ['noerrors']}
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['input/asciimath', '[tex]/noerrors']
+  }
+};
+</script>
+<script async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
+</script>
+<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>t-SNE 高维数据可视化 (t-SNE: High-Dimensional Data Visualization)</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2020-08-24
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#机器学习" title="Category: 机器学习" rel="category">机器学习</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-introduction" id="markdown-toc-1-introduction">1. Introduction</a></li>
+  <li><a href="#2-sne" id="markdown-toc-2-sne">2. SNE</a></li>
+  <li><a href="#3-t-sne" id="markdown-toc-3-t-sne">3. t-SNE</a>    <ul>
+      <li><a href="#31-对称-sne" id="markdown-toc-31-对称-sne">3.1 对称 SNE</a></li>
+      <li><a href="#32-拥挤问题" id="markdown-toc-32-拥挤问题">3.2 拥挤问题</a></li>
+      <li><a href="#33-调整低维空间的分布" id="markdown-toc-33-调整低维空间的分布">3.3 调整低维空间的分布</a></li>
+      <li><a href="#34-算法" id="markdown-toc-34-算法">3.4 算法</a></li>
+    </ul>
+  </li>
+  <li><a href="#4-可视化" id="markdown-toc-4-可视化">4. 可视化</a></li>
+  <li><a href="#5-tvcg-2020-t-visne-interactive-assessment-and-interpretation-of-t-sne-projections" id="markdown-toc-5-tvcg-2020-t-visne-interactive-assessment-and-interpretation-of-t-sne-projections">5. (TVCG 2020) t-viSNE: Interactive Assessment and Interpretation of t-SNE Projections</a>    <ul>
+      <li><a href="#51-引言" id="markdown-toc-51-引言">5.1 引言</a>        <ul>
+          <li><a href="#511-t-sne-对超参数很敏感" id="markdown-toc-511-t-sne-对超参数很敏感">5.1.1 t-SNE 对超参数很敏感</a></li>
+          <li><a href="#512-高维空间数据的方差不会反映在低维表示中" id="markdown-toc-512-高维空间数据的方差不会反映在低维表示中">5.1.2 高维空间数据的方差不会反映在低维表示中</a></li>
+          <li><a href="#513-聚类间的距离没有意义" id="markdown-toc-513-聚类间的距离没有意义">5.1.3 聚类间的距离没有意义</a></li>
+          <li><a href="#514-随机噪声看起来不一定那么随机" id="markdown-toc-514-随机噪声看起来不一定那么随机">5.1.4 随机噪声看起来不一定那么随机</a></li>
+          <li><a href="#515-有时候会出现一些特殊的形状" id="markdown-toc-515-有时候会出现一些特殊的形状">5.1.5 有时候会出现一些特殊的形状</a></li>
+        </ul>
+      </li>
+      <li><a href="#52-相关工作" id="markdown-toc-52-相关工作">5.2 相关工作</a></li>
+      <li><a href="#53-t-visne" id="markdown-toc-53-t-visne">5.3 t-viSNE</a>        <ul>
+          <li><a href="#g1-超参数探索" id="markdown-toc-g1-超参数探索">G1: 超参数探索</a></li>
+          <li><a href="#g2-主视图" id="markdown-toc-g2-主视图">G2: 主视图</a></li>
+          <li><a href="#g3-quality" id="markdown-toc-g3-quality">G3: Quality</a>            <ul>
+              <li><a href="#shepard-heatmap" id="markdown-toc-shepard-heatmap">Shepard Heatmap</a></li>
+              <li><a href="#visual-mapping" id="markdown-toc-visual-mapping">Visual Mapping</a></li>
+              <li><a href="#neighborhood-preservation" id="markdown-toc-neighborhood-preservation">Neighborhood Preservation</a></li>
+            </ul>
+          </li>
+          <li><a href="#g4-dimensions" id="markdown-toc-g4-dimensions">G4: Dimensions</a>            <ul>
+              <li><a href="#自适应平行坐标系-adaptive-pcp" id="markdown-toc-自适应平行坐标系-adaptive-pcp">自适应平行坐标系 Adaptive PCP</a></li>
+              <li><a href="#dimension-correlation" id="markdown-toc-dimension-correlation">Dimension Correlation</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#附录" id="markdown-toc-附录">附录</a>    <ul>
+      <li><a href="#公式-11-的梯度计算" id="markdown-toc-公式-11-的梯度计算">公式 (11) 的梯度计算.</a></li>
+    </ul>
+  </li>
+  <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
+</ul>
+
+<blockquote>
+  <p>本文内容主要翻译自 Visualizating Data using t-SNE<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>.</p>
+</blockquote>
+
+<h2 id="1-introduction">1. Introduction</h2>
+
+<p>高维数据可视化是许多领域的都要涉及到的一个重要问题. <strong>降维 (dimensionality reduction)</strong> 是把高维数据转化为二维或三维数据从而可以通过散点图展示的方法. <strong>降维的目标是尽可能多的在低维空间保留高维数据的关键结构.</strong> 传统降维方法如 PCA<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup>, MDS<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup> 都是线性方法, 在降维过程中主要<u>保证了不相似的点尽量远离</u>的结构特征. 但是当高维数据处于低维非线性流形上时, <u>保证相似的点尽量接近</u>更为重要, 而这在线性映射中通过难以做到.</p>
+
+<p>目前已经有大量非线性降维技术, 可以参考 Lee 和 Verleysen 在 2007 年的综述论文<sup id="fnref:4" role="doc-noteref"><a href="#fn:4" class="footnote" rel="footnote">4</a></sup>. 这里列举七种方法:</p>
+
+<ul>
+  <li>Sammon mapping<sup id="fnref:5" role="doc-noteref"><a href="#fn:5" class="footnote" rel="footnote">5</a></sup></li>
+  <li>Curvilinear components analysis, CCA<sup id="fnref:6" role="doc-noteref"><a href="#fn:6" class="footnote" rel="footnote">6</a></sup></li>
+  <li>Stochastic Neighbor Embedding, SNE<sup id="fnref:7" role="doc-noteref"><a href="#fn:7" class="footnote" rel="footnote">7</a></sup></li>
+  <li>Isomap<sup id="fnref:8" role="doc-noteref"><a href="#fn:8" class="footnote" rel="footnote">8</a></sup></li>
+  <li>Maximum Variance Unfolding, MVU<sup id="fnref:9" role="doc-noteref"><a href="#fn:9" class="footnote" rel="footnote">9</a></sup></li>
+  <li>Locally Linear Embedding, LLE<sup id="fnref:10" role="doc-noteref"><a href="#fn:10" class="footnote" rel="footnote">10</a></sup></li>
+  <li>Laplacian Eigenmaps<sup id="fnref:11" role="doc-noteref"><a href="#fn:11" class="footnote" rel="footnote">11</a></sup></li>
+</ul>
+
+<p>本文提出 t-SNE 用于可视化高维数据, 它可以保留高维数据的局部特征, 同时也能揭示数据的整体结构. 
+\(\newcommand{\pjci}{p_{j\vert i}} \newcommand{\qjci}{q_{j\vert i}} \newcommand{\pij}{p_{ij}} \newcommand{\qij}{q_{ij}} \newcommand{\pji}{p_{ji}} \newcommand{\qji}{q_{ji}}\)</p>
+
+<h2 id="2-sne">2. SNE</h2>
+
+<p><strong>随机近邻嵌入 (stochastic neighbor embedding, SNE)</strong> 把高维数据点之间的<u>欧氏距离</u>转化为<u>表示相似度的条件概率</u>. 数据点 \(x_j\) 与  \(x_i\) 的相似度定义为条件概率 \(p_{j\vert i}\) , 它表示数据点 \(x_i\) 选择邻近点 \(x_j\) , 且该条件概率正比于在点 \(x_i\) 做高斯中心化后的概率密度, 如下式所示:</p>
+
+\[\pjci=\frac{\exp\left(-\Vert x_i-x_j\Vert^2/2\sigma_i^2\right)}{\sum_{k\neq i}\exp\left(-\Vert x_i-x_k\Vert^2/2\sigma_i^2\right)}\]
+
+<p>其中 \(\sigma_i\) 是中心在 \(x_i\) 高斯分布的标准差. 如果两个点离得很近, \(p_{j\vert i}\) 就会比较大; 反之就会接近 0. 我们定义 \(p_{i\vert i}=0\) . 对于高维点 \(x_i\) 和 \(x_j\) 对应的低维点 \(y_i\) 和 \(y_j\) , 我们可以计算一个类似地相似度, 记为 \(q_{j\vert i}\) . 我们固定低维空间中用于计算 \(q_{j\vert i}\) 的高斯分布的标准差为 \(1/\sqrt2\) , 这样我们有:</p>
+
+\[\qjci=\frac{\exp\left(-\Vert y_i-y_j\Vert^2\right)}{\sum_{k\neq i}\exp\left(-\Vert y_i-y_k\Vert^2\right)}\]
+
+<p>按照假设, 如果 \(q_{j\vert i}\) 可以正确建模高维数据点之间的相似度, 那么条件概率 \(p_{j\vert i}\) 和 \(q_{j\vert i}\) 应该是相等的. 因此 SNE 的目标就转化为减小这两个条件概率之间的误差. 一个自然的想法是利用 <strong>KL 散度 (Kullback-Leibler divergence)</strong> . 我们使用梯度下降法令 SNE 极小化所有数据点的 KL 散度, 损失函数定义为:</p>
+
+\[C=\sum_i KL(P_i\Vert Q_i)=\sum_i\sum_j \pjci\log\frac{\pjci}{\qjci}\]
+
+<p>其中 \(P_i\) 表示给定数据点 \(x_i\) 时关于其他所有数据点的条件概率分布, 而 \(Q_i\) 表示给定降维后的数据点 \(y_i\) 时关于其他所有数据点的条件概率分布. 由于 KL 散度是<strong>非对称的</strong>, 所以我们有如下的观察:</p>
+
+<ul>
+  <li>如果用<u>低维空间</u>中距离<strong>远</strong>的两个点 ( \(\qjci\) 小) 来表示<u>高维空间</u>中距离<strong>近</strong>的两个点 ( \(\pjci\) 大 ), 那么就会得到一个较<strong>大</strong>的损失</li>
+  <li>如果用<u>低维空间</u>中距离<strong>近</strong>的两个点 ( \(\qjci\) 大) 来表示<u>高维空间</u>中距离<strong>远</strong>的两个点 ( \(\pjci\) 小 ), 那么就会得到一个较<strong>小</strong>的损失</li>
+</ul>
+
+<p>从这两点观察可以总结出: SNE 损失函数目标是尽可能保持数据的局部结构 (即距离近的点在低维空间中映射的不能太远).</p>
+
+<p>另外要考虑的是参数 \(\sigma_i\) 的选取. 由于数据点密度的不同, 我们不应该用单个 \(\sigma_i\) 的值来建模所有的数据点. 在数据稠密的区域, 用小的 \(\sigma_i\) 显然要比大的值更准确. 任意 \(\sigma_i\) 的值都对应一个概率分布 \(P_i\) , 它可以关联到熵, 随着 \(\sigma_i\) 的增大而增大 (表示数据点的分散程度). SNE 通过给定一个固定的<strong>困惑度 (perplexity)</strong> 后进行二分搜索来寻找 \(\sigma_i\) , 从而确定 \(P_i\). 这里定义困惑度 为:</p>
+
+\[Perp(P_i)=2^{H(P_i)}\]
+
+<p>其中 \(H(P_i)\) 为香农熵:</p>
+
+\[H(P_i)=-\sum_j \pjci\log_2\pjci\]
+
+<p>困惑度可以解释为有效邻近点个数的光滑化的测度.  SNE 对困惑度的调整有一定鲁棒性, 典型值为 \(5\sim50\) .</p>
+
+<p>公式 (3) 的极小化可以通过梯度下降法来计算. 其梯度为:</p>
+
+\[\frac{\partial C}{\partial y_i} = 2\sum_j (\pjci-\qjci+p_{i\vert j}-q_{i\vert j})(y_i-y_j)\]
+
+<p>为了加速收敛并避免陷入局部极小值点, 在梯度下降的过程中要使用动量 (即加上先前梯度的指数衰减项):</p>
+
+\[\mathcal{Y}^{(t)}=\mathcal{Y}^{(t-1)}+\eta\frac{\partial C}{\partial \mathcal{Y}}+\alpha(t)\left(\mathcal{Y}^{(t-1)}-\mathcal{Y}^{(t-2)}\right)\]
+
+<h2 id="3-t-sne">3. t-SNE</h2>
+
+<p>尽管 SNE 已经可以给出较好的数据可视化, 但它仍然受限于优化问题的困难和”拥挤问题”. 本节我们提出 t-SNE 来解决该问题. 与 SNE 相比, t-SNE 的损失函数有两点不同:</p>
+
+<ol>
+  <li>它使用了一种<strong>对称的</strong>损失函数 (梯度更简洁)</li>
+  <li>它使用了 t-分布代替高斯分布在低维空间表示两点间的相似度 (采用长尾分布来减轻”拥挤问题”)</li>
+</ol>
+
+<h3 id="31-对称-sne">3.1 对称 SNE</h3>
+
+<p>除了直接优化条件概率 \(p_{j\vert i}\) 和 \(q_{j\vert i}\) 之间的 KL 散度, 还可以优化两个联合分布 (高维空间的 P 分布和低维空间的 Q 分布) 的 KL 散度:</p>
+
+\[C=KL(P\Vert Q)=\sum_i\sum_j \pij\log\frac{\pij}{\qij}\]
+
+<p>与之前类似, 我们令 \(p_{ii}=0,q_{ii}=0\) . 我们把这种 SNE 称为对称 SNE, 因为满足  \(\pij=\pji,\qij=\qji,\forall i,j\). 在对称 SNE 中, 低维空间两点的相似度为:</p>
+
+\[\qij=\frac{\exp\left(-\Vert y_i-y_j\Vert^2\right)}{\sum_{k\neq l}\exp\left(-\Vert y_k-y_l\Vert^2\right)}\]
+
+<p>类似地高维空间两点相似度为:</p>
+
+\[\pij=\frac{\exp\left(-\Vert x_i-x_j\Vert^2/2\sigma^2\right)}{\sum_{k\neq l}\exp\left(-\Vert x_k-x_l\Vert^2/2\sigma^2\right)}\nonumber\]
+
+<p>注意到如果有离群点 \(x_i\), 那么 \(\pij\) 的值就会对所有的 \(x_j\) 都非常小 (因为 \(\Vert y_i-y_j\Vert^2\) 非常大) , 这样对损失函数的影响就很小, 导致低维空间中无法很好的捕获离群点和其他点之间的关系. 为了避免这个问题, 我们把联合概率 \(\pij\) 定义为:</p>
+
+\[\pij=\frac{\pjci+p_{i\vert j}}{2n}\]
+
+<p>这保证了对于所有的 \(x_i\) , 都有 \(\sum_j\pij&gt;\frac1{2n}\) , 从而每一项都会对损失函数有可观的贡献. 在低维空间中对称 SNE 的计算直接使用 (9) 式. 对称 SNE 的一个主要的优点是梯度简洁容易计算:</p>
+
+\[\frac{\partial C}{\partial y_i}=4\sum_j(\pij-\qij)(y_i-y_j)\]
+
+<p>梯度的计算方式见<a href="#%E9%99%84%E5%BD%95">附录</a>.</p>
+
+<h3 id="32-拥挤问题">3.2 拥挤问题</h3>
+
+<p>先考虑一种简单的情况: 一族点分布在一个二维流形上, 其分布呈近似的直线型, 该流行嵌入到高维空间中. 那么我们可以比较容易地对点之间的距离在二维空间中建模.</p>
+
+<p>再考虑一种复杂的情况: 流行有10个本征维度并嵌入到一个更高维的空间中, 此时对点的距离进行建模就会遇到问题:</p>
+
+<ul>
+  <li>比如, 在10维空间, 存在11个点构成的正多面体, 任意两点之间的距离都相等. 这种情况下不可能在二维空间中对其建模.</li>
+  <li>比如, 一个点为高维球心, 其余点均匀的分布在高维球的表面, 这是个10维流行, 那么对球心到其他点在低维空间的建模也会遇到困难, 称为<strong>拥挤问题</strong>:
+    <ul>
+      <li>在高维空间中距离近的点被映射到低维空间的距离仍然可以比较近</li>
+      <li>在高维空间中距离远的点被映射到低维空间后无法使得距离足够远, 即低维空间无法分散地容纳高维空间中远距离的点, 这是由降维造成的, 从而这些远距离的点在高维空间可能是分散的, 但在低维空间就挤在了一起.</li>
+    </ul>
+  </li>
+  <li>SNE 方法并没有解决这个问题. 要解决该问题, 需要对低维空间用于建模的分布做一定的调整.</li>
+</ul>
+
+<h3 id="33-调整低维空间的分布">3.3 调整低维空间的分布</h3>
+
+<p>因为对称 SNE 实际上匹配的是高维空间和低维空间数据的联合分布而非距离, 因此我们可以通过以下的方法来解决拥挤问题:</p>
+
+<ul>
+  <li>在高维空间, 我们用高斯分布把距离转化为概率</li>
+  <li>在低维空间, 我们用长尾分布把距离转化为概率</li>
+</ul>
+
+<p>这样高维空间里的中等距离映射到低维空间中有一个较远的距离, 这样可以避免不相似的点离得太近. 在 t-SNE 中, 我们使用<strong>自由度为 1 的 t-分布</strong> (也称为柯西分布) 作为低维空间中的长尾分布, 这样联合概率就变为:</p>
+
+\[\qij=\frac{(1+\Vert y_i-y_j\Vert^2)^{-1}}{\sum_{k\neq l}(1+\Vert y_k-y_l\Vert^2)^{-1}}\]
+
+<p>我们采用自由度为 1 的 t-分布是因为 \((1+\Vert y_i-y_j\Vert^2)^{-1}\) 在 \(\Vert y_i-y_j\Vert\) 距离较大时接近平方倒数. 这使得联合分布的低维表示对于低维尺度的缩放有着一定的不变性. 我们选择 t-分布的原因是它是一种无限的高斯混合分布, 但计算概率密度时却不再需要计算指数, 可以降低计算复杂度.</p>
+
+<p>高维分布 \(P\) 和低维 t-分布 \(Q\) 的 KL 散度的梯度可以根据附录类似地计算:</p>
+
+\[\frac{\partial C}{\partial y_i}=4\sum_j(\pij-\qij)(y_i-y_j)(1+\Vert y_i-y_j\Vert^2)^{-1}\]
+
+<p>下图展示了 \(\Vert x_i-x_j\Vert\) 和 \(\Vert y_i-y_j\Vert\) 和梯度的关系, 三幅图分别为对称 SNE, UNI-SNE 和 t-SNE 的结果.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-1.png" data-caption="三种类型 SNE 的梯度作为高维点距和低维点距函数的热力图" />
+    
+        
+        <div class="container">
+            <p>图 1. 三种类型 SNE 的梯度作为高维点距和低维点距函数的热力图</p>
+        </div>
+    
+</div>
+
+<p>其中正梯度表示两点之间存在引力, 负梯度表示斥力. 从上图可以发现 t-SNE 有以下优点:</p>
+
+<ul>
+  <li>t-SNE 梯度对于低维中邻近的不相似点有较大的斥力, 相比于 SNE 和 UNI-SNE 在分布上更为均匀合理</li>
+  <li>t-SNE 的斥力是有限的, 不像 UNI-SNE 那样随着距离无限增大</li>
+</ul>
+
+<h3 id="34-算法">3.4 算法</h3>
+
+<p>t-SNE 的一种简单算法</p>
+
+<hr />
+<p><strong>数据</strong>: 数据集 \(\mathcal{X}=\{x_1,x_2,\dots,x_n\}\)</p>
+
+<p>损失函数的参数: 困惑度 \(Perp\)</p>
+
+<p>优化算法的参数: 迭代次数 \(T\) , 学习率 \(\eta\) , 动量 \(\alpha(t)\)</p>
+
+<p><strong>结果</strong>: 低维数据表示 \(\mathcal{Y}^{(T)}=\{y_1,y_2,\dots,y_n\}\)</p>
+
+<p><strong>begin</strong></p>
+
+<p>    使用 \(Perp\) 计算相似度 \(\pjci\)</p>
+
+<p>    令 \(\pij=\frac{\pjci+p_{i\vert j}}{2}\)</p>
+
+<p>    从 \(\mathcal{N}(0,10^{-4}I)\) 中采样初始结果 \(\mathcal{Y}^{(0)}=\{y_1,y_2,\dots,y_n\}\)</p>
+
+<p>    <strong>for</strong> \(t=1\) <strong>to</strong> \(T\) <strong>do</strong></p>
+
+<p>        计算低维相似度 \(\qij\)</p>
+
+<p>        计算梯度 \(\frac{\partial C}{\partial \mathcal{Y}}\)</p>
+
+<p>        更新 \(\mathcal{Y}^{(t)}=\mathcal{Y}^{(t-1)}+\eta\frac{\partial C}{\partial\mathcal{Y}}+\alpha(t)(\mathcal{Y}^{(t-1)}-\mathcal{Y}^{(t-2)})\)</p>
+
+<p>    <strong>end</strong></p>
+
+<p><strong>end</strong></p>
+
+<hr />
+
+<h2 id="4-可视化">4. 可视化</h2>
+
+<p>代码实现: <a href="https://github.com/Jarvis73/MachineLearning">Github: Jarvis73/MachineLearning</a></p>
+
+<p>代码中包含了根据 <a href="https://nlml.github.io/in-raw-numpy/in-raw-numpy-t-sne/">blog</a> 及其 <a href="https://github.com/nlml/tsne_raw">Github: nlml/tsne_raw</a> 的实现, 以及基于 <a href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html">sklearn</a> 的实现. 后者在执行速度和效果上都有很大幅度的提升.</p>
+
+<ul>
+  <li>sklearn 的实现</li>
+</ul>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-2.png" data-caption="sklearn: mnist, lr=10, perplexity=20, n_pts=1000, n_iter=500" />
+    
+        
+        <div class="container">
+            <p>图 2. sklearn: mnist, lr=10, perplexity=20, n_pts=1000, n_iter=500</p>
+        </div>
+    
+</div>
+
+<ul>
+  <li>自行实现的结果</li>
+</ul>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-3.png" data-caption="raw: mnist, lr=10, perplexity=20, n_pts=1000, n_iter=500" />
+    
+        
+        <div class="container">
+            <p>图 3. raw: mnist, lr=10, perplexity=20, n_pts=1000, n_iter=500</p>
+        </div>
+    
+</div>
+
+<ul>
+  <li>Mnist 通过神经网络学习到的特征</li>
+</ul>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-4.png" data-caption="[Tensorboard 中的 projector 工具得到的结果](https://projector.tensorflow.org/)" />
+    
+        
+        <div class="container">
+            <p>图 4. [Tensorboard 中的 projector 工具得到的结果](https://projector.tensorflow.org/)</p>
+        </div>
+    
+</div>
+
+<h2 id="5-tvcg-2020-t-visne-interactive-assessment-and-interpretation-of-t-sne-projections">5. (TVCG 2020) t-viSNE: Interactive Assessment and Interpretation of t-SNE Projections</h2>
+
+<p>t-viSNE<sup id="fnref:12" role="doc-noteref"><a href="#fn:12" class="footnote" rel="footnote">12</a></sup> 是一个用于交互式地研究和探索超参数、距离、近邻、密度和损失与 t-SNE 结果的可视化系统.</p>
+
+<h3 id="51-引言">5.1 引言</h3>
+
+<p>在 Wattenberg 等人的研究<sup id="fnref:13" role="doc-noteref"><a href="#fn:13" class="footnote" rel="footnote">13</a></sup> 中我们知道, t-SNE 中有一些值得注意的<strong>陷阱</strong>:</p>
+
+<h4 id="511-t-sne-对超参数很敏感">5.1.1 t-SNE 对超参数很敏感</h4>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-5.png" data-caption="不同困惑度下 t-SNE 的结果" />
+    
+        
+        <div class="container">
+            <p>图 5. 不同困惑度下 t-SNE 的结果</p>
+        </div>
+    
+</div>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-6.png" data-caption="不同迭代次数下 t-SNE 的结果" />
+    
+        
+        <div class="container">
+            <p>图 6. 不同迭代次数下 t-SNE 的结果</p>
+        </div>
+    
+</div>
+
+<h4 id="512-高维空间数据的方差不会反映在低维表示中">5.1.2 高维空间数据的方差不会反映在低维表示中</h4>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-7.png" data-caption="高维数据的低维表示不会保留方差信息" />
+    
+        
+        <div class="container">
+            <p>图 7. 高维数据的低维表示不会保留方差信息</p>
+        </div>
+    
+</div>
+
+<h4 id="513-聚类间的距离没有意义">5.1.3 聚类间的距离没有意义</h4>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-8.png" data-caption="三个高斯分布, 每个包含50个点" />
+    
+        
+        <div class="container">
+            <p>图 8. 三个高斯分布, 每个包含50个点</p>
+        </div>
+    
+</div>
+
+<p>可以发现困惑度达到50的时候聚类间的全局关系反映出来了.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-9.png" data-caption="三个高斯分布, 每个包含200个点" />
+    
+        
+        <div class="container">
+            <p>图 9. 三个高斯分布, 每个包含200个点</p>
+        </div>
+    
+</div>
+
+<p>但是当点的数量增加到200时, 困惑度再大也没有反映出全局关系.</p>
+
+<h4 id="514-随机噪声看起来不一定那么随机">5.1.4 随机噪声看起来不一定那么随机</h4>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-10.png" data-caption="一个高斯分布, 低困惑度的时候随机噪声也会形成一些小块" />
+    
+        
+        <div class="container">
+            <p>图 10. 一个高斯分布, 低困惑度的时候随机噪声也会形成一些小块</p>
+        </div>
+    
+</div>
+
+<p>在 t-SNE 中, 低困惑度的时候往往会产生一些小块. 要意识到这些小块并不代表任何含义, 它们往往是随机噪声导致的.</p>
+
+<h4 id="515-有时候会出现一些特殊的形状">5.1.5 有时候会出现一些特殊的形状</h4>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-11.png" data-caption="出现了奇怪的形状" />
+    
+        
+        <div class="container">
+            <p>图 11. 出现了奇怪的形状</p>
+        </div>
+    
+</div>
+
+<p>尽管这些建议对于避坑有一定用处, 但是主要讨论了合成的数据. 遇到真实数据的时候, 其分布是未知的, 此时难以从中获得可靠的超参数调整信息.</p>
+
+<table><tr>
+<td>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-26.gif" data-caption="" />
+    
+        
+        <div class="container">
+            <p>图 12. </p>
+        </div>
+    
+</div></td>
+<td>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-27.gif" data-caption="" />
+    
+        
+        <div class="container">
+            <p>图 13. </p>
+        </div>
+    
+</div></td>
+</tr></table>
+
+<h3 id="52-相关工作">5.2 相关工作</h3>
+
+<p>略.</p>
+
+<h3 id="53-t-visne">5.3 t-viSNE</h3>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-12.png" data-caption="t-viSNE 系统概览" />
+    
+        
+        <div class="container">
+            <p>图 14. t-viSNE 系统概览</p>
+        </div>
+    
+</div>
+
+<p>t-viSNE 系统的设计包含四个目标:</p>
+
+<ul>
+  <li>G1: 超参数探索</li>
+  <li>G2: 概览</li>
+  <li>G3: Quality</li>
+  <li>G4: 维度</li>
+</ul>
+
+<h4 id="g1-超参数探索">G1: 超参数探索</h4>
+
+<p>如上图(a). 功能: 网格搜索/单参数运行 (困惑度, 学习率, 最大迭代次数). 500 个搜索格点, 最终选择 25 个展示缩略图 (通过 K-Medoids 聚类出 25 个, 使用 Procrustes 距离).</p>
+
+<div class="polaroid-script">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-13.png" data-caption="网格搜索的结果展示" />
+    
+        
+        <div class="container">
+            <p>图 15. 网格搜索的结果展示</p>
+        </div>
+    
+</div>
+
+<p>同时下面利用灰度热力图展示了五种质量评估的指标和一个平均指标. 下图展示了通过连续性排序的结果. 同时我们选择第四幅图, 它具有较高的连续性和不错的平均质量.</p>
+
+<div class="polaroid-script">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-14.png" data-caption="通过连续性排序" />
+    
+        
+        <div class="container">
+            <p>图 16. 通过连续性排序</p>
+        </div>
+    
+</div>
+
+<p>选择后点击 Confirm 确认回到主面板, 然后点击中间上方的前六个结果的第4个(我们选择的), 即可在主视图看到降维结果.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-15.png" data-caption="中间的面板为主视图" />
+    
+        
+        <div class="container">
+            <p>图 17. 中间的面板为主视图</p>
+        </div>
+    
+</div>
+
+<h4 id="g2-主视图">G2: 主视图</h4>
+
+<p>主视图是一个交互式的散点图. 四种交互模式:</p>
+
+<ul>
+  <li>Point Exploration 模式 (默认): 支持平移, 缩放, 鼠标在点上悬浮时可以展示点的各个维度的属性.</li>
+  <li>Group Selection 模式: 套索选择, 其他视图可联动</li>
+  <li>Dimension Corresion</li>
+  <li>Reset Filters</li>
+</ul>
+
+<h4 id="g3-quality">G3: Quality</h4>
+
+<h5 id="shepard-heatmap">Shepard Heatmap</h5>
+
+<p>Y-轴表示 N 维空间点之间的距离分布, X-轴表示二维空间点之间的距离分布. 下图中分布偏上, 说明高维空间聚集起来的点在低维空间中被<strong>分散</strong>开了.</p>
+
+<div class="polaroid-script">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-16.png" data-caption="Shepard Heatmap" />
+    
+        
+        <div class="container">
+            <p>图 18. Shepard Heatmap</p>
+        </div>
+    
+</div>
+
+<p>进一步, 如果分布在中轴线附近, 则说明高低维空间点的距离<strong>保持</strong>的比较好. (尽管t-SNE不保距); 如果分布在中轴线下方, 则说明高维空间分散的点在低维空间中<strong>聚集</strong>起来了.</p>
+
+<h5 id="visual-mapping">Visual Mapping</h5>
+
+<div class="polaroid-script">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-17.png" data-caption="Visual Mapping " />
+    
+        
+        <div class="container">
+            <p>图 19. Visual Mapping </p>
+        </div>
+    
+</div>
+
+<p>Visual Mapping 面板包含 Density, Remaining Cost 两项主要功能.</p>
+
+<ul>
+  <li>Density</li>
+</ul>
+
+<div class="polaroid-small">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-18.png" data-caption="Visual Mapping 中 Density 的作用" />
+    
+        
+        <div class="container">
+            <p>图 20. Visual Mapping 中 Density 的作用</p>
+        </div>
+    
+</div>
+
+<p>由于 t-SNE 在降维前每个点都有一个 sigma 来表示密度, 而降维后没有了 sigma, 这样 t-SNE 就丢失了密度信息. 因此本文使用颜色来编码 Density 反映在降维后的点上. 这样在上图(c)中, 聚类2和3就可以通过密度来表明是是两个类, 而不是一个大类(b).</p>
+
+<ul>
+  <li>Remaining Cost</li>
+</ul>
+
+<div class="polaroid-small">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-19.png" data-caption="Visual Mapping 中 Remaining Cost 的作用" />
+    
+        
+        <div class="container">
+            <p>图 21. Visual Mapping 中 Remaining Cost 的作用</p>
+        </div>
+    
+</div>
+
+<p>Remaining Cost 这里是用点的大小来表示的. 如上图是鸢尾花的降维结果, 选中的圆圈中的点的较大, 表明这里的点最终的损失较大. 实际上这里是两个类别的交界处. 进一步通过平行坐标系也可以看出这些点位于两个类别交界处.</p>
+
+<h5 id="neighborhood-preservation">Neighborhood Preservation</h5>
+
+<p>在降维中, 相比于保距降维, 人们往往会优先考虑保近邻. 因此 t-SNE 中高维点采用高斯分布来建模距离, 从而保持近邻. 因此在 t-SNE 中判断保近邻的效果也是一个重要的评估 t-SNE 质量的指标.</p>
+
+<div class="polaroid-script">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-20.png" data-caption="保近邻的效果, 选中点集与平均进行比较" />
+    
+        
+        <div class="container">
+            <p>图 22. 保近邻的效果, 选中点集与平均进行比较</p>
+        </div>
+    
+</div>
+
+<p>在 Neighborhood Preservation 视图中, 黑色柱形图表示 k 近邻的保持程度. 随着 k (横轴坐标)增大, 近邻保持度越高, 这是符合直觉的. 在上图中选出的点集的近邻保持程度用灰色柱形图表示. 上图中k=30 左右时灰色柱高于黑色柱, 说明这个降维结果中, 选中的点集在 k=30 个近邻的保持度上比较好(高于平均水平).</p>
+
+<h4 id="g4-dimensions">G4: Dimensions</h4>
+
+<h5 id="自适应平行坐标系-adaptive-pcp">自适应平行坐标系 Adaptive PCP</h5>
+
+<p>显示选中的点集的最多8个属性. 显示哪些属性以及显示的顺序都是自适应的. 本文对选中的点集应用 PCA 降维, 选出特征值的那个特征值对应的特征向量(该轴方差最大), 该向量的每个维度表示了使用原始的维度来解释最大方差的重要程度. 因此按照该特征向量的值大小, 对原始的轴进行排序, 选出前 8 个按顺序绘制 PCP.</p>
+
+<div class="polaroid-script">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-21.png" data-caption="鸢尾花数据集, 选择点集之前" />
+    
+        
+        <div class="container">
+            <p>图 23. 鸢尾花数据集, 选择点集之前</p>
+        </div>
+    
+</div>
+
+<div class="polaroid-script">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-22.png" data-caption="鸢尾花数据集, 选择点集之后" />
+    
+        
+        <div class="container">
+            <p>图 24. 鸢尾花数据集, 选择点集之后</p>
+        </div>
+    
+</div>
+
+<p>选择点集之后, sepal_length 这一属性排到了最前面.</p>
+
+<h5 id="dimension-correlation">Dimension Correlation</h5>
+
+<p>对聚类结果的解释是 t-SNE 重要的一环. 但根据前文的讨论, t-SNE 可以产生各种聚类的形状, 因此并不一定反映真实的高维形状. 因此自然地我们要允许用户对其发现的特殊形状进行探索, 查看是否有高度相关的维度.</p>
+
+<p>用户首先在主视图中绘制连续的线段来表示其发现的特殊形状, 然后程序自动根据设定的距离 rho 提取线段周边的点, 并投影到线段上, 从而这些点就可以拥有”用户定义”的顺序. 然后把用户定义的顺序和这些点在每个维度上的顺序之间的相关性通过 Spearman’s rank correlation coefficient 进行度量, 得到 dimension correlation 的系数. 从而反映出用户给定的特殊形状主要与哪些维度是高度相关的.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-23.png" data-caption="维度相关性工具" />
+    
+        
+        <div class="container">
+            <p>图 25. 维度相关性工具</p>
+        </div>
+    
+</div>
+
+<p>下面我们给出乳腺癌良恶性聚类的一个例子.</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-24.png" data-caption="DC 工具, 用户添加线段" />
+    
+        
+        <div class="container">
+            <p>图 26. DC 工具, 用户添加线段</p>
+        </div>
+    
+</div>
+
+<p>然后点击 Dimension Correlation 面板中相关度最高的维度, 这样主视图的配色用最相关的维度进行重编码</p>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2020/08/tSNE-25.png" data-caption="主视图的配色用最相关的维度进行重编码" />
+    
+        
+        <div class="container">
+            <p>图 27. 主视图的配色用最相关的维度进行重编码</p>
+        </div>
+    
+</div>
+
+<h2 id="附录">附录</h2>
+
+<h3 id="公式-11-的梯度计算">公式 (11) 的梯度计算.</h3>
+
+<p>我们把要用到的表达式先列在前面:</p>
+
+<ul>
+  <li>高维空间数据点的相似度为 \(p_{ij}\)</li>
+  <li>低维空间数据点的相似度为</li>
+</ul>
+
+\[\qij=\frac{\exp\left(-\Vert y_i-y_j\Vert^2\right)}{\sum_{k\neq l}\exp\left(-\Vert y_k-y_l\Vert^2\right)}\]
+
+<ul>
+  <li>t-SNE 损失函数 (公式 (11)) 为</li>
+</ul>
+
+\[\begin{align}
+C=KL(P\Vert Q) &amp;=\sum_i\sum_j\pij\log\frac{\pij}{\qij} \\
+&amp;=\sum_i\sum_j\pij\log \pij-\pij\log\qij
+\end{align}\]
+
+<p>为简化计算, 我们定义两个辅助变量</p>
+
+\[\begin{align}
+d_{ij} &amp;=\Vert y_i-y_j\Vert^2 \\
+Z &amp;=\sum_{j\neq l}\exp(-d_{kl})
+\end{align}\]
+
+<p>其中 \(Z\) 就是 \(q_{ij}\) 的分母, 所以有 \(q_{ij}Z=\exp(-d_{ij})\) .</p>
+
+<p>注意到当 \(y_i\) 变化一个微元时, 只有距离 \(d_{ij}\) 和 \(d_{ji}\) 发生变化, \(\forall j\) . 因此 \(C\) 关于 \(y_i\) 的梯度为:</p>
+
+\[\begin{align}\nonumber
+\frac{\partial C}{\partial y_i} &amp;= \sum_j\left(\frac{\partial C}{\partial d_{ij}}\frac{\partial d_{ij}}{\partial y_i} + \frac{\partial C}{\partial d_{ji}}\frac{\partial d_{ji}}{\partial y_i}\right) \\ \nonumber
+&amp;= 2\sum_j\frac{\partial C}{\partial d_{ij}}\frac{\partial d_{ij}}{\partial y_i} \qquad\qquad \Longleftarrow \qquad\qquad d_{ij}=d_{ji} \\ \nonumber
+&amp;= 2\sum_j\frac{\partial C}{\partial d_{ij}}\frac{\partial(\Vert y_i-y_j\Vert^2)}{\partial y_i} \\
+&amp;= 4\sum_j\frac{\partial C}{\partial d_{ij}}(y_i-y_j)
+\end{align}\]
+
+<p>接下来计算 \(\frac{\partial C}{\partial d_{ij}}\) . 由于损失函数第一项关于 \(d_{ij}\) 为常数, 因此只计算第二项的导数:</p>
+
+\[\begin{align}
+\frac{\partial C}{\partial d_{ij}} \nonumber
+&amp;= -\sum_{k\neq l}p_{kl}\frac{\partial(\log q_{kl})}{\partial d_{ij}} \\ \nonumber
+&amp;= -\sum_{k\neq l}p_{kl}\frac{\partial(\log q_{kl}Z-\log Z)}{\partial d_{ij}} \\ \nonumber
+&amp;= -\sum_{k\neq l}p_{kl}\left(\frac1{q_{kl}Z}\frac{\partial(\exp(-d_{kl}))}{\partial d_{ij}}-\frac1Z\frac{\partial Z}{\partial d_{ij}}\right) \\ \nonumber
+&amp;= \frac{\pij}{\qij Z}\exp(-d_{ij})-\sum_{k\neq l}p_{kl}\frac{\exp(-d_{ij})}{Z} &amp;&amp;\Longleftarrow\quad \frac{\partial(\exp(-d_{kl}))}{\partial d_{ij}}\neq 0 \text{ iff } d_{kl}=d_{ij} \\ \nonumber
+&amp;= \pij - \sum_{k\neq l}p_{kl}\frac{\exp(-d_{ij})}{Z} &amp;&amp;\Longleftarrow\quad \qij Z=\exp(-d_{ij}) \\
+&amp;= \pij - \qij &amp;&amp;\Longleftarrow\quad \sum_{k\neq l}p_{kl}=1,\;\; \qij Z=\exp(-d_{ij})
+\end{align}\]
+
+<p>综合以上两式的推导可得</p>
+
+\[\frac{\partial C}{\partial y_i}=4\sum_j(\pij-\qij)(y_i-y_j)\]
+
+<h2 id="参考文献">参考文献</h2>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+
+      <p><strong>Visualizing Data using t-SNE</strong><br />
+Laurens van der Maaten, Geoffrey Hinton <br />
+<a href="https://www.jmlr.org/papers/v9/vandermaaten08a.html">[html]</a>, <a href="https://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf">[pdf]</a>, Journal of machine learning research, 2008, 9(Nov): 2579-2605. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+
+      <p><strong>Analysis of a complex of statistical variables into principal components</strong><br />
+Hotelling H <br />
+<a href="https://psycnet.apa.org/record/1934-00645-001">[html]</a>, Journal of educational psychology, 1933, 24(6): 417. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:3" role="doc-endnote">
+
+      <p><strong>Multidimensional scaling: I. Theory and method</strong><br />
+Torgerson W S. <br />
+<a href="https://link.springer.com/content/pdf/10.1007/BF02288916.pdf">[pdf]</a>, Psychometrika, 1952, 17(4): 401-419. <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:4" role="doc-endnote">
+
+      <p><strong>Nonlinear dimensionality reduction of data manifolds with essential loops</strong><br />
+Lee J A, Verleysen M. <br />
+<a href="https://link.springer.com/content/pdf/10.1007/BF02288916.pdf">[pdf]</a>, Neurocomputing, 2005, 67: 29-53. <a href="#fnref:4" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:5" role="doc-endnote">
+
+      <p><strong>A nonlinear mapping for data structure analysis</strong><br />
+Sammon J W. <br />
+<a href="https://ieeexplore.ieee.org/abstract/document/1671271/">[html]</a>, IEEE Transactions on computers, 1969, 100(5): 401-409. <a href="#fnref:5" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:6" role="doc-endnote">
+
+      <p><strong>Curvilinear component analysis: A self-organizing neural network for nonlinear mapping of data sets</strong><br />
+Demartines P, Hérault J. <br />
+<a href="https://ieeexplore.ieee.org/abstract/document/554199/">[html]</a>, IEEE Transactions on neural networks, 1997, 8(1): 148-154. <a href="#fnref:6" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:7" role="doc-endnote">
+
+      <p><strong>Stochastic neighbor embedding</strong><br />
+Hinton G E, Roweis S T. <br />
+<a href="http://papers.nips.cc/paper/2276-stochastic-neighbor-embedding.pdf">[pdf]</a>, In NIPS 2003: 857-864. <a href="#fnref:7" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:8" role="doc-endnote">
+
+      <p><strong>A global geometric framework for nonlinear dimensionality reduction</strong><br />
+Tenenbaum J B, De Silva V, Langford J C. <br />
+<a href="https://link.springer.com/content/pdf/10.1007/BF02288916.pdf">[pdf]</a>, science, 2000, 290(5500): 2319-2323. <a href="#fnref:8" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:9" role="doc-endnote">
+
+      <p><strong>Learning a kernel matrix for nonlinear dimensionality reduction</strong><br />
+Weinberger K Q, Sha F, Saul L K. <br />
+<a href="https://dl.acm.org/doi/abs/10.1145/1015330.1015345">[html]</a>, In ICML. 2004: 106. <a href="#fnref:9" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:10" role="doc-endnote">
+
+      <p><strong>Nonlinear dimensionality reduction by locally linear embedding</strong><br />
+Roweis S T, Saul L K. <br />
+<a href="https://science.sciencemag.org/content/290/5500/2323.abstract">[html]</a>, science, 2000, 290(5500): 2323-2326. <a href="#fnref:10" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:11" role="doc-endnote">
+
+      <p><strong>Laplacian eigenmaps and spectral techniques for embedding and clustering</strong><br />
+Belkin M, Niyogi P. <br />
+<a href="http://papers.nips.cc/paper/1961-laplacian-eigenmaps-and-spectral-techniques-for-embedding-and-clustering.pdf">[pdf]</a>, In NIPS. 2002: 585-591. <a href="#fnref:11" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:12" role="doc-endnote">
+
+      <p><strong>t-viSNE: Interactive Assessment and Interpretation of t-SNE Projections</strong><br />
+Angelos Chatzimparmpas, Rafael Messias Martins, Andreas Kerren <br />
+<a href="https://ieeexplore.ieee.org/document/9064929">[html]</a>, <a href="https://arxiv.org/pdf/2002.06910.pdf">[pdf]</a>, <a href="https://github.com/angeloschatzimparmpas/t-viSNE">[code]</a>, In TVCG 2020. 26(8): 2696-2714 <a href="#fnref:12" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:13" role="doc-endnote">
+
+      <p><strong>How to Use t-SNE Effectively</strong><br />
+Wattenberg, Martin and Viégas, Fernanda and Johnson, Ian <br />
+<a href="https://distill.pub/2016/misread-tsne/">[html]</a>, In Distill. 2016. Online. <a href="#fnref:13" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2020/08/20/Mixture-Models/">机器学习(四): 混合模型和EM算法 (Mixture Models and EM Algorithm)</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2020/09/06/Thinking-About-FSL/">关于少样本学习的思考 (一) (Thinking About FSL 1)</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Tensorflow 模型的保存、读取和冻结、执行</title>
+    <meta name="description" content="">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2018/04/25/Tensorflow-Model-Save-Read/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>Tensorflow 模型的保存、读取和冻结、执行</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2018-04-25
+            </div>
+
+            
+            <div class="label-custom-card">
+                <i class="fa fa-pencil"></i>2018-12-26
+            </div>
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#Framework" title="Category: Framework" rel="category">Framework</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-模型的保存" id="markdown-toc-1-模型的保存">1. 模型的保存</a></li>
+  <li><a href="#2-模型的读取" id="markdown-toc-2-模型的读取">2. 模型的读取</a>    <ul>
+      <li><a href="#21-读取计算图" id="markdown-toc-21-读取计算图">2.1 读取计算图</a>        <ul>
+          <li><a href="#211-读取计算图核心函数" id="markdown-toc-211-读取计算图核心函数">2.1.1 读取计算图核心函数</a></li>
+          <li><a href="#212-获取计算图内的任意变量操作" id="markdown-toc-212-获取计算图内的任意变量操作">2.1.2 获取计算图内的任意变量/操作</a></li>
+        </ul>
+      </li>
+      <li><a href="#22-读取模型变量" id="markdown-toc-22-读取模型变量">2.2 读取模型变量</a>        <ul>
+          <li><a href="#221-读取模型变量核心函数" id="markdown-toc-221-读取模型变量核心函数">2.2.1 读取模型变量核心函数</a></li>
+          <li><a href="#222-获取任意模型变量的属性" id="markdown-toc-222-获取任意模型变量的属性">2.2.2 获取任意模型变量的属性</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#3-模型的冻结" id="markdown-toc-3-模型的冻结">3. 模型的冻结</a></li>
+  <li><a href="#4-模型的执行" id="markdown-toc-4-模型的执行">4. 模型的执行</a></li>
+</ul>
+
+<p>本文假设读者已经懂得了 Tensorflow 的一些基础概念, 如果不懂, 则移步 TF <a href="https://www.tensorflow.org/get_started">官网</a> .</p>
+
+<p>在 Tensorflow 中我们一般使用 <code class="language-plaintext highlighter-rouge">tf.train.Saver()</code> 定义的存储器对象来保存模型, 并得到形如下面列表的文件:</p>
+
+<blockquote>
+  <p>checkpoint<br />
+model.ckpt.data-00000-of-00001<br />
+model.ckpt.index<br />
+model.ckpt.meta</p>
+</blockquote>
+
+<p>其中 <code class="language-plaintext highlighter-rouge">checkpoint</code> 文件中记录了该储存器历史上所有保存过的模型(三件套文件)的名称, 以及最近一次保存的文件, 这里我们并不需要 <code class="language-plaintext highlighter-rouge">checkpoint</code> .</p>
+
+<p>Tensorflow 模型冻结是指把<strong>计算图的定义</strong>和<strong>模型权重</strong>合并到同一个文件中, 可以按照以下步骤实施:</p>
+
+<ul>
+  <li>恢复已保存的计算图: 把预先保存的计算图(meta graph) 载入到默认的计算图中, 并将计算图序列化.</li>
+  <li>加载权重: 开启一个会话(Session), 把权重载入到计算图中</li>
+  <li>删除推导所需以外的计算图元数据(metadata): 冻结模型之后是不需要训练的, 所以只保留推导(inference) 部分的计算图 (这部分可以通过指定模型输出来自动完成)</li>
+  <li>保存到硬盘: 序列化冻结的 graph_def 协议缓冲区(Protobuf) 并转储到硬盘</li>
+</ul>
+
+<p>注意: 前两步实际上就是 Tensorflow 中的加载计算图和权重, 关键的部分就是图的冻结, 而<strong>冻结</strong> TF 已经提供了函数.</p>
+
+<h2 id="1-模型的保存">1. 模型的保存</h2>
+
+<p>TF 使用 <code class="language-plaintext highlighter-rouge">saver = tf.train.Saver()</code> 定义一个存储器对象, 然后使用 <code class="language-plaintext highlighter-rouge">saver.save()</code> 函数保存模型. <code class="language-plaintext highlighter-rouge">saver</code> 定义时可以指定需要保存的变量列表, 最大的检查点数量, 是否保存计算图等. 官网例子如下:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="rouge-code"><pre><span class="n">v1</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Variable</span><span class="p">(...,</span> <span class="n">name</span><span class="o">=</span><span class="sh">'</span><span class="s">v1</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">v2</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Variable</span><span class="p">(...,</span> <span class="n">name</span><span class="o">=</span><span class="sh">'</span><span class="s">v2</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># 使用字典指定要保存的变量, 此时可以为每个变量重命名(保存的名字)
+</span><span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nc">Saver</span><span class="p">({</span><span class="sh">'</span><span class="s">v1</span><span class="sh">'</span><span class="p">:</span> <span class="n">v1</span><span class="p">,</span> <span class="sh">'</span><span class="s">v2</span><span class="sh">'</span><span class="p">:</span> <span class="n">v2</span><span class="p">})</span>
+
+<span class="c1"># 使用列表指定要保存的变量, 变量名字不变. 以下两种保存方式等价
+</span><span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nc">Saver</span><span class="p">([</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">])</span>
+<span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nc">Saver</span><span class="p">({</span><span class="n">v</span><span class="p">.</span><span class="n">op</span><span class="p">.</span><span class="n">name</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">]})</span>
+
+<span class="c1"># 保存相应变量到指定文件, 如果指定 global_step, 则实际保存的名称变为 model.ckpt-xxxx
+</span><span class="n">saver</span><span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="n">sess</span><span class="p">,</span> <span class="sh">"</span><span class="s">./model.ckpt</span><span class="sh">"</span><span class="p">,</span> <span class="n">global_step</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>每保存一次, 就会产生前言所述的四个文件, 其中 checkpoint 文件会更新. 其中 <code class="language-plaintext highlighter-rouge">saver.save()</code> 函数的 <code class="language-plaintext highlighter-rouge">write_meta_graph</code> 参数默认为 <code class="language-plaintext highlighter-rouge">True</code> , 即保存权重时同时保存计算图到 <code class="language-plaintext highlighter-rouge">meta</code> 文件.</p>
+
+<h2 id="2-模型的读取">2. 模型的读取</h2>
+
+<p>TF 模型的读取分为两种, 一种是我们仅读取模型变量, 即 <code class="language-plaintext highlighter-rouge">index</code> 文件和 <code class="language-plaintext highlighter-rouge">data</code> 文件; 另一种是读取计算图. 通常来说如果是我们自己保存的模型, 那么完全可以设置 <code class="language-plaintext highlighter-rouge">saver.save()</code> 函数的 <code class="language-plaintext highlighter-rouge">write_meta_graph</code> 参数为 <code class="language-plaintext highlighter-rouge">False</code> 以节省空间和保存的时间, 因为我们可以使用已有的代码直接重新构建计算图. 当然如果为了模型迁移到其他地方, 则最好同时保存变量和计算图.</p>
+
+<h3 id="21-读取计算图">2.1 读取计算图</h3>
+
+<h4 id="211-读取计算图核心函数">2.1.1 读取计算图核心函数</h4>
+
+<p>从 <code class="language-plaintext highlighter-rouge">meta</code> 文件读取计算图使用 <code class="language-plaintext highlighter-rouge">tf.train.import_meta_graph()</code> 函数, 比如:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre><span class="k">with</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Session</span><span class="p">()</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+	<span class="n">new_saver</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nf">import_meta_graph</span><span class="p">(</span><span class="sh">"</span><span class="s">model.ckpt.meta</span><span class="sh">"</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>此时计算图就会加载到 <code class="language-plaintext highlighter-rouge">sess</code> 的默认计算图中, 这样我们就无需再次使用大量的脚本来定义计算图了. 实际上使用上面这两行代码即可完成计算图的读取. 注意可能我们获取的模型(meta文件)同时包含定义在CPU主机(host)和GPU等设备(device)上的, 上面的代码保留了原始的设备信息. 此时如果我们想同时加载模型权重, 那么如果当前没有指定设备的话就会出现错误, 因为tensorflow无法按照模型中的定义把某些变量(的值)放在指定的设备上. 那么有一个办法是增加一个参数清楚设备信息.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre><span class="k">with</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Session</span><span class="p">()</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+	<span class="n">new_saver</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nf">import_meta_graph</span><span class="p">(</span><span class="sh">"</span><span class="s">model.ckpt.meta</span><span class="sh">"</span><span class="p">,</span> <span class="n">clear_devices</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>2.1 节剩下的内容我们尝试探索一下 TF 中图的一些内容和基本结构, 不感兴趣可以跳过直接看 2.2 节.</p>
+
+<h4 id="212-获取计算图内的任意变量操作">2.1.2 获取计算图内的任意变量/操作</h4>
+
+<p>接下来可以使用 <code class="language-plaintext highlighter-rouge">get_all_collection_keys()</code> 来获取该计算图中所有的收集器的键:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="rouge-code"><pre><span class="n">sess</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="nf">get_all_collection_keys</span><span class="p">()</span>
+<span class="c1"># 或
+</span><span class="n">sess</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">collections</span>
+<span class="c1"># 或
+</span><span class="n">tf</span><span class="p">.</span><span class="nf">get_default_graph</span><span class="p">().</span><span class="nf">get_all_collection_keys</span><span class="p">()</span>
+
+<span class="c1"># 输出
+</span><span class="p">[</span><span class="sh">'</span><span class="s">summaries</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">train_op</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">trainable_variables</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">variables</span><span class="sh">'</span><span class="p">]</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>进一步我们可以通过 <code class="language-plaintext highlighter-rouge">get_collection()</code> 函数来获取每个收集器的内容:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="kn">from</span> <span class="n">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="nf">pprint</span><span class="p">(</span><span class="n">sess</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="nf">get_collection</span><span class="p">(</span><span class="sh">"</span><span class="s">summaries</span><span class="sh">"</span><span class="p">))</span>
+<span class="nf">pprint</span><span class="p">(</span><span class="n">sess</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="nf">get_collection</span><span class="p">(</span><span class="sh">"</span><span class="s">variables</span><span class="sh">"</span><span class="p">))</span>
+<span class="bp">...</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>通过浏览 <code class="language-plaintext highlighter-rouge">variables</code> , <code class="language-plaintext highlighter-rouge">trainable_variables</code> , <code class="language-plaintext highlighter-rouge">sumamries</code> 和 <code class="language-plaintext highlighter-rouge">train_op</code> 中的变量我们可以初步推断计算图的结构和重要信息. 此外, 读取计算图后还可以直接使用 <code class="language-plaintext highlighter-rouge">tf.summary.FileWriter()</code> 保存计算图到 tensorboard, 从而获得更直观的计算图.</p>
+
+<p>要注意的是, <code class="language-plaintext highlighter-rouge">get_collection()</code> 方法只能获得保存在收集器中的变量, 而无法看到其他操作(如 placeholder), 除非在脚本中构建计算图时刻意把某些操作加入到某个 <code class="language-plaintext highlighter-rouge">collection</code> . 所以我们可以用更骚的方法来获取这些没有包含在 <code class="language-plaintext highlighter-rouge">collection</code> 中的操作:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="n">sess</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="nf">get_operations</span><span class="p">()</span>
+<span class="c1"># 或
+</span><span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">sess</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="nf">get_operations</span><span class="p">():</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">op</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">op</span><span class="p">.</span><span class="nf">values</span><span class="p">())</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>函数 <code class="language-plaintext highlighter-rouge">get_operations()</code> 返回一个列表, 列表的每个元素均为计算图中的一个 <code class="language-plaintext highlighter-rouge">Operation</code> 对象. 举个栗子, 当我们使用 <code class="language-plaintext highlighter-rouge">reshape()</code> 函数时 <code class="language-plaintext highlighter-rouge">tf.reshape(x, [-1, 28, 28, -1])</code> 在计算图中会产生这样的计算节点</p>
+
+<div class="polaroid">
+    <img class="cool-img" src="/images/2018/04/reshape.png" />
+    <div class="container">
+        <p>图 1: Tensorboard 中操作 tf.reshape(x, shape) 的计算图</p>
+    </div>
+</div>
+
+<p>其中 <code class="language-plaintext highlighter-rouge">x</code> 就是上图中左下角的 <code class="language-plaintext highlighter-rouge">input</code> , 右侧的小柱状图表示我对 <code class="language-plaintext highlighter-rouge">Reshape</code> 的输出做了 <code class="language-plaintext highlighter-rouge">summary</code> 并命名为 <code class="language-plaintext highlighter-rouge">input</code> .  Tensorboard 中类似于 <code class="language-plaintext highlighter-rouge">shape</code> 这样的小圆点表示常数(类型仍然是 <code class="language-plaintext highlighter-rouge">Operation</code>), 点击后可以看到该操作的属性</p>
+
+<div class="polaroid-tiny">
+    <img class="cool-img" src="/images/2018/04/attr.png" />
+    <div class="container">
+        <p>图 2: Tensorboard 中常量 shape 的属性</p>
+    </div>
+</div>
+
+<p>而属性中的 <code class="language-plaintext highlighter-rouge">tensor_content</code> 的值就是该常数被赋予的值. 实际上我们也可以通过代码开查看计算图中操作的属性:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">sess</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="nf">get_operation_by_name</span><span class="p">(</span><span class="sh">"</span><span class="s">input_reshape/Reshape/shape</span><span class="sh">"</span><span class="p">).</span><span class="n">node_def</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>通过名称索引该 <code class="language-plaintext highlighter-rouge">reshape</code> 操作, 并获取其 <code class="language-plaintext highlighter-rouge">node_def</code> 属性即可得到和图 2 相同的信息. 注意到, <code class="language-plaintext highlighter-rouge">shape</code> 的值是一个字符串 <code class="language-plaintext highlighter-rouge">"\377\377\377\377\034\000\000\000\034\000\000\000\001\000\000\000"</code> , 该字符串可以这么理解: 没饿过形如 <code class="language-plaintext highlighter-rouge">\377</code> 的单元表示一个字节, 该字节用八进制来表示, 比如 <code class="language-plaintext highlighter-rouge">\377</code> 还原为二进制为 <code class="language-plaintext highlighter-rouge">011 111 111</code>, 由于我们可以看到该常量的类型为 <code class="language-plaintext highlighter-rouge">DT_INT32</code>, 即四个字节, 所以每四个字节拼成一个长整型数字, 即 <code class="language-plaintext highlighter-rouge">\377\377\377\377</code> 表示成十六进制为<code class="language-plaintext highlighter-rouge">FFFFFFFF</code> , 十进制为 <code class="language-plaintext highlighter-rouge">-1</code>; 而 <code class="language-plaintext highlighter-rouge">\034\000\000\000</code> (注意这里是小端表示法, litter endian, 即从后往前读取字节)表示成十六进制为 <code class="language-plaintext highlighter-rouge">1C000000</code> , 十进制为 <code class="language-plaintext highlighter-rouge">28</code> .</p>
+
+<h3 id="22-读取模型变量">2.2 读取模型变量</h3>
+
+<h4 id="221-读取模型变量核心函数">2.2.1 读取模型变量核心函数</h4>
+
+<p>读取模型权重也很简单, 仍然使用 <code class="language-plaintext highlighter-rouge">tf.train.Saver()</code> 来读取:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="c1"># 首先定义一系列变量
+</span><span class="bp">...</span>
+<span class="c1"># 载入变量的值
+</span><span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nc">Saver</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Session</span><span class="p">()</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+    <span class="n">saver</span><span class="p">.</span><span class="nf">restore</span><span class="p">(</span><span class="n">sess</span><span class="p">,</span> <span class="sh">"</span><span class="s">path/to/model.ckpt</span><span class="sh">"</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>注意模型路径中应当以诸如 <code class="language-plaintext highlighter-rouge">.ckpt</code> 之类的来结尾, 即需要保证实际存在的文件是 <code class="language-plaintext highlighter-rouge">model.ckpt.data-00000-of-00001</code> 和 <code class="language-plaintext highlighter-rouge">model.ckpt.index</code> , 而指定的路径是 <code class="language-plaintext highlighter-rouge">model.ckpt</code> 即可. 类似地, 如果我们只需要载入部分模型变量, 则和保存模型变量类似地可以在 <code class="language-plaintext highlighter-rouge">tf.train.Saver()</code> 中使用字典或列表来指定相应的变量. 注意, 载入的模型变量是不需要再初始化的(即不需要 <code class="language-plaintext highlighter-rouge">tf.variable_initializer()</code> 初始化), 所以如果只载入部分变量, 则要么手动指定, 要么先初始化所有的变量, 再从检查点载入变量的值.</p>
+
+<h4 id="222-获取任意模型变量的属性">2.2.2 获取任意模型变量的属性</h4>
+
+<p>另外, 我们还可以使用 TF 内置的函数 <code class="language-plaintext highlighter-rouge">tf.train.get_checkpoint_state()</code> 来获得最近的一次检查点的文件名:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="n">ckpt</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nf">get_checkpoint_state</span><span class="p">(</span><span class="n">log_dir</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">ckpt</span> <span class="ow">and</span> <span class="n">ckpt</span><span class="p">.</span><span class="n">model_checkpoint_path</span><span class="p">:</span>
+    <span class="n">saver</span><span class="p">.</span><span class="nf">restore</span><span class="p">(</span><span class="n">sess</span><span class="p">,</span> <span class="n">ckpt</span><span class="p">.</span><span class="n">model_checkpoint_path</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>有时候我们需要浏览变量中变量名/形状/值, 则可以预先通过下面的代码进行查看:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre></td><td class="rouge-code"><pre><span class="kn">from</span> <span class="n">tensorflow.python</span> <span class="kn">import</span> <span class="n">pywrap_tensorflow</span> <span class="k">as</span> <span class="n">pt</span>
+<span class="n">reader</span> <span class="o">=</span> <span class="n">pt</span><span class="p">.</span><span class="nc">NewCheckpointReader</span><span class="p">(</span><span class="sh">"</span><span class="s">path/to/model.ckpt</span><span class="sh">"</span><span class="p">)</span>
+<span class="c1"># 获取 变量名: 形状
+</span><span class="nb">vars</span> <span class="o">=</span> <span class="n">reader</span><span class="p">.</span><span class="nf">get_variable_to_shape_map</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nf">sorted</span><span class="p">(</span><span class="nb">vars</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">vars</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+<span class="c1"># 获取 变量名: 类型
+</span><span class="nb">vars</span> <span class="o">=</span> <span class="n">reader</span><span class="p">.</span><span class="nf">get_variable_to_dtype_map</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nf">sorted</span><span class="p">(</span><span class="nb">vars</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">vars</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+<span class="c1"># 获取张量的值
+</span><span class="n">value</span> <span class="o">=</span> <span class="n">reader</span><span class="p">.</span><span class="nf">get_tensor</span><span class="p">(</span><span class="sh">"</span><span class="s">tensor_name</span><span class="sh">"</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>其中 <code class="language-plaintext highlighter-rouge">get_variable_to_shape_map()</code> 函数会生成一个 {变量名: 形状} 的字典, 而 <code class="language-plaintext highlighter-rouge">get_variable_to_dtype_map()</code> 类似. 而 <code class="language-plaintext highlighter-rouge">get_tensor()</code> 函数会返回相应变量名的变量值, 返回一个 numpy 数组.</p>
+
+<p>另一种获取方法则是 TF 官方文档给出的使用 <code class="language-plaintext highlighter-rouge">tensorflow.python.tools.insepct_checkpoint</code> , 示例代码如下, 不再赘述:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre></td><td class="rouge-code"><pre><span class="kn">from</span> <span class="n">tensorflow.python.tools</span> <span class="kn">import</span> <span class="n">inspect_checkpoint</span> <span class="k">as</span> <span class="n">chkp</span>
+
+<span class="c1"># 打印检查点所有的变量
+</span><span class="n">chkp</span><span class="p">.</span><span class="nf">print_tensors_in_checkpoint_file</span><span class="p">(</span><span class="sh">"</span><span class="s">/tmp/model.ckpt</span><span class="sh">"</span><span class="p">,</span> <span class="n">tensor_name</span><span class="o">=</span><span class="sh">''</span><span class="p">,</span> <span class="n">all_tensors</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># tensor_name:  v1
+# [ 1.  1.  1.]
+# tensor_name:  v2
+# [-1. -1. -1. -1. -1.]
+</span>
+<span class="c1"># 仅打印检查点中的 v1 变量
+</span><span class="n">chkp</span><span class="p">.</span><span class="nf">print_tensors_in_checkpoint_file</span><span class="p">(</span><span class="sh">"</span><span class="s">/tmp/model.ckpt</span><span class="sh">"</span><span class="p">,</span> <span class="n">tensor_name</span><span class="o">=</span><span class="sh">'</span><span class="s">v1</span><span class="sh">'</span><span class="p">,</span> <span class="n">all_tensors</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="c1"># tensor_name:  v1
+# [ 1.  1.  1.]
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="3-模型的冻结">3. 模型的冻结</h2>
+
+<p>我们从已有的三个检查点文件出发生成冻结模型:</p>
+
+<blockquote>
+  <p>model.ckpt.data-00000-of-00001<br />
+  model.ckpt.index<br />
+  model.ckpt.meta</p>
+</blockquote>
+
+<p>假设我们已经通过上面模型的读取知道了我们需要的最终输出的张量名为 <code class="language-plaintext highlighter-rouge">"Accuracy/prediction"</code> 和 <code class="language-plaintext highlighter-rouge">"Metric/Dice"</code> , 则按照前言部分的步骤来冻结模型:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre></td><td class="rouge-code"><pre><span class="kn">import</span> <span class="n">tensorflow</span> <span class="k">as</span> <span class="n">tf</span>
+
+<span class="c1"># 指定模型输出, 这样可以允许自动裁剪无关节点. 这里认为使用逗号分割
+</span><span class="n">output_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">Accuracy/prediction</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Metric/Dice</span><span class="sh">"</span><span class="p">]</span>
+
+<span class="c1"># 1. 加载模型
+</span><span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nf">import_meta_graph</span><span class="p">(</span><span class="sh">"</span><span class="s">model.ckpt.meta</span><span class="sh">"</span><span class="p">,</span> <span class="n">clear_devices</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Session</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="n">tf</span><span class="p">.</span><span class="nf">get_default_graph</span><span class="p">())</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+    <span class="c1"># 序列化模型
+</span>    <span class="n">input_graph_def</span> <span class="o">=</span> <span class="n">sess</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="nf">as_graph_def</span><span class="p">()</span>
+    <span class="c1"># 2. 载入权重
+</span>    <span class="n">saver</span><span class="p">.</span><span class="nf">restore</span><span class="p">(</span><span class="n">sess</span><span class="p">,</span> <span class="sh">"</span><span class="s">model.ckpt</span><span class="sh">"</span><span class="p">)</span>
+    <span class="c1"># 3. 转换变量为常量
+</span>    <span class="n">output_graph_def</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">graph_util</span><span class="p">.</span><span class="nf">convert_variables_to_constants</span><span class="p">(</span><span class="n">sess</span><span class="p">,</span>
+                                                                    <span class="n">input_graph_def</span><span class="p">,</span>
+                                                                    <span class="n">output_nodes</span><span class="p">)</span>
+    <span class="c1"># 4. 写入文件
+</span>    <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">frozen_model.pb</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">wb</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">output_graph_def</span><span class="p">.</span><span class="nc">SerializeToString</span><span class="p">())</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>注意, 我们冻结模型的目的是不再训练, 而仅仅做正向推导使用, 所以才会把变量转换为常量后同计算图结构保存在协议缓冲区文件(.pb)中, 因此需要在计算图中预先定义输出节点的名称.</p>
+
+<h2 id="4-模型的执行">4. 模型的执行</h2>
+
+<p>模型的执行过程也很简单, 首先从协议缓冲区文件(*.pb)中读取模型, 然后导入计算图</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="rouge-code"><pre><span class="c1"># 读取模型并保存到序列化模型对象中
+</span><span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">frozen_graph_path</span><span class="p">,</span> <span class="sh">"</span><span class="s">rb</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">graph_def</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">GraphDef</span><span class="p">()</span>
+    <span class="n">graph_def</span><span class="p">.</span><span class="nc">ParseFromString</span><span class="p">(</span><span class="n">f</span><span class="p">.</span><span class="nf">read</span><span class="p">())</span>
+<span class="c1"># 导入计算图
+</span><span class="n">graph</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Graph</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">graph</span><span class="p">.</span><span class="nf">as_default</span><span class="p">():</span>
+    <span class="n">tf</span><span class="p">.</span><span class="nf">import_graph_def</span><span class="p">(</span><span class="n">graph_def</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">MyGraph</span><span class="sh">"</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>之后就是获取输入和输出的张量对象, 注意, 在 TF 的计算图结构中, 我们只能使用 <code class="language-plaintext highlighter-rouge">feed_dict</code> 把数值数组传入张量 <code class="language-plaintext highlighter-rouge">Tensor</code> , 同时也只能获取张量的值, 而不能给<code class="language-plaintext highlighter-rouge">Operation</code> 赋值. 由于我们导入序列化模型到计算图时给定了 <code class="language-plaintext highlighter-rouge">name</code> 参数, 所以导入所有操作都会加上 <code class="language-plaintext highlighter-rouge">MyGraph</code> 前缀.</p>
+
+<p>接下来我们获取输入和输出对应的张量:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="n">x_tensor</span> <span class="o">=</span> <span class="n">graph</span><span class="p">.</span><span class="nf">get_tensor_by_name</span><span class="p">(</span><span class="sh">"</span><span class="s">MyGraph/input/image-input:0</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">y_tensor</span> <span class="o">=</span> <span class="n">graph</span><span class="p">.</span><span class="nf">get_tensor_by_name</span><span class="p">(</span><span class="sh">"</span><span class="s">MyGraph/input/label-input:0</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">keep_prob</span> <span class="o">=</span> <span class="n">graph</span><span class="p">.</span><span class="nf">get_tensor_by_name</span><span class="p">(</span><span class="sh">"</span><span class="s">MyGraph/dropout/Placeholder:0</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">y_target_tensor</span> <span class="o">=</span> <span class="n">graph</span><span class="p">.</span><span class="nf">get_tensor_by_name</span><span class="p">(</span><span class="sh">"</span><span class="s">MyGraph/accuracy/accuracy:0</span><span class="sh">"</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>注意 TF 中的张量名均是 <code class="language-plaintext highlighter-rouge">op:num</code> 的形式, 其中的 <code class="language-plaintext highlighter-rouge">op</code> 表示产生该张量的操作名(可由 <code class="language-plaintext highlighter-rouge">tensor.op.name</code> 获取), 而冒号后面的数字表示该张量是其对应操作的第几个输出, 下面的图给出了张量和操作名的关系</p>
+
+<div class="polaroid-small">
+    <img class="cool-img" src="/images/2018/04/tensor.png" />
+    <div class="container">
+        <p>图 3: Tensorflow 中张量和相应操作的命名关系</p>
+    </div>
+</div>
+
+<p>最后我们提取 mnist 的数据, 并执行验证:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="rouge-code"><pre><span class="kn">from</span> <span class="n">tensorflow.examples.tutorials.mnist</span> <span class="kn">import</span> <span class="n">input_data</span>
+<span class="n">mnist</span> <span class="o">=</span> <span class="n">input_data</span><span class="p">.</span><span class="nf">read_data_sets</span><span class="p">(</span><span class="sh">"</span><span class="s">mnist_data</span><span class="sh">"</span><span class="p">,</span> <span class="n">one_hot</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span> <span class="o">=</span> <span class="n">mnist</span><span class="p">.</span><span class="n">test</span><span class="p">.</span><span class="nf">next_batch</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Session</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">sess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">acc_tensor</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="p">{</span><span class="n">x_tensor</span><span class="p">:</span> <span class="n">x_values</span><span class="p">,</span>
+                                          <span class="n">y_tensor</span><span class="p">:</span> <span class="n">y_values</span><span class="p">,</span>
+                                          <span class="n">keep_prob</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">})</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">acc</span><span class="p">)</span>
+
+<span class="c1"># 输出
+</span><span class="mf">0.9665</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2018/04/10/Group-Normalizatioin/">Group Normalization 阅读笔记</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2018/04/28/Tensorflow-Input-Pipline/">Tensorflow 数据输入管线</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>

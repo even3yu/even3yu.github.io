@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>半监督学习(Semi-Supervised Learning, SSL)</title>
+    <meta name="description" content="深度学习 (deep learning) 通过监督学习 (supervised learning) 在大量的机器学习任务上取得了瞩目的成就, 如 ImageNet 上超过 90% 的分类准确率, Cityscapes 上超过 85% 的分割准确率. 然而, 实现高精度的分类, 分割等任务需要大规模有标签的训练数据...">
+
+    <!-- 网站所有权验证 -->
+    <meta name="baidu-site-verification" content="code-kzX4R1yDEi" />
+    <meta name="google-site-verification" content="kj0sMKl0iZFsV2KPqmN9OJ3S7aeCrJnNYAOTpJzXCz4" />
+    <meta name="msvalidate.01" content="C9A829578EE81A43ECA102B601A5E052" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/css/zui.min.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2021/08/07/Semi-Supervised-Learning/">
+    <link rel="alternate" type="application/rss+xml" title="Jarvis' Blog (总有美丽的风景让人流连)" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?b9d127980a49e998bbedb8aab536a81d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-108096001-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [["$$ "," $$"],["\\(","\\)"]],
+    processEscapes: true,
+    tags: "all",
+    macros: {
+      bm: ["{\\boldsymbol #1}",1]
+    },
+    packages: {'[+]': ['noerrors']}
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['input/asciimath', '[tex]/noerrors']
+  }
+};
+</script>
+<script async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js" id="MathJax-script">
+</script>
+<!-- src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"> -->
+
+
+
+<!--  -->
+    
+<script type="text/javascript">
+    var host = "jarvis73.com";
+    if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+</script>
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/index.html" class="brand">Jarvis' Blog (总有美丽的风景让人流连)</a>
+        <small>总有美丽的风景让人流连</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/index.html">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/wiki/">
+                        
+                            <i class="fa fa-book"></i>Wiki
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left-jekyll">
+        <h1>半监督学习(Semi-Supervised Learning, SSL)</h1>
+        <div class="label-custom">
+
+            <div class="label-custom-card">
+                <i class="fa fa-calendar"></i>2021-08-07
+            </div>
+
+            
+
+            <div class="label-custom-card">
+                <i class="fa fa-user"></i>Jarvis
+                
+            </div>
+
+            <div class="label-custom-card">
+                <i class="fa fa-key"></i>Post  
+            </div>
+
+            <div class="label-custom-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#表示学习" title="Category: 表示学习" rel="category">表示学习</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#1-introduction" id="markdown-toc-1-introduction">1. Introduction</a>    <ul>
+      <li><a href="#11-半监督学习" id="markdown-toc-11-半监督学习">1.1 半监督学习</a></li>
+      <li><a href="#12-分类" id="markdown-toc-12-分类">1.2 分类</a></li>
+      <li><a href="#13-ssl-的假设" id="markdown-toc-13-ssl-的假设">1.3 SSL 的假设</a></li>
+      <li><a href="#14-ssl-与其他任务的联系" id="markdown-toc-14-ssl-与其他任务的联系">1.4 SSL 与其他任务的联系</a></li>
+    </ul>
+  </li>
+  <li><a href="#2-consistency-regularization" id="markdown-toc-2-consistency-regularization">2. Consistency Regularization</a>    <ul>
+      <li><a href="#21-ladder-network" id="markdown-toc-21-ladder-network">2.1 Ladder Network</a></li>
+      <li><a href="#22-pitext-model" id="markdown-toc-22-pitext-model">2.2 \(\Pi\text{-Model}\)</a></li>
+      <li><a href="#23-temporal-ensembling" id="markdown-toc-23-temporal-ensembling">2.3 Temporal Ensembling</a></li>
+      <li><a href="#24-mean-teachers" id="markdown-toc-24-mean-teachers">2.4 Mean Teachers</a></li>
+      <li><a href="#25-dual-students" id="markdown-toc-25-dual-students">2.5 Dual Students</a></li>
+      <li><a href="#26-data-augmentation" id="markdown-toc-26-data-augmentation">2.6 Data Augmentation</a></li>
+    </ul>
+  </li>
+  <li><a href="#3-entropy-minimization" id="markdown-toc-3-entropy-minimization">3. Entropy Minimization</a></li>
+  <li><a href="#4-proxy-label-methods" id="markdown-toc-4-proxy-label-methods">4. Proxy-Label Methods</a>    <ul>
+      <li><a href="#41-self-training" id="markdown-toc-41-self-training">4.1 Self-Training</a></li>
+      <li><a href="#42-multi-view-training" id="markdown-toc-42-multi-view-training">4.2 Multi-View Training</a></li>
+    </ul>
+  </li>
+  <li><a href="#5-holistic-methods" id="markdown-toc-5-holistic-methods">5. Holistic Methods</a>    <ul>
+      <li><a href="#51-mixmatch" id="markdown-toc-51-mixmatch">5.1 MixMatch</a></li>
+      <li><a href="#52-remixmatch" id="markdown-toc-52-remixmatch">5.2 ReMixMatch</a></li>
+      <li><a href="#53-fixmatch" id="markdown-toc-53-fixmatch">5.3 FixMatch</a></li>
+    </ul>
+  </li>
+  <li><a href="#6-generative-models" id="markdown-toc-6-generative-models">6. Generative Models</a></li>
+  <li><a href="#7-graph-based-ssl" id="markdown-toc-7-graph-based-ssl">7. Graph-Based SSL</a></li>
+  <li><a href="#8-self-supervision-for-ssl" id="markdown-toc-8-self-supervision-for-ssl">8. Self-Supervision for SSL</a></li>
+  <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
+</ul>
+
+<p>深度学习 (deep learning) 通过监督学习 (supervised learning) 在大量的机器学习任务上取得了瞩目的成就, 如 ImageNet 上超过 90% 的分类准确率, Cityscapes 上超过 85% 的分割准确率. 然而, 实现高精度的分类, 分割等任务需要大规模有标签的训练数据, 如 ImageNet 的百万张图像或是 Cityscapes 上数千张 1080p 分辨率图像的像素级标注, 都需要耗费大量的人力物力, 同时在这些数据上训练的模型往往在跨域的数据泛化上仍然具有挑战性 (如医学图像). 虽然数据标注难以获取, 但从多种渠道收集无标注数据是相对容易的, 因此研究者逐渐把目光转向如何利用少部分有标注数据和大规模的无标注数据来训练模型 (比如, 有标签数据占整体的 1-10%). 这种<strong>同时利用少量有标注数据和大量无标注数据训练模型的方法称为半监督学习 (semi-supervised learning, SSL)</strong>.</p>
+
+<h2 id="1-introduction">1. Introduction</h2>
+
+<h3 id="11-半监督学习">1.1 半监督学习</h3>
+
+<p>SSL 介于监督学习和无监督学习之间, 数据集 \(X = \{x_i\}\) 可以分为两部分, 有标签的数据集 \(X_l = \{(x_1, y_1), \dots, (x_l, y_l)\}\) 和无标签数据集 \(X_u = \{x_{l+1}, \dots, x_{l+u}\}\). 我们可以从两个角度来看待半监督学习:</p>
+
+<ul>
+  <li>我们使用 \(X_l\) 来确定分类边界, 并期望使用 \(X_u\) 来更好地估计数据分布 \(p(x)\), 从而更准确的确定分类边界. 如图 1 所示, 我们可以通过大量的无标签数据寻找低密度区域, 以更好地确定分类边界. 这类方法是比较经典的做法.</li>
+</ul>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2021/08/SSL-01.png" data-caption="SSL toy example" />
+    
+        
+        <div class="container">
+            <p>图 1. SSL toy example</p>
+        </div>
+    
+</div>
+
+<ul>
+  <li>我们首先使用 \(X_u\) 基于自监督方法训练一个大模型, 然后使用 \(X_l\) 对模型进行 finetune, 最后可以进一步蒸馏得到小模型以减少参数量<sup id="fnref:18" role="doc-noteref"><a href="#fn:18" class="footnote" rel="footnote">1</a></sup>. 这类方法是在自监督方法有了突破式的发展之后出现的.</li>
+</ul>
+
+<h3 id="12-分类">1.2 分类</h3>
+
+<p>SSL 可以大致分类以下几类:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">序号</th>
+      <th style="text-align: center">分类</th>
+      <th style="text-align: left">描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">1</td>
+      <td style="text-align: center"><strong>Consistency Regularization</strong></td>
+      <td style="text-align: left"><strong>一致性约束方法</strong>. 数据扰动后, 特征/预测结果不应有显著变化. 从而通过约束扰动前后的数据对应的特征来训练模型.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">2</td>
+      <td style="text-align: center"><strong>Entropy Minimization</strong></td>
+      <td style="text-align: left"><strong>熵极小化</strong>. 鼓励模型预测高置信度的结果.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">2</td>
+      <td style="text-align: center"><strong>Proxy-Label Method</strong></td>
+      <td style="text-align: left"><strong>伪标签方法</strong>. 通过一个预训练模型对无标签数据打标签, 然后进一步利用打了伪标签的数据训练模型.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">3</td>
+      <td style="text-align: center"><strong>Generative Models</strong></td>
+      <td style="text-align: left"><strong>生成式模型</strong>. 结合 GAN 或 VAE, 从无标签数据中学习好的用于分类的判别器.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">4</td>
+      <td style="text-align: center"><strong>Graph-Based Methods</strong></td>
+      <td style="text-align: left"><strong>基于图的方法</strong>. 有标签数据和无标签数据可以看做图的节点, 目标是通过节点之间的相似性把有标签节点的标签传播到无标签节点.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>此外, 还可以通过学习模式分为:</p>
+<ul>
+  <li><strong>归纳学习 (Inductive Learning)</strong>: 学习一个分类器, 从而可以泛化到 unseen 的测试数据集上.</li>
+  <li><strong>直推式学习 (Transductive Learning)</strong>: 在训练时同时利用测试数据以提高测试数据上的性能, 这种方法不要求泛化到新的测试数据上.</li>
+</ul>
+
+<h3 id="13-ssl-的假设">1.3 SSL 的假设</h3>
+
+<p>SSL 需要一些假设来保证从大规模无标签数据中学习知识是有效的.</p>
+
+<ol>
+  <li><strong>光滑性假设 (Smoothness)</strong>: 如果高密度区域的两个点 \(x_1\) 和 \(x_2\) 距离很近, 那么他们的预测结果 \(y_1\) 和 \(y_2\) 也应该很近. 反过来, 如果两个点被低密度区域分离, 那么他们的标签应当不同. 该假设对于分类问题是有用的, 但对于回归问题不然.</li>
+  <li><strong>聚类假设 (Cluster)</strong>: 如果两个点在同一个聚类, 那么它们很可能属于同一个类别. (聚类假设也可以看做是低密度分离假设, 即分类边界应当落在低密度区域.) 基于该假设, 我们就可以要求数据在局部扰动时, 其预测分类保持不变.</li>
+  <li><strong>流形假设 (Manifold)</strong>: 高维数据分布在一个低维流形上. 由于空间大小随着维度指数增长, 这对于建模来说是灾难性的. 然而有了流形假设, 我们可以寻找低维映射来建模数据.</li>
+</ol>
+
+<p>这三个假设来源于 Chapelle 等人的 Semi-Supervised Learning 一书<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">2</a></sup>.</p>
+
+<h3 id="14-ssl-与其他任务的联系">1.4 SSL 与其他任务的联系</h3>
+
+<ul>
+  <li>
+    <p>SSL 和<strong>无监督域适应 (unsupervised domain adaptation, UDA)</strong> 是十分接近的任务, 他们都使用有标签和无标签的数据, 区别在于 SSL 的两类数据属于同一个域, 而 UDA 是源域是有标签数据, 目标域是无标签数据. 同时, 如果我们可以在 UDA 中通过一些方法 (如生成式方法) 把目标域数据变成源域数据, 此时我们就可以把众多 SSL 方法应用到 UDA 方法中.</p>
+  </li>
+  <li>
+    <p>SSL 与 <strong>learning from noisy labels</strong> 的任务有密切联系. 基于伪标签的 SSL 方法势必会遇到伪标签存在大量噪声的问题, 此时 SSL (包括基于伪标签的 UDA 方法) 可以应用 noisy labels 任务的方法.</p>
+  </li>
+  <li>
+    <p>SSL 还可以利用<strong>自监督学习</strong>, 通过自监督学习获得好的 warm-up model; 或在半监督学习的过程中, 引入自监督损失来对模型进行正则化 (一致性约束).</p>
+  </li>
+  <li>
+    <p>SSL 不同于<strong>弱监督学习 (weakly-supervised learning)</strong>, 后者所有数据都有标签, 强调的是标签为弱标签. 比如分割任务只提供分类标签, 这与 SSL 的目标是不同的.</p>
+  </li>
+</ul>
+
+<h2 id="2-consistency-regularization">2. Consistency Regularization</h2>
+
+<p>一致性约束是对模型的一种正则化. 根据流形假设, 高维数据分布在一个低维流形上, 我们希望模型对于流形上相近数据点能给出相似的预测结果. 这一点是很自然的, 但是简单扰动后的数据并不一定能落在流形上, 而且我们实际上无法有效的去建模数据流形. 过去的诸多实验证明, 一致性约束是 SSL 一种有效的方法. Ghosh 等人<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">3</a></sup>提出我们可以用 Manifold Tangent Classifier (MTC) 来近似数据流形, 也就是说, 给定流形上的一个数据点 \(x\), 我们可以做过该点关于流形的切平面, 切平面是可以用一组正交基 \(\mathbf{e}_1^x,\dots,\mathbf{e}_d^x\) 表示的, 这意味着</p>
+
+\[\hat{x} = x + \underbrace{\sum_{j=1}^d \omega_j\textbf{e}_j^x}_{V_{\omega}}\]
+
+<p>中系数 \(w_j\) 足够小时, 切平面可以充分地近似流形. 因此当我们迫使 \(f_{\theta}(x)\) 在 \(x\) 的附近沿着流形近似为常数的时候, 我们实际上是在惩罚 \(f_{\theta}(x)\) 在 \(x\) 处的梯度. 具体地,</p>
+
+\[\mathbb{E}_{\omega}[\Vert f_{\theta}(x+V_{\omega}) - f_{\theta}(x)\Vert^2] \approx \mathbb{E}_{\omega}[\Vert \mathbf{J}_x V_{\omega}\Vert^2]\]
+
+<p>其中 \(\mathbf{J}_x\) 是 \(f_{\theta}\) 关于 \(x\) 的 Jacobian 矩阵<sup id="fnref:2:1" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">3</a></sup>. (泰勒展开)</p>
+
+<p>此外, 一致性约束可以有多种度量距离的方法, 比较常用的包括 mean squared error (MSE), Kullback-Leiber Divergence (KL 散度) 和 Jensen-Shannon Divergence (JS 散度). 假设 \(f_{\theta}(x)\) 和 \(f_{\theta}(\hat{x})\) 是 \(C\) 个类别上的分布, 且 \(m=\frac12(f_{\theta}(x) + f_{\theta}(\hat{x}))\), 那么这三个度量可以写为:</p>
+
+\[\begin{align}
+d_{\text{MSE}}(f_{\theta}(x), f_{\theta}(\hat{x})) &amp;= \frac1{C}\sum_{k=1}^C(f_{\theta}(x)_k - f_{\theta}(\hat{x})_k)^2 \\
+d_{\text{KL}}(f_{\theta}(x), f_{\theta}(\hat{x})) &amp;= \frac1{C}\sum_{k=1}^C f_{\theta}(x)_k \log\frac{f_{\theta}(x)_k}{f_{\theta}(\hat{x})_k}  \\
+d_{\text{JS}}(f_{\theta}(x), f_{\theta}(\hat{x})) &amp;= \frac12 d_{\text{KL}}(f_{\theta}(x)_k, m) + \frac12 d_{\text{KL}}(f_{\theta}(\hat{x})_k, m) \\
+\end{align}\]
+
+<p>注意我们也可以在两个扰动后的样本 \(\hat{x}_1\) 和 \(\hat{x}_2\) 上施加一致性约束.</p>
+
+<h3 id="21-ladder-network">2.1 Ladder Network</h3>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2021/08/SSL-02.png" data-caption="Ladder Network" />
+    
+        
+        <div class="container">
+            <p>图 2. Ladder Network</p>
+        </div>
+    
+</div>
+
+<p>Rasmus 等人提出使用 Ladder Network<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">4</a></sup>, 最右侧的 encoder 对 \(x\) 进行编码, 最左侧的 encoder 在编码过程中加入噪声, 然后通过 decoder 去噪, 同时在每一层的解码输出和右侧 encoder 的编码输出进行一致性约束.</p>
+
+\[\begin{align}
+\mathcal{L} &amp;= \mathcal{L}_u + \mathcal{L}_s \\
+            &amp;= \frac1{\vert D\vert}\sum_{x\in\mathcal{D}}\sum_{l=0}^L\lambda_l d_{\text{MSE}}(z^{(l)}, \hat{z}^{(l)}) + \frac1{\vert\mathcal{D}_l\vert}\sum_{x,t\in\mathcal{D}}H(\tilde{y},t)
+\end{align}\]
+
+<p>其中 \(\mathcal{L}_u\) 是一致性约束, \(\mathcal{L}_s\) 是交叉熵监督损失.</p>
+
+<p>此外, 当 \(l &lt; L\) 时令 \(\lambda_l=0\), 则这个 Ladder Network 的变体称为 \(\Gamma\text{-Model}\).</p>
+
+<h3 id="22-pitext-model">2.2 \(\Pi\text{-Model}\)</h3>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2021/08/SSL-03.png" data-caption=" $$ \Pi\text{-Model} $$" />
+    
+        
+        <div class="container">
+            <p>图 3.  $$ \Pi\text{-Model} $$</p>
+        </div>
+    
+</div>
+
+<p>Laine 等人提出的 \(\Pi\text{-Model}\) <sup id="fnref:4" role="doc-noteref"><a href="#fn:4" class="footnote" rel="footnote">5</a></sup>简化了 \(\Gamma\text{-Model}\), 去除了加噪的 encoder, 只使用一个网络, 利用 augmentation 的输入和 dropout 来实现预测结果的扰动, 并进行约束:</p>
+
+\[\mathcal{L} = w\frac1{\vert \mathcal{D}_u\vert}\sum_{x\in\mathcal{D}_u}d_{\text{MSE}}(\tilde{y}_1,\tilde{y}_2) + \frac1{\vert\mathcal{D}_l\vert}\sum_{x,y\in\mathcal{D}_l}H(y, f(x))\]
+
+<p>其中 \(w\) 是权重函数, 在训练的前一阶段 (如 20%) 从 0 增加到一个固定值 \(\lambda\) (如 30), 以避免训练初期随机初始化的权重导致的不稳定的输出.</p>
+
+<div class="alert alert-info with-icon card">
+
+<i class="icon-info-sign"></i>
+<div class="zui-card-content">
+
+<div class="title"><strong>提示</strong></div><hr />
+
+<div class="content">
+      <p>对于 \(\Gamma\text{-Model}\) 和 \(\Pi\text{-Model}\), 我们发现前者是只对模型做扰动, 后者是同时对模型和输入数据做扰动.</p>
+    </div>
+
+</div>
+</div>
+
+<h3 id="23-temporal-ensembling">2.3 Temporal Ensembling</h3>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2021/08/SSL-04.png" data-caption="Temporal Ensembling" />
+    
+        
+        <div class="container">
+            <p>图 4. Temporal Ensembling</p>
+        </div>
+    
+</div>
+
+<p>在 \(\Pi\text{-Model}\) 中, 每个训练 step 可以分为两步: (1) 对数据进行 inference, 获得 prediction, (2) 把 prediction 作为无监督样本的 target, 利用不同的 augmentation 和 dropout 应该产生相同结果来目标来施加一致性约束. 但是, 考虑到单次 inference 的结果是不稳定的, 因此 Laine 等人<sup id="fnref:4:1" role="doc-noteref"><a href="#fn:4" class="footnote" rel="footnote">5</a></sup>提出第二个版本的 \(\Pi\text{-Model}\), 称为 Temporal Ensembling, 其中 target \(y_{\text{ema}}\) 通过对所有前面预测结果的指数滑动平均 (exponential moving average, EMA) 来获得, 这样每个 step 只需要 inference 一次就能计算损失. 当前步的预测结果 \(\tilde{y}\) 和 ensemble 的历史加权求和:</p>
+
+\[y_{\text{ema}} = \alpha y_{\text{ema}} + (1 - \alpha)\tilde{y}\]
+
+<p>其中 \(\alpha\) 是加权系数, 通常取 0.99, 0.999 等较大的值以确保稳定性. 此外, 在训练初期, 由于预测结果不稳定, 因此通过一个偏置系数对结果进行修正 (类似于 Adam 优化器的做法):</p>
+
+\[y_{\text{ema}} = (\alpha y_{\text{ema}} + (1 - \alpha)\tilde{y}) / (1 - \alpha^t)\]
+
+<p>其中 \(t\) 是训练的 step.</p>
+
+<h3 id="24-mean-teachers">2.4 Mean Teachers</h3>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2021/08/SSL-05.png" data-caption="Mean Teachers" />
+    
+        
+        <div class="container">
+            <p>图 5. Mean Teachers</p>
+        </div>
+    
+</div>
+
+<p>Temporal Ensembling 为每一个样本都记录了一个预测结果的 EMA, 但是最新学到的信息也会因为 EMA 模型而被以极其缓慢的速度加入到模型训练的过程中, 每个 epoch 只会更新一次. 同时, 在 \(\Pi\text{-Model}\) 和 Temporal Ensembling 中, 同一个模型既当老师又当学生, 这样很容易让模型陷入 confirmation bias (即错误被自己放大). 因此, Mean Teacher 方法<sup id="fnref:5" role="doc-noteref"><a href="#fn:5" class="footnote" rel="footnote">6</a></sup>被提出来解决这个问题. 与 Temporal Ensembling 不同的是, Mean Teacher 是对模型参数做 EMA, 而非样本的 predictions. 这样的好处是, 每一个 step 模型参数都会更新, 因此 EMA 模型作为 Teacher, 使用梯度更新的模型作为 Student, 可以提供更准确的 targets. 令 \(\theta_t'\) 是 Teacher Model \(f_{\theta'}\) 在 step \(t\) 的参数, 则其更新方法为:</p>
+
+\[\theta_t' = \alpha \theta_{t-1}' + (1 - \alpha)\theta_t\]
+
+<p>因而损失函数计算为:</p>
+
+\[\mathcal{L} = w\frac1{\vert \mathcal{D}_u\vert}\sum_{x\in\mathcal{D}_u}d_{\text{MSE}}(f_{\theta}(x), f_{\theta'}(x)) + \frac1{\vert\mathcal{D}_l\vert}\sum_{x,y\in\mathcal{D}_l}H(y, f(x))\]
+
+<h3 id="25-dual-students">2.5 Dual Students</h3>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2021/08/SSL-06.png" data-caption="Dual Students" />
+    
+        
+        <div class="container">
+            <p>图 6. Dual Students</p>
+        </div>
+    
+</div>
+
+<p>Mean Teacher 模型的一个主要的缺点是当训练时间足够长时, Teacher Model 的参数会收敛到 Student Model (假设 Student Model 最后是收敛的), 这样 Teacher 的作用就会随着训练的过程而弱化. Ke 等人提出了 Dual Students<sup id="fnref:6" role="doc-noteref"><a href="#fn:6" class="footnote" rel="footnote">7</a></sup> 来解决该问题, 即训练两个独立初始化的模型. 但是, 单纯训练两个独立的模型可能会导致结果相差较大, 而直接施加一致性约束的话又会导致两个模型交换错误的信息而形成模式坍缩变成一个模型, 因此 Dual Students 定义了 stable sample 的概念, 即 \(x\) 和扰动点 \(\tilde{x}\) 预测结果相同且离决策边界有一定距离的点. 定义</p>
+
+\[\mathcal{E}_i = \Vert f_{\theta^i}(x) - f_{\theta^i}(\tilde{x})\Vert^2\]
+
+<p>这样, 那些对两个模型都是 stable sample 的样本, 如果 \(\mathcal{E}_i &lt; \mathcal{E}_j\), 则模型 \(i\) 作为模型 \(j\) 的 Teacher; 只对其中一个模型是 stable sample 的样本, 令稳定模型是 Teacher, 对两个模型都不稳定的样本不参与梯度更新. 最终模型 \(i\) 的损失为:</p>
+
+\[\begin{multline}
+\mathcal{L} = \frac1{\vert\mathcal{D}_l\vert}\sum_{x,y\in\mathcal{D}_l}H(y, f_{\theta^i}(x)) + \lambda_1 \frac1{\vert \mathcal{D}_u\vert}\sum_{x\in\mathcal{D}_u}d_{\text{MSE}}(f_{\theta^i}(x), f_{\theta^i}(\tilde{x})) \\ 
++ \lambda_2 \frac1{\vert \mathcal{D}_u^{\text{ stable for } i}\vert}\sum_{x\in\mathcal{D}_u^{\text{ stable for } i}}d_{\text{MSE}}(f_{\theta^i}(x), f_{\theta^j}(x))
+\end{multline}\]
+
+<h3 id="26-data-augmentation">2.6 Data Augmentation</h3>
+
+<p>把更多复杂的 Data Augmentation 方法应用于 SSL 的数据扰动, 如 MixUp<sup id="fnref:7" role="doc-noteref"><a href="#fn:7" class="footnote" rel="footnote">8</a></sup>, AutoAugmentat<sup id="fnref:8" role="doc-noteref"><a href="#fn:8" class="footnote" rel="footnote">9</a></sup>, RandAugment<sup id="fnref:9" role="doc-noteref"><a href="#fn:9" class="footnote" rel="footnote">10</a></sup> 等.</p>
+
+<h2 id="3-entropy-minimization">3. Entropy Minimization</h2>
+
+<p>聚类假设要求分类边界落在低密度区域, 除了上面的一致性约束方法外, 我们还可以对模型施加一个约束, 使其预测的结果更加 confident (而不管它预测的对与错), 这样的约束可以通过熵极小化的损失函数来实现:</p>
+
+\[-\sum_{k=1}^Cf_{\theta}(x)_k\log f_{\theta}(x)_k\]
+
+<p>单独使用熵极小化并不能带来精度上的提升, 因为该约束并不能让模型修正潜在的错误. 但是该方法与其他方法结合之后可以实现 SOTA 的效果.</p>
+
+<div class="alert alert-info with-icon card">
+
+<i class="icon-info-sign"></i>
+<div class="zui-card-content">
+
+<div class="title"><strong>Confidence Regularization</strong></div><hr />
+
+<div class="content">
+      <p>与 Entropy Minimization 相反的一个概念是 Confidence Regularization. 有时我们不能获得准确的标签 (比如伪标签方法, 带噪声的标签等等). 在这种情况下由于不确定标签的正确性, 因此我们希望模型预测的类别概率是留有余地的, 即任何类别都不应该预测出过高的概率, 这时候使用 Confidence Regularization 会更加有效. 比如对熵的正则化:</p>
+
+\[\sum_{k=1}^Cf_{\theta}(x)_k\log f_{\theta}(x)_k\]
+
+      <p>或者使用 KL 散度让预测概率倾向于 uniform distribution:</p>
+
+\[-\sum_{k=1}^C\frac1K\log f_{\theta}(x)_k\]
+
+    </div>
+
+</div>
+</div>
+
+<h2 id="4-proxy-label-methods">4. Proxy-Label Methods</h2>
+
+<p>Proxy-Label 方法通常也称为伪标签 (pseudo-label) 方法, 是利用预训练模型对无标签数据打伪标签后, 和有标签数据结合起来训练模型的一类方法. 这类方法的典型实现有 self-training 和 multi-view training.</p>
+
+<h3 id="41-self-training">4.1 Self-Training</h3>
+
+<p>在 self-training 中, 首先使用有标签的 \(\mathcal{D}_l\) 数据集训练一个分类器 \(f_{\theta}\), 然后用该分类器对无标签数据 \(x\in\mathcal{D}_u\) 打伪标签. 给定一个阈值 \(\tau\), 如果 \(\max f_{\theta}(x) &gt; \tau\), 则把 \((x, \arg\max f_{\theta}(x))\) 加入训练集, 进一步训练模型. 迭代打伪标签和训练模型的步骤, 直到模型无法再产生 confident predictions. 当然, 为了进一步提高伪标签的质量, 可以对设置动态阈值, 或根据不同的类别设置不同的阈值等.</p>
+
+<p>其他:</p>
+
+<ul>
+  <li>Pseudo-label and confirmation bias<sup id="fnref:10" role="doc-noteref"><a href="#fn:10" class="footnote" rel="footnote">11</a></sup></li>
+  <li>Pseudo-label and label propagation<sup id="fnref:11" role="doc-noteref"><a href="#fn:11" class="footnote" rel="footnote">12</a></sup><sup id="fnref:12" role="doc-noteref"><a href="#fn:12" class="footnote" rel="footnote">13</a></sup></li>
+</ul>
+
+<h3 id="42-multi-view-training">4.2 Multi-View Training</h3>
+
+<p>Multi-View Training 的一个代表性的工作是 Co-Training<sup id="fnref:13" role="doc-noteref"><a href="#fn:13" class="footnote" rel="footnote">14</a></sup>. 在数据存在两个条件独立的 views 时, 使用两种 views 分别训练两个模型. 比如, 两个 views 可以是 RGB 和 Depth; 图像和文本等. 对于每个无标签数据, 如果在模型 \(j\) 的预测结果高于阈值 \(\tau\), 则把它加入模型 \(i\) 的训练集, 从而实现两个模型相互监督训练.</p>
+
+<p>其他:</p>
+
+<ul>
+  <li>Tri-Training<sup id="fnref:14" role="doc-noteref"><a href="#fn:14" class="footnote" rel="footnote">15</a></sup></li>
+</ul>
+
+<h2 id="5-holistic-methods">5. Holistic Methods</h2>
+
+<p>Holistic 方法是把 SSL 已有的的不同路线的 SOTA 方法集成起来的一类方法, 代表性的工作主要是 Google 一系列的 *Match 方法.</p>
+
+<h3 id="51-mixmatch">5.1 MixMatch</h3>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2021/08/SSL-07.png" data-caption="MixMatch" />
+    
+        
+        <div class="container">
+            <p>图 7. MixMatch</p>
+        </div>
+    
+</div>
+
+<p>MixMatch<sup id="fnref:15" role="doc-noteref"><a href="#fn:15" class="footnote" rel="footnote">16</a></sup> 方法如下:</p>
+
+<ol>
+  <li><strong>数据增广.</strong> 有标签数据 \((x_b, p_b)\in\mathcal{D}_l, b \in (1,\dots,B)\), 其中 \(B\) 为 batch size, 计算其增广 \(\hat{x}_b\). 无标签数据 \(u_b\in\mathcal{D}_u, b \in (1,\dots,B)\), 计算其 \(K\) 个增广 \(\hat{u}_{b,1},\dots,\hat{u}_{b,K}\).</li>
+  <li>
+    <p><strong>打伪标签.</strong> 这一步是给无标签数据打伪标签. 使用模型 \(f_{\theta}\) 对 \(K\) 个增广数据进行预测, 取平均预测结果作为 \(K\) 个增广数据共同的伪标签</p>
+
+\[q_b = \frac1K\sum_{k=1}^K f_{\theta}(\hat{u}_{b,k})\]
+  </li>
+  <li>
+    <p><strong>锐化.</strong> 通过调整温度系数 \(T\), 对上一步的伪标签结果进行锐化</p>
+
+\[\text{Sharpen}(q, T) = q_i^{\frac1T} \Big/ \sum_{j=1}^C q_j^{\frac1T}\]
+
+    <p>其中 \(C\) 是类别数.</p>
+  </li>
+  <li>
+    <p><strong>MixUp.</strong> 在一个 batch 中, 对增广的有标签数据和增广的伪标签数据</p>
+
+\[\begin{align}
+ \hat{\mathcal{X}} &amp;= \{(\hat{x}_b, p_b); b \in (1,\dots, B)\} \\
+ \hat{\mathcal{U}} &amp;= \{(\hat{u}_{b,k}, q_b); b \in (1,\dots,B), k \in (1,\dots,K) \}
+ \end{align}\]
+
+    <p>进行打乱得到混合数据 \(\mathcal{W}=\text{Shuffle}(\text{Concat}(\hat{\mathcal{X}}, \hat{\mathcal{U}}))\). 然后再随机划分为和集合 \(\hat{\mathcal{X}}, \hat{\mathcal{U}}\) 一样大小的 \(\hat{\mathcal{W}}_1, \hat{\mathcal{W}}_2\). 接着使用 MixUp 生成新的增广数据:</p>
+
+\[\begin{align}
+ \mathcal{X}' &amp;= \text{MixUp}(\hat{\mathcal{X}}, \hat{\mathcal{W}}_1) \\
+ \mathcal{U}' &amp;= \text{MixUp}(\hat{\mathcal{U}}, \hat{\mathcal{W}}_2)
+ \end{align}\]
+
+    <p>其中在使用 MixUp 时保证左侧集合占主导(\(\eqref{eq:mixup_lambda}\) 式), 即混合数据靠近左侧的数据. MixUp 方式如下:</p>
+
+\[\begin{align}
+ \lambda &amp;\sim \text{Beta}(\alpha, \alpha) \\ \label{eq:mixup_lambda}
+ \lambda' &amp;= \max(\lambda, 1-\lambda) \\
+ x' &amp;= \lambda'x_1 + (1 - \lambda')x_2 \\
+ p' &amp;= \lambda'p_1 + (1 - \lambda')p_2
+ \end{align}\]
+  </li>
+</ol>
+
+<p>最后使用 \(\mathcal{X}'\) 和 \(\mathcal{U}'\) 构造常规的 SSL 损失函数:</p>
+
+\[\begin{align}
+\mathcal{L} &amp;= \mathcal{L}_s + w\mathcal{L}_u \\
+            &amp;= \frac1{\vert\mathcal{X}'\vert}\sum_{x,p\in\mathcal{X}'}H(p, f_{\theta}(x)) + w\frac1{\vert\mathcal{U}'\vert}\sum_{u,q\in\mathcal{U}'}\Vert q-f_{\theta}(u)\Vert_2^2
+\end{align}\]
+
+<h3 id="52-remixmatch">5.2 ReMixMatch</h3>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2021/08/SSL-08.png" data-caption="ReMixMatch: distribution alignment and augmentation anchoring" />
+    
+        
+        <div class="container">
+            <p>图 8. ReMixMatch: distribution alignment and augmentation anchoring</p>
+        </div>
+    
+</div>
+
+<p>ReMixMatch<sup id="fnref:16" role="doc-noteref"><a href="#fn:16" class="footnote" rel="footnote">17</a></sup> 在 MixMatch 的基础上, 引入了两个新技术:</p>
+
+<ul>
+  <li>分布对齐 (distribution alignment): 要求无标签数据的预测(边缘)分布要对齐有标签数据的(边缘)分布</li>
+  <li>增广锚定 (augmentation anchoring): 要求多个强增广数据的预测接近弱增广数据的预测 (锚点).</li>
+</ul>
+
+<h3 id="53-fixmatch">5.3 FixMatch</h3>
+
+<div class="polaroid">
+    
+    
+    
+    <img data-toggle="lightbox" src="/images/2021/08/SSL-09.png" data-caption="FixMatch" />
+    
+        
+        <div class="container">
+            <p>图 9. FixMatch</p>
+        </div>
+    
+</div>
+
+<p>FixMatch<sup id="fnref:17" role="doc-noteref"><a href="#fn:17" class="footnote" rel="footnote">18</a></sup>: 对于无标签数据, 如果模型 weakly-augmentated 样本的预测类别的置信度大于一个阈值, 则该类别当做伪标签用于训练 strongly-augmentated 的样本.</p>
+
+\[\mathcal{L}_u = \frac1{K\vert\mathcal{D}_u\vert}\sum_{x\in\mathcal{D}_u}\sum_{i=1}^K\mathbf{1}(\max(f_{\theta}(A_w(x))) \geq \tau)H(f_{\theta}(A_w(x)), f_{\theta}(A_s(x)))\]
+
+<p>其中 \(A_w, A_s\) 分别表示 weakly-augmentation 和 strongly-augmentation.</p>
+
+<h2 id="6-generative-models">6. Generative Models</h2>
+
+<h2 id="7-graph-based-ssl">7. Graph-Based SSL</h2>
+
+<h2 id="8-self-supervision-for-ssl">8. Self-Supervision for SSL</h2>
+
+<h2 id="参考文献">参考文献</h2>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:18" role="doc-endnote">
+
+      <p><strong>Big Self-Supervised Models are Strong Semi-Supervised Learners</strong><br />
+T. Chen, S. Kornblith, K. Swersky, M. Norouzi, and G. Hinton<br />
+<a href="https://proceedings.neurips.cc/paper/2020/file/fcbc95ccdd551da181207c0c1400c655-Paper.pdf">[pdf]</a> In NeurIPS 2020 <a href="#fnref:18" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:1" role="doc-endnote">
+
+      <p><strong>Semi-Supervised Learning (Book)</strong><br /> 
+Chapelle O., Scholkopf B., Zien A. Eds<br />
+<a href="https://ieeexplore.ieee.org/document/4787647/">[html]</a> In IEEE Transactions on Neural Networks 20, 542–542 (2009) <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+
+      <p><strong>On Data-Augmentation and Consistency-Based Semi-Supervised Learning</strong><br />
+Ghosh A., Thiery A. H.<br />
+<a href="https://openreview.net/forum?id=7FNqrcPtieT">[html]</a> In ICLR 2021 <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a> <a href="#fnref:2:1" class="reversefootnote" role="doc-backlink">&#8617;<sup>2</sup></a></p>
+    </li>
+    <li id="fn:3" role="doc-endnote">
+
+      <p><strong>Semi-Supervised Learning with Ladder Networks</strong><br />
+Rasmus A., Valpola H., Honkala M., Berglund M., Raiko, T. <br />
+<a href="http://arxiv.org/abs/1507.02672">[html]</a> In arXiv:1507.02672 <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:4" role="doc-endnote">
+
+      <p><strong>Temporal Ensembling for Semi-Supervised Learning</strong><br />
+S. Laine and T. Aila<br />
+<a href="http://arxiv.org/abs/1610.02242">[html]</a> In arXiv:1610.02242 <a href="#fnref:4" class="reversefootnote" role="doc-backlink">&#8617;</a> <a href="#fnref:4:1" class="reversefootnote" role="doc-backlink">&#8617;<sup>2</sup></a></p>
+    </li>
+    <li id="fn:5" role="doc-endnote">
+
+      <p><strong>Mean teachers are better role models: Weight-averaged consistency targets improve semi-supervised deep learning results</strong><br />
+A. Tarvainen and H. Valpola<br />
+<a href="https://proceedings.neurips.cc/paper/2017/file/68053af2923e00204c3ca7c6a3150cf7-Paper.pdf">[pdf]</a> In NeurIPS 2017 <a href="#fnref:5" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:6" role="doc-endnote">
+
+      <p><strong>Dual Student: Breaking the Limits of the Teacher in Semi-Supervised Learning</strong><br />
+Z. Ke, D. Wang, Q. Yan, J. Ren, and R. W. H. Lau<br />
+<a href="https://openaccess.thecvf.com/content_ICCV_2019/html/Ke_Dual_Student_Breaking_the_Limits_of_the_Teacher_in_Semi-Supervised_ICCV_2019_paper.html">[html]</a> In CVPR 2019 <a href="#fnref:6" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:7" role="doc-endnote">
+
+      <p><strong>MixUp: Beyond Empirical Risk Minimization</strong><br />
+H. Zhang, M. Cisse, Y. N. Dauphin, and D. Lopez-Paz<br />
+<a href="http://arxiv.org/abs/1710.09412">[html]</a> In ICLR 2018 <a href="#fnref:7" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:8" role="doc-endnote">
+
+      <p><strong>AutoAugment: Learning Augmentation Policies from Data</strong><br />
+E. D. Cubuk, B. Zoph, D. Mane, V. Vasudevan, and Q. V. Le<br />
+<a href="http://arxiv.org/abs/1805.09501">[html]</a> In CVPR 2019 <a href="#fnref:8" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:9" role="doc-endnote">
+
+      <p><strong>RandAugment: Practical automated data augmentation with a reduced search space</strong><br />
+E. D. Cubuk, B. Zoph, J. Shlens, and Q. Le<br />
+<a href="https://proceedings.neurips.cc/paper/2020/file/d85b63ef0ccb114d0a3bb7b7d808028f-Paper.pdf">[pdf]</a> In NeurIPS 2020 <a href="#fnref:9" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:10" role="doc-endnote">
+
+      <p><strong>Pseudo-Labeling and Confirmation Bias in Deep Semi-Supervised Learning</strong><br />
+E. Arazo, D. Ortego, P. Albert, N. E. O’Connor, and K. McGuinness<br />
+<a href="https://ieeexplore.ieee.org/abstract/document/9207304">[html]</a> In IJCNN 2020 <a href="#fnref:10" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:11" role="doc-endnote">
+
+      <p><strong>Label Propagation for Deep Semi-Supervised Learning</strong><br />
+A. Iscen, G. Tolias, Y. Avrithis, and O. Chum<br />
+<a href="https://openaccess.thecvf.com/content_CVPR_2019/html/Iscen_Label_Propagation_for_Deep_Semi-Supervised_Learning_CVPR_2019_paper.html">[html]</a> In CVPR 2019 <a href="#fnref:11" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:12" role="doc-endnote">
+
+      <p><strong>Learning from Labeled and Unlabeled Data with Label Propagation</strong><br />
+X. Zhu and Z. Ghahramani<br />
+<a href="https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.14.3864&amp;rep=rep1&amp;type=pdf">[pdf]</a> In 2002 <a href="#fnref:12" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:13" role="doc-endnote">
+
+      <p><strong>Combining labeled and unlabeled data with co-training</strong><br />
+A. Blum and T. Mitchell<br />
+<a href="https://dl.acm.org/doi/abs/10.1145/279943.279962">[html]</a> In COLT 1998 <a href="#fnref:13" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:14" role="doc-endnote">
+
+      <p><strong>Tri-training: exploiting unlabeled data using three classifiers</strong><br />
+Zhi-Hua Zhou; Ming Li<br />
+<a href="https://ieeexplore.ieee.org/abstract/document/1512038">[html]</a> In TKDE 2005 <a href="#fnref:14" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:15" role="doc-endnote">
+
+      <p><strong>MixMatch: A holistic approach to semi-supervised learning</strong><br />
+D. Berthelot, N. Carlini, I. Goodfellow, N. Papernot, A. Oliver, and C. A. Raffel<br />
+<a href="https://proceedings.neurips.cc/paper/2019/file/1cd138d0499a68f4bb72bee04bbec2d7-Paper.pdf">[pdf]</a> In NeurIPS 2019 <a href="#fnref:15" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:16" role="doc-endnote">
+
+      <p><strong>ReMixMatch: Semi-Supervised Learning with Distribution Matching and Augmentation Anchoring</strong><br />
+D. Berthelot<br />
+<a href="https://openreview.net/forum?id=HklkeR4KPB">[html]</a> In ICLR 2019 <a href="#fnref:16" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:17" role="doc-endnote">
+
+      <p><strong>FixMatch: Simplifying semi-supervised learning with consistency and confidence</strong><br />
+K. Sohn<br />
+<a href="https://proceedings.neurips.cc/paper/2020/file/06964dce9addb1c5cb5d6e3d9838f733-Paper.pdf">[pdf]</a> In NeurIPS 2020 <a href="#fnref:17" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+        </article>
+        <hr>
+
+        <!-- 
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+         -->
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2021/06/09/PyTorch-Slow/">PyTorch 训练慢的问题</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2021/08/14/FSS1000/">FSS1000 数据集</a></p>
+        
+    </div>
+</div>
+
+
+        <!-- <h2 id="comments">Comments</h2>
+        
+
+
+
+ -->
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right-jekyll">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id]):not([class])')
+    for (var i = 0; i < aTags.length; i++) {
+        if (aTags[i].getAttribute('href').startsWith('#'))
+        {
+            continue
+        }
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="contact">
+            联系我: 
+            <a href="https://github.com/jarvis73" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:zjw.math@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>   
+            <a href="https://www.zhihu.com/people/lin-xi-1-1" title="Zhihu"><i class="iconfont icon-daoruzhihu"></i></a>      
+        </p>
+        <p>
+            <i class="fa fa-eye" style="padding-right: 2px;"></i> 访问量: <span id="busuanzi_value_site_pv"></span>次 | <i class="fa fa-user" style="padding-right: 2px;"></i> 访客数<span id="busuanzi_value_site_uv"></span>人次
+        </p>
+        <p class="power">
+            网站支持 <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a> | 主题支持 <a href="https://github.com/Gaohaoyang/gaohaoyang.github.io">HyG</a> & <a href="https://github.com/Jarvis73/jarvis73.github.io">Jarvis73</a>
+        </p>
+        <p>
+            <img src="/images/misc/beian.png" style="padding-right: 2px; padding-bottom: 4px; vertical-align: middle;" /> <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo" class="beian" >浙公网安备 33010602011353号 | </a>
+            <a target="_blank" href="https://beian.miit.gov.cn/" class="beian">浙ICP备2020038513号-1</a>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/lib/jquery/jquery.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zui/1.9.2/js/zui.min.js" charset="utf-8"></script>
+    <script src="/js/index_page.js" charset="utf-8"></script>
+    <script src="/js/functions.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+  </body>
+
+</html>
