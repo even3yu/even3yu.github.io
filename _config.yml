@@ -1,0 +1,20 @@
+#URL
+url: https://doublesand.github.io
+baseurl: 
+
+
+#博客名字和描述自定义
+title: fisher
+description: 个人博客，关于音视频，移动端，AI相关的开发
+
+#个人信息
+author: fisher
+github: even3yu
+email:  ligexiao@gmail.com
+
+#下面的是配置和插件，不需要改
+permalink: none
+plugins: [jekyll-sitemap]
+
+plugins:
+  - jekyll-sitemap
