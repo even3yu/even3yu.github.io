@@ -351,9 +351,7 @@ PeerConnectionFactory::CreateAudioSource(const cricket::AudioOptions& options) {
 
 ## 4. 其他
 
-我们看到AudioTrackProxy的所有方法都是需要在信令线程中执行，因此相对来说还比较简单。但是我们会遇到这种情况：一个类的某些方法需要运行在信令线程上，令一些方法需要运行在工作线程上。这时该如何是好？
-
-同样，在api/proxy类中，另外两个宏配合在一起提供了这个功能：
+我们看到AudioTrackProxy的所有方法都是需要在信令线程中执行，因此相对来说还比较简单。但是我们会遇到这种情况：一个类的某些方法需要运行在信令线程上，另一些方法需要运行在工作线程上。在api/proxy类中，另外几个宏配合在一起提供了这个功能。
 
 ### 4.1 BEGIN_PROXY_MAP
 
