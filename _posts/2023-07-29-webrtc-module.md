@@ -42,6 +42,15 @@ WebRTC采用模块机制，把数据流水线上功能相对独立的处理点�
 
 ![module]({{ site.url }}{{ site.baseurl }}/images/module-processThread.png)
 
+- ProcessThread， 是抽象类，实现类是ProcessModuleImpl；
+- Event，类似锁，实现线程阻塞和唤醒；
+- PlatformThread，是包含了不同平台的线程API的类，快平台的线程类，不过具体的实现是由各个平台对应实现；
+- Module是个抽象类，三个方法，TimeUntilNextProcess（距离下个Task执行的时间ms）， Process（处理Task），ProcessThreadAttached（处理模块的线程，就是ProcessThread， 通过参数ProcessThread 传递给实现Module中去）；
+- ProcessModuleImpl 包含了PlatformThread（工作线程），std::list<Module>（注册的所有模块）
+- ProcessModuleImpl::Run 就是传递给了PlatformThread， 就是ThreadFunction run_funciton_; 最终传递个pthread；
+  就是PlatformThread执行的函数；
+
+
 ## 3. Module
 
 modules/include/module.h
