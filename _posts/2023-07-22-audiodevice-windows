@@ -8,6 +8,12 @@ meta: Post
 categories: webrtc
 ---
 
+
+* content
+{:toc}
+
+---
+
 ## Windows的AudioDeviceModule的两种实现方式
 
 目前Windows平台关于音频设备的有两种实现方式，分别是AudioDeviceWindowsCore （继承于AudioDeviceGeneric）和WindowsAudioDeviceModule（继承于AudioDeviceModule）。

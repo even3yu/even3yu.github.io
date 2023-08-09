@@ -8,6 +8,12 @@ meta: Post
 categories: webrtc
 ---
 
+
+* content
+{:toc}
+
+---
+
 ## 1. 前言
 
 WebRTC实现了跨平台(Windows，MacOS，Linux，IOS，Android)的线程类rtc::Thread，WebRTC内部的network_thread，worker_thread，signaling_thread均是该类的实例。该类的源码位于rtc_base目录下的thread.h与thread.cc中。

@@ -8,6 +8,12 @@ meta: Post
 categories: webrtc
 ---
 
+
+* content
+{:toc}
+
+---
+
 ## 1. 前言
 
 webrtc 默认是对音频是是封装在内部，直接采集麦克风设备的语音数据作为数据源。可以看PeerConnectionFactoryInterface的接口中

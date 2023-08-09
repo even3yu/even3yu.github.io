@@ -8,6 +8,12 @@ meta: Post
 categories: webrtc
 ---
 
+
+* content
+{:toc}
+
+---
+
 ## 1. 前言 
 
 从 WebRTC ADM 的实现来看，WebRTC 只实现对应了各个平台具体的硬件设备，并没什么虚拟设备。但是在实际的项目，往往需要支持外部音频输入/输出，就是由业务上层 push/pull 音频数据（PCM ...），而不是直接启动平台硬件进行采集/播放。在这种情况下，虽然原生的 WebRTC 不支持，但是要改造也是非常的简单，由于虚拟设备与平台无关，所以可以直接在 AudioDeviceModuleImpl 中增加一个与真实设备 audio_device_ 对应的Virtual Device（变量名暂定为`virtual_device_`），`virtual_device_`  也跟 `audio_device_ `一样，实现 AudioDeviceGeneric 相关接口，然后参考 audio_device_ 的实现去实现数据的“采集”（push）与 “播放”（pull），无须对接具体平台的硬件设备，唯一需要处理的就是物理设备 audio_device_ 与虚拟设备 virtual_device_ 之间的切换或协同工作。
