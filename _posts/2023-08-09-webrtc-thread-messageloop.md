@@ -22,14 +22,16 @@ categories: webrtc
 - 一个是Peek消息msgPeek_ ；
 - 一个即时消息队列 messages_ ；
 - 一个是延迟消息队列 delayed_messages_ ；
-
+----
 消息循环中的消息队列功能以及通过持有SocketServer对象带来的IO多路复用功能。两部分功能不是完全孤立的，而是相互配合在一起使用。
 
+----
 跨线程的消息通信，两种：同步和异步；
 
 1. PostTask/PostDelayTask，注意区别，这组，其实有两组实现，主要输入的参数不同，不过最终都会调用到Post，后文详细说明；
 2. Invoke，同步调用，会阻塞调用线程，等到执行任务的工作线程放回，才会释放；
 
+----
 消息循环，其实就是在Thread 的线程中，
 
 - 准备了一个while死循环，
