@@ -47,7 +47,7 @@ rtc::Thread类封装了WebRTC中线程的功能,
 
 ### 3.1 类图
 
-![thread]({{ site.url }}{{ site.baseurl }}/images/thread.png)
+![thread]({{ site.url }}{{ site.baseurl }}/images/thread.jpg)
 
 ### 3.2 属性
 
