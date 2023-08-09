@@ -31,7 +31,7 @@ rtc:: Thread及其相关类，ThreadManager、MessageQueue，Runnable等等一�
 
 ## 2. ThreadManager
 
-参考前文
+[参考前文](https://even3yu.github.io/2023/08/08/webrtc-threadmanager/)
 
 
 
