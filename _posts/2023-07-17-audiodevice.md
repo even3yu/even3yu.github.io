@@ -23,7 +23,7 @@ WebRTC的音频设备类主要包含AudioDeviceGeneric和AudioDeviceModule。
 
 
 
-### AudioDeviceModuleImpl 和 AudioDeviceGeneric关系图
+### 1. AudioDeviceModuleImpl 和 AudioDeviceGeneric关系图
 
 
 ![audio-AuidoDevieModule-AudioDevice.drawio]({{ site.url }}{{ site.baseurl }}/images/audio-AuidoDevieModule-AudioDevice.drawio.png)
@@ -51,7 +51,7 @@ WebRTC的音频设备类主要包含AudioDeviceGeneric和AudioDeviceModule。
 
    
 
-### AudioDeviceModule 功能介绍
+### 2. AudioDeviceModule 功能介绍
 
 ![img]({{ site.url }}{{ site.baseurl }}/images/5c85b0fa2e57831467de36d674e701bb.png)
 
@@ -66,28 +66,28 @@ WebRTC的音频设备类主要包含AudioDeviceGeneric和AudioDeviceModule。
 
 AudioDeviceModule 具体由 AudioDeviceModuleImpl 实现，二者之间还有一个 AudioDeviceModuleForTest，主要是添加了一些测试接口，对本文的分析无影响，可直接忽略。AudioDeviceModuleImpl 中有两个非常重要的成员变量，一个是 audio_device_ ，它的具体类型是 std::unique_ptr，另一个是 audio_device_buffer_ ，它的具体类型是 AudioDeviceBuffer。
 
-### AudioDeviceGeneric
+### 3. AudioDeviceGeneric
 
 
 其中 audio_device_ 是 AudioDeviceGeneric 类型，AudioDeviceGeneric 是各个平台具体音频采集和播放设备的一个抽象，由它承担 AudioDeviceModuleImpl 对具体设备的操作。涉及到具体设备的操作，AudioDeviceModuleImpl 除了做一些状态的判断具体的操作设备工作都由 AudioDeviceGeneric 来完成。AudioDeviceGeneric 的具体实现由各个平台自己实现，例如对于 iOS 平台具体实现是 AudioDeviceIOS，Android 平台具体实现是 AudioDeviceTemplate。至于各个平台的具体实现，有兴趣的可以单个分析。这里说一下最重要的共同点，从各个平台具体实现的定义中可以发现，他们都有一个 audio_device_buffer 成员变量，而这个变量与前面提到的 AudioDeviceModuleImpl 中的另一个重要成员变量 audio_device_buffer_ ，其实二者是同一个。AudioDeviceModuleImpl 通过 AttachAudioBuffer() 方法，将自己的 audio_device_buffer_ 对象传给具体的平台实现对象。
 
-### AudioDeviceBuffer
+### 4. AudioDeviceBuffer
 
-audio_device_buffer_ 的具体类型是 AudioDeviceBuffer，AudioDeviceBuffer 中的 play_buffer_、rec_buffer_ 是 int16_t  类型的 buffer，前者做为向下获取播放 PCM 数据的 Buffer，后者做为向下传递采集 PCM 数据的 Buffer，具体的 PCM 数据流向在后面的数据流向章节具体分析，而另一个成员变量 audio_transport_cb_ ，类型为 AudioTransport，从 AudioTransport 接口定义的中的两个核心方法不难看出他的作用，一是向下获取播放 PCM 数据存储在 play_buffer_ ，另一个把采集存储在 rec_buffer_ 中的 PCM 数据向下传递，后续具体流程参考数据流向章节。
+audio_device_buffer_ 的具体类型是 AudioDeviceBuffer，AudioDeviceBuffer 中的 `play_buffer_`、`rec_buffer_` 是 `int16_t`  类型的 buffer，前者做为向下获取播放 PCM 数据的 Buffer，后者做为向下传递采集 PCM 数据的 Buffer，具体的 PCM 数据流向在后面的数据流向章节具体分析，而另一个成员变量  `audio_transport_cb_` ，类型为 AudioTransport，从 AudioTransport 接口定义的中的两个核心方法不难看出他的作用，一是向下获取播放 PCM 数据存储在 `play_buffer_` ，另一个把采集存储在 `rec_buffer_` 中的 PCM 数据向下传递，后续具体流程参考数据流向章节。
 
-### AudioTransport
+### 5. AudioTransport
 
 待补充。
 
 
 
-### 关于 ADM 扩展的思考 
+### 6. 关于 ADM 扩展的思考 
 
-从 WebRTC ADM 的实现来看，WebRTC 只实现对应了各个平台具体的硬件设备，并没什么虚拟设备。但是在实际的项目，往往需要支持外部音频输入/输出，就是由业务上层 push/pull 音频数据（PCM ...），而不是直接启动平台硬件进行采集/播放。在这种情况下，虽然原生的 WebRTC 不支持，但是要改造也是非常的简单，由于虚拟设备与平台无关，所以可以直接在 AudioDeviceModuleImpl 中增加一个与真实设备 audio_device_ 对应的Virtual Device（变量名暂定为virtual_device_），virtual_device_ 也跟 audio_device_ 一样，实现 AudioDeviceGeneric 相关接口，然后参考 audio_device_ 的实现去实现数据的“采集”（push）与 “播放”（pull），无须对接具体平台的硬件设备，唯一需要处理的就是物理设备 audio_device_ 与虚拟设备 virtual_device_ 之间的切换或协同工作。
+从 WebRTC ADM 的实现来看，WebRTC 只实现对应了各个平台具体的硬件设备，并没什么虚拟设备。但是在实际的项目，往往需要支持外部音频输入/输出，就是由业务上层 push/pull 音频数据（PCM ...），而不是直接启动平台硬件进行采集/播放。在这种情况下，虽然原生的 WebRTC 不支持，但是要改造也是非常的简单，由于虚拟设备与平台无关，所以可以直接在 AudioDeviceModuleImpl 中增加一个与真实设备 `audio_device_` 对应的Virtual Device（变量名暂定为`virtual_device_`），`virtual_device_` 也跟 `audio_device_` 一样，实现 AudioDeviceGeneric 相关接口，然后参考 `audio_device_` 的实现去实现数据的“采集”（push）与 “播放”（pull），无须对接具体平台的硬件设备，唯一需要处理的就是物理设备 `audio_device_` 与虚拟设备 `virtual_device_` 之间的切换或协同工作。
 
 
 
 ## 参考
 
-[技术宝典 | WebRTC ADM 源码流程分析](https://blog.csdn.net/netease_im/article/details/123088666)
+[WebRTC ADM 源码流程分析](https://blog.csdn.net/netease_im/article/details/123088666)
 

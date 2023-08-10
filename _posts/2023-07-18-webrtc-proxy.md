@@ -178,6 +178,10 @@ END_PROXY_MAP()
     INTERNAL_CLASS* internal() { return c_; }
 ```
 
+这里的`typedef c##Interface C; `  就是`typedef AudioTrackInterface C;`，在Method地方会用到， 参考小节 4.2。
+
+
+
 #### 2.2.3 SIGNALING_PROXY_MAP_BOILERPLATE
 
 ```cpp
@@ -253,7 +257,7 @@ END_PROXY_MAP()
 ```
 
 关于PROXY_METHOD宏系列，举个示例，其他的都基本类似。
-以PeerConnectionFactory的const Options& options() const { return options_; }方法为例，宏定义
+以AudioTrack的GetSignalLevel方法为例，宏定义
 
 ```cpp
 PROXY_METHOD1(bool, GetSignalLevel, int*)
@@ -433,4 +437,11 @@ PeerConnectionFactory::CreateAudioSource(const cricket::AudioOptions& options) {
 
 为了线程安全，通过Proxy代理对象，将所有操作代理到对应的线程上执行对应的方法， 这也是proxy存在的价值。
 
+
+
+## 参考
+
+1. [WebRTC源码分析-线程安全之Proxy，防止线程乱入](https://blog.csdn.net/ice_ly000/article/details/103191668)
+
+2. [webrtc proxy 分析](https://blog.csdn.net/liwenlong_only/article/details/80166016)
 
