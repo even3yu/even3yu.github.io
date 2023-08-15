@@ -19,9 +19,9 @@ categories: webrtc
 webrtc 中的并发任务, 通常每个线程维护一个任务队列，不同的线程有不同的分工。其中，taskqueue 结构便是线程模型的基础。
 
 > - webrtc的模型
->   <img src="webrtc-taskqueuebase.assets/taskqueuebase-threadmodle-rtc.png" alt="image-20230815220023182" style="zoom:25%;" />
+>   <img src="{{ site.url }}{{ site.baseurl }}/images/webrtc-taskqueuebase.assets/taskqueuebase-threadmodle-rtc.png" alt="image-20230815220023182" style="zoom:25%;" />
 > - 传统型的模型
->   <img src="webrtc-taskqueuebase.assets/taskqueuebase-threadmodle.png" alt="image-20230815215409251" style="zoom:25%;" />
+>   <img src="{{ site.url }}{{ site.baseurl }}/images/webrtc-taskqueuebase.assets/taskqueuebase-threadmodle.png" alt="image-20230815215409251" style="zoom:25%;" />
 
 在WebRTC中，会单独创建线程用于处理即时任务和延迟任务。其他线程可以将待做的事包装成任务投递到该线程去，由该线程执行。这个线程只做一件事，就是循环的处理任务。 
 
@@ -35,7 +35,7 @@ webrtc 中的并发任务, 通常每个线程维护一个任务队列，不同�
 
 ## 2. 跨线程通信
 
-<img src="webrtc-taskqueuebase.assets/taskqueuebase-thread.png" alt="taskqueuebase-thread" style="zoom:50%;" />
+<img src="{{ site.url }}{{ site.baseurl }}/images/webrtc-taskqueuebase.assets/taskqueuebase-thread.png" alt="taskqueuebase-thread" style="zoom:50%;" />
 
 在创建任务队列时，会创建一个线程，这个线程只用于任务的处理，其他线程可以向其投递任务。在主线程中又创建了一个子线程，并将任务队列传入，在子线程也可以向其投递任务。
 这里有三个线程；
