@@ -21,7 +21,7 @@ categories: webrtc
 1. SdpOfferAnswerHandler::PushdownTransportDescription，创建了JsepTransport，DtlsTransport
    RtpTransport，SrtpTransport，DtlsSrtpTransport
    JsepTransportController，JsepTransportDescription。
-   （mid， JsepTransport ）以这样的键值对存放，其中，如果Bundle 多个m Line， 那么以第一个mid 为key，公用JsepTransport；如果没有Bundle，那么每个mLine 都会生成JsepTransport；
+   （mid， JsepTransport ）以这样的键值对存放，其中，如果Bundle 多个m Line， 那么以第一个mid 为key，共用JsepTransport；如果没有Bundle，那么每个mLine 都会生成JsepTransport；
 
 2. SdpOfferAnswerHandler::UpdateTransceiverChannel，检查PC中的每个RtpTranceiver是存在MediaChannel，不存在的会调用WebRtcVideoEngine::CreateMediaChannel()创建WebRtcVideoChannel对象，并赋值给RtpTranceiver的RtpSender和RtpReceiver，这儿解决了VideoRtpSender的media_channel_成员为空的问题；
 
@@ -341,6 +341,7 @@ RTCError SdpOfferAnswerHandler::ApplyLocalDescription(
 
   // 创建WebRtcVideoSendStream 【章节2.4】
   // type= offer
+  // local_description()->description() 返回SessionDescription
   error = UpdateSessionState(type, cricket::CS_LOCAL,
                              local_description()->description());
   if (!error.ok()) {
@@ -481,16 +482,18 @@ pc/sdp_offer_answer.cc
 创建了JsepTransport，DtlsTransport
 RtpTransport，SrtpTransport，DtlsSrtpTransport
 JsepTransportController，JsepTransportDescription。
-（mid， JsepTransport ）以这样的键值对存放，其中，如果Bundle 多个m Line， 那么以第一个mid 为key，公用JsepTransport；如果没有Bundle，那么每个mLine 都会生成JsepTransport；
+（mid， JsepTransport ）以这样的键值对存放，其中，如果Bundle 多个m Line， 那么以第一个mid 为key，共用JsepTransport；如果没有Bundle，那么每个mLine 都会生成JsepTransport；
 
 ### 4.2 --SdpOfferAnswerHandler.UpdateTransceiversAndDataChannels
 
 pc/sdp_offer_answer.cc
 创建BaseChannel。
 
-### 4.3 --UpdateSessionState
+### 4.3 --SdpOfferAnswerHandler::UpdateSessionState
 
 pc/sdp_offer_answer.cc
+
+
 
 ## 5. SdpOfferAnswerHandler::PushdownTransportDescription
 

@@ -216,8 +216,7 @@ RTCError SdpOfferAnswerHandler::UpdateTransceiverChannel(
             RTCErrorType::INTERNAL_ERROR,
             "Failed to create channel for mid=" + content.name);
       }
-      // VideoChannel 通知给RtpTransceiver， Transceiver 得到了VideoChannel
-      // 【章节2.3.3】
+      // VideoChannel 通知给RtpTransceiver， Transceiver 得到了VideoChannel/Voicechannel
       transceiver->internal()->SetChannel(channel);
     }
   }
@@ -248,6 +247,66 @@ pc/sdp_offer_answer.cc
 #### 8.2.2 SdpOfferAnswerHandler::CreateVoiceChannel
 
 pc/sdp_offer_answer.cc
+
+
+
+
+
+#### 8.2.3 !!! RtpTransceiver.setChannel
+
+VideoChannel 带着WebRtcVideoChannel 给到RtpTransceiver。在 updateTransceiverChannel的时候 setChannel
+
+```c++
+// channel 就是VideoChannel
+void RtpTransceiver::SetChannel(cricket::ChannelInterface* channel) {
+  // Cannot set a non-null channel on a stopped transceiver.
+  if (stopped_ && channel) {
+    return;
+  }
+
+  if (channel) {
+    RTC_DCHECK_EQ(media_type(), channel->media_type());
+  }
+
+  if (channel_) {
+    channel_->SignalFirstPacketReceived().disconnect(this);
+  }
+
+  // RtpTransceiver保存了 VideoChannel
+  channel_ = channel;
+
+  // 接收到第一rtp 包
+  if (channel_) {
+    channel_->SignalFirstPacketReceived().connect(
+        this, &RtpTransceiver::OnFirstPacketReceived);
+  }
+
+  // unify plan,应该是只有一个sender，VideoRtpSender
+  for (const auto& sender : senders_) {
+    // 把WebRtcVoiceChannel/WebRtcVideoChannel 给 RtpSender
+    // sender 是 RtpSenderProxyWithInternal<RtpSenderInternal>
+    // internal 就是VideoRtpSender
+    sender->internal()->SetMediaChannel(channel_ ? channel_->media_channel()
+                                                 : nullptr);
+  }
+
+  for (const auto& receiver : receivers_) {
+    if (!channel_) {
+      receiver->internal()->Stop();
+    }
+
+    receiver->internal()->SetMediaChannel(channel_ ? channel_->media_channel()
+                                                   : nullptr);
+  }
+}
+```
+
+1. sender_
+
+   ```c++
+   std::vector<rtc::scoped_refptr<RtpSenderProxyWithInternal<RtpSenderInternal>>>
+         senders_;
+   ```
 
  
 
@@ -370,12 +429,10 @@ webrtc::RtpTransportInternal* rtp_transport() const
 
 
 
-### 9.2 ChannelManager.CreateVideoChannel
+### 9.2 --ChannelManager.CreateVideoChannel
 
 pc/channel_manager.cc
-创建VideoChannel。
-
-
+创建VideoChannel。【章节10】
 
 ### 9.3 !!! BaseChannel::SetRtpTransport
 
@@ -422,66 +479,6 @@ bool BaseChannel::SetRtpTransport(webrtc::RtpTransportInternal* rtp_transport) {
   return true;
 }
 ```
-
-
-
-### 9.3 RtpTransceiver.setChannel
-
-VideoChannel 带着WebRtcVideoChannel 给到RtpTransceiver
-
-在【章节2.3.0】updateTransceiverChannel的时候 setChannel
-
-```c++
-// channel 就是VideoChannel
-void RtpTransceiver::SetChannel(cricket::ChannelInterface* channel) {
-  // Cannot set a non-null channel on a stopped transceiver.
-  if (stopped_ && channel) {
-    return;
-  }
-
-  if (channel) {
-    RTC_DCHECK_EQ(media_type(), channel->media_type());
-  }
-
-  if (channel_) {
-    channel_->SignalFirstPacketReceived().disconnect(this);
-  }
-
-  // RtpTransceiver保存了 VideoChannel
-  channel_ = channel;
-
-  // 接收到第一rtp 包
-  if (channel_) {
-    channel_->SignalFirstPacketReceived().connect(
-        this, &RtpTransceiver::OnFirstPacketReceived);
-  }
-
-  // unify plan,应该是只有一个sender，VideoRtpSender
-  for (const auto& sender : senders_) {
-    // 把WebRtcVoiceChannel/WebRtcVideoChannel 给 RtpSender
-    // sender 是 RtpSenderProxyWithInternal<RtpSenderInternal>
-    // internal 就是VideoRtpSender
-    sender->internal()->SetMediaChannel(channel_ ? channel_->media_channel()
-                                                 : nullptr);
-  }
-
-  for (const auto& receiver : receivers_) {
-    if (!channel_) {
-      receiver->internal()->Stop();
-    }
-
-    receiver->internal()->SetMediaChannel(channel_ ? channel_->media_channel()
-                                                   : nullptr);
-  }
-}
-```
-
-1. sender_
-
-   ```c++
-   std::vector<rtc::scoped_refptr<RtpSenderProxyWithInternal<RtpSenderInternal>>>
-         senders_;
-   ```
 
 
 
@@ -683,9 +680,10 @@ void BaseChannel::Init_w(webrtc::RtpTransportInternal* rtp_transport) {
 
 
 
-#### 10.3.1 ???MediaChannel::SetRtpTransport
+#### 10.3.1 !!! BaseChannel::SetRtpTransport
 
 media/base/media_channel.cc
+就是【章节9.3】
 
 
 
@@ -701,3 +699,25 @@ void MediaChannel::SetInterface(NetworkInterface* iface) {
 }
 ```
 
+- BaseChannel 实现了`MediaChannel::NetworkInterface`;
+
+  ```cpp
+  class MediaChannel : public sigslot::has_slots<> {
+   public:
+    class NetworkInterface {
+     public:
+      enum SocketType { ST_RTP, ST_RTCP };
+      virtual bool SendPacket(rtc::CopyOnWriteBuffer* packet,
+                              const rtc::PacketOptions& options) = 0;
+      virtual bool SendRtcp(rtc::CopyOnWriteBuffer* packet,
+                            const rtc::PacketOptions& options) = 0;
+      virtual int SetOption(SocketType type,
+                            rtc::Socket::Option opt,
+                            int option) = 0;
+      virtual ~NetworkInterface() {}
+    };
+  
+  }
+  ```
+
+  

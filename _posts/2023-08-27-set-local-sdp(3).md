@@ -52,14 +52,8 @@ RTCError SdpOfferAnswerHandler::UpdateSessionState(
     SdpType type,// kOffer
     cricket::ContentSource source,//cricket::CS_LOCAL
     const cricket::SessionDescription* description) {
-  RTC_DCHECK_RUN_ON(signaling_thread());
+  ...
 
-  // If there's already a pending error then no state transition should happen.
-  // But all call-sites should be verifying this before calling us!
-  RTC_DCHECK(session_error() == SessionError::kNone);
-
-  // Update the signaling state according to the specified state machine (see
-  // https://w3c.github.io/webrtc-pc/#rtcsignalingstate-enum).
   // 通知PeerConnection的PeerConnectionObserver  的 SignalingState 变化
   if (type == SdpType::kOffer) {
     // 走的是这里
@@ -123,12 +117,11 @@ pc/sdp_offer_answer.cc
 ```c++
 RTCError SdpOfferAnswerHandler::PushdownMediaDescription(
     SdpType type,
-    cricket::ContentSource source) {
+    cricket::ContentSource source) { // source = cricket::CS_LOCAL
   const SessionDescriptionInterface* sdesc =
       (source == cricket::CS_LOCAL ? local_description()
                                    : remote_description());
-  RTC_DCHECK_RUN_ON(signaling_thread());
-  RTC_DCHECK(sdesc);
+  ...
 
   // Gather lists of updates to be made on cricket channels on the signaling
   // thread, before performing them all at once on the worker thread. Necessary
@@ -140,7 +133,8 @@ RTCError SdpOfferAnswerHandler::PushdownMediaDescription(
   // Collect updates for each audio/video transceiver.
   // 更新 tranceivers
   for (const auto& transceiver : transceivers()->List()) {
-    //  SessionDescriptionInterface* sdesc
+    //  SessionDescriptionInterface* sdesc，
+		// 通过transceiver 从SessionDescription找到ContentInfo
     const ContentInfo* content_info =
         FindMediaSectionForTransceiver(transceiver, sdesc);
     // channel 就是 VideoChannel
@@ -148,7 +142,7 @@ RTCError SdpOfferAnswerHandler::PushdownMediaDescription(
     if (!channel || !content_info || content_info->rejected) {
       continue;
     }
-    // 需要看JsepTransport，SessionDescription？？？？
+    // ContentInfo 得到 ContentInfo::MediaContentDescription 
     const MediaContentDescription* content_desc =
         content_info->media_description();
     if (content_desc) {
@@ -175,7 +169,9 @@ RTCError SdpOfferAnswerHandler::PushdownMediaDescription(
 }
 ```
 
-1. ContentUpdate ？？？？，MediaContentDescription
+1. 通过transceivers()->List() 获取到content_updates；
+   
+1. ContentUpdate，MediaContentDescription
    
    ```c++
    struct ContentUpdate {
@@ -189,7 +185,17 @@ RTCError SdpOfferAnswerHandler::PushdownMediaDescription(
 
 
 
-### 11.2 SdpOfferAnswerHandler.ApplyChannelUpdates
+#### ??? GetPayloadTypeDemuxingUpdates
+
+
+
+### 11.2 --SdpOfferAnswerHandler.ApplyChannelUpdates
+
+pc/sdp_offer_answer.cc
+
+
+
+## 12. SdpOfferAnswerHandler.ApplyChannelUpdates
 
 pc/sdp_offer_answer.cc
 
@@ -209,6 +215,7 @@ RTCError SdpOfferAnswerHandler::ApplyChannelUpdates(
     modified_channels.insert(update.channel);
     update.channel->SetPayloadTypeDemuxingEnabled(update.enabled);
   }
+  // 对所有的channel 进行处理
   for (const auto& update : content_updates) {
     modified_channels.insert(update.channel);
     std::string error;
@@ -243,9 +250,14 @@ RTCError SdpOfferAnswerHandler::ApplyChannelUpdates(
 }
 ```
 
+- 通过transceivers()->List() 获取到content_updates； 这是在上一步处理的，对content_updates 循环，处理数据。
+- 
 
 
-### 2.4.3 BaseChannel.SetLocalContent
+
+### 12.1 BaseChannel.SetLocalContent
+
+pc/channel.cc
 
 ```c++
 bool BaseChannel::SetLocalContent(const MediaContentDescription* content,
@@ -260,21 +272,15 @@ bool BaseChannel::SetLocalContent(const MediaContentDescription* content,
 
 
 
-### 2.4.4 VideoChannel.SetLocalContent_w
+### 12.2 !!! VideoChannel.SetLocalContent_w
+
+pc/channel.cc
 
 ```c++
 bool VideoChannel::SetLocalContent_w(const MediaContentDescription* content,
                                      SdpType type,
                                      std::string* error_desc) {
-  TRACE_EVENT0("webrtc", "VideoChannel::SetLocalContent_w");
-  RTC_DCHECK_RUN_ON(worker_thread());
-  RTC_LOG(LS_INFO) << "Setting local video description for " << ToString();
-
-  RTC_DCHECK(content);
-  if (!content) {
-    SafeSetError("Can't find video content in local description.", error_desc);
-    return false;
-  }
+	...
 
   const VideoContentDescription* video = content->as_video();
 
@@ -361,7 +367,7 @@ bool VideoChannel::SetLocalContent_w(const MediaContentDescription* content,
 
 
 
-### 2.4.5 BaseChannel.UpdateLocalStreams_w
+### 12.3 BaseChannel.UpdateLocalStreams_w
 
 ```c++
 bool BaseChannel::UpdateLocalStreams_w(const std::vector<StreamParams>& streams,
@@ -449,7 +455,7 @@ bool BaseChannel::UpdateLocalStreams_w(const std::vector<StreamParams>& streams,
 
 
 
-### 2.4.6 WebRtcVideoChannel.AddSendStream——创建并保存WebRtcVideoSendStream
+### 12.4 WebRtcVideoChannel.AddSendStream——创建并保存WebRtcVideoSendStream
 
 ```c++
 bool WebRtcVideoChannel::AddSendStream(const StreamParams& sp) {
@@ -517,7 +523,7 @@ bool WebRtcVideoChannel::AddSendStream(const StreamParams& sp) {
    std::map<uint32_t, WebRtcVideoSendStream*> send_streams_  RTC_GUARDED_BY(thread_checker_);
    ```
 
-### 2.4.7 WebRtcVideoSendStream.WebRtcVideoSendStream
+### 12.5 WebRtcVideoSendStream.WebRtcVideoSendStream
 
 ```c++
 WebRtcVideoChannel::WebRtcVideoSendStream::WebRtcVideoSendStream(
