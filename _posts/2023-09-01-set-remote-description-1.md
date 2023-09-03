@@ -1,3 +1,20 @@
+---
+layout: post
+title: webrtc setRemoteDescription-1
+date: 2023-09-01 23:32:00 +0800
+author: Fisher
+pin: True
+meta: Post
+categories: webrtc
+---
+
+
+* content
+{:toc}
+
+---
+
+
 ![setRemoteSDP](setRemoteDescription.assets/setRemoteSDP-6649445.svg)
 
 

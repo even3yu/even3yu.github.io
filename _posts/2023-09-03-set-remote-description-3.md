@@ -1,7 +1,7 @@
 ---
 layout: post
 title: webrtc setRemoteDescription-3
-date: 2023-09-03 23:32:00 +0800
+date: 2023-09-03 23:00:00 +0800
 author: Fisher
 pin: True
 meta: Post
