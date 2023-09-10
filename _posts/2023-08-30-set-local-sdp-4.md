@@ -215,7 +215,7 @@ bool WebRtcVideoChannel::SetVideoSend(
 
 2. WebRtcVideoSendStream 和VideoSource 绑定
 
-### 15.3 WebRtcVideoChannel::WebRtcVideoSendStream::SetVideoSend
+### 15.3 --WebRtcVideoChannel::WebRtcVideoSendStream::SetVideoSend
 
 media/engine/webrtc_video_engine.cc
 
@@ -287,19 +287,19 @@ bool WebRtcVideoChannel::WebRtcVideoSendStream::SetVideoSend(
 
 
 
-### WebRtcVideoChannel.WebRtcVideoSendStream.SetCodec
+### --WebRtcVideoChannel.WebRtcVideoSendStream.SetCodec
 
 media/engine/webrtc_video_engine.cc
 
 
 
-### WebRtcVideoChannel.WebRtcVideoSendStream.ReconfigureEncoder
+### --WebRtcVideoChannel.WebRtcVideoSendStream.ReconfigureEncoder
 
 media/engine/webrtc_video_engine.cc
 
 
 
-### webrtc::VideoSendStream::setSource
+### --webrtc::VideoSendStream::setSource
 
 
 
@@ -360,7 +360,6 @@ void WebRtcVideoChannel::WebRtcVideoSendStream::SetCodec(
 media/engine/webrtc_video_engine.cc
 
 ```cpp
-
 void WebRtcVideoChannel::WebRtcVideoSendStream::RecreateWebRtcStream() {
   RTC_DCHECK_RUN_ON(&thread_checker_);
   if (stream_ != NULL) {

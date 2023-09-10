@@ -15,7 +15,7 @@ categories: webrtc
 ---
 
 
-![]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/view.png)
+![]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/caller-set-local-description.jpg)
 
 
 
@@ -78,8 +78,7 @@ RTCError SdpOfferAnswerHandler::UpdateTransceiversAndDataChannels(
         return transceiver_or_error.MoveError();
       }
       auto transceiver = transceiver_or_error.MoveValue();
-      // 设置Channel， 如果原先的没有，创建VoiceChannel 或者 VideoChannel【章节2.3】
-      // 参数理解下？？？
+      // 设置Channel， 如果原先的没有，创建VoiceChannel 或者 VideoChannel,就是BaseChannel
       RTCError error =
           UpdateTransceiverChannel(transceiver, new_content, bundle_group);
       if (!error.ok()) {
@@ -117,7 +116,7 @@ RTCError SdpOfferAnswerHandler::UpdateTransceiversAndDataChannels(
 
 
 
-### 8.1 SdpOfferAnswerHandler::AssociateTransceiver
+### 8.1 ??? SdpOfferAnswerHandler::AssociateTransceiver
 
 pc/sdp_offer_answer.cc
 
@@ -330,6 +329,7 @@ cricket::VideoChannel* SdpOfferAnswerHandler::CreateVideoChannel(
     RTC_DCHECK_RUN_ON(pc_->signaling_thread());
     // 2. 通过Channel Manager 创建VideoChannel
     // RtpTransportInternal *rtp_transport， 
+    // rtp_transport 传递给BaseChannel
     video_channel = channel_manager()->CreateVideoChannel(
         pc_->call_ptr(), pc_->configuration()->media_config, rtp_transport,
         signaling_thread(), mid, pc_->SrtpRequired(), pc_->GetCryptoOptions(),
@@ -527,7 +527,8 @@ VideoChannel* ChannelManager::CreateVideoChannel(
       absl::WrapUnique(media_channel), content_name, srtp_required,
       crypto_options, ssrc_generator);
 
-  // 3. ？？？？？
+  // 3. 把 transport 和mediaChannel 关联起来；
+	// 同时，BaseChannel和MediaChannel 关联起来，SetInterface
   video_channel->Init_w(rtp_transport);
 
   VideoChannel* video_channel_ptr = video_channel.get();
@@ -578,6 +579,7 @@ VideoMediaChannel* WebRtcVideoEngine::CreateMediaChannel(
 ```
 
 创建WebRtcVideoChannel，就是MediaChannel。
+继承关系如下：
 
 ```
 MediaChannel

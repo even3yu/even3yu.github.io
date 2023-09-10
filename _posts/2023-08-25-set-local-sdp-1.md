@@ -22,12 +22,17 @@ categories: webrtc
    RtpTransport，SrtpTransport，DtlsSrtpTransport
    JsepTransportController，JsepTransportDescription。
    （mid， JsepTransport ）以这样的键值对存放，其中，如果Bundle 多个m Line， 那么以第一个mid 为key，共用JsepTransport；如果没有Bundle，那么每个mLine 都会生成JsepTransport；
-
+   JsepTransportController 管理着这些transport。
 2. SdpOfferAnswerHandler::UpdateTransceiverChannel，检查PC中的每个RtpTranceiver是存在MediaChannel，不存在的会调用WebRtcVideoEngine::CreateMediaChannel()创建WebRtcVideoChannel对象，并赋值给RtpTranceiver的RtpSender和RtpReceiver，这儿解决了VideoRtpSender的media_channel_成员为空的问题；
 
-3. SdpOfferAnswerHandler::UpdateSessionState，将SDP中的信息应用到上一步创建的视频媒体通道对象WebRtcVideoChannel上，调用WebRtcVideoChannel::AddSendStream()方法为通道创建WebRtcVideoSendStream，如果有多个视频Track，会有多个WebRtcVideoSendStream分别与之对应。WebRtcVideoSendStream对象存入WebRtcVideoChannel的std::map<uint32_t, WebRtcVideoSendStream*> send_streams_成员，以ssrc为key。创建WebRtcVideoSendStream，其构造函数中会进一步创建VideoSendStream，VideoSendStream的构造中会进一步创建
+3. SdpOfferAnswerHandler::UpdateSessionState，将SDP中的信息应用到上一步创建的视频媒体通道对象WebRtcVideoChannel上，调用WebRtcVideoChannel::AddSendStream()方法为通道创建WebRtcVideoSendStream，在planB 中如果有多个视频Track，会有多个WebRtcVideoSendStream分别与之对应，而unified 是只有一个WebRtcVideoSendStream。 WebRtcVideoSendStream对象存入WebRtcVideoChannel的std::map<uint32_t, WebRtcVideoSendStream*> send_streams_成员，以ssrc为key。创建WebRtcVideoSendStream，其构造函数中会进一步创建VideoSendStream，VideoSendStream的构造中会进一步创建。
+4. VideoRtpSender::SetSsrc，
 
 
+
+## 0. 调用堆栈
+
+![caller-set-local-description]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/caller-set-local-description.jpg)![]()
 
 ## 1. PeerConnection::SetLocalDescription
 
@@ -339,7 +344,7 @@ RTCError SdpOfferAnswerHandler::ApplyLocalDescription(
     RemoveUnusedChannels(local_description()->description());
   }
 
-  // 创建WebRtcVideoSendStream 【章节2.4】
+  // 创建WebRtcVideoSendStream
   // type= offer
   // local_description()->description() 返回SessionDescription
   error = UpdateSessionState(type, cricket::CS_LOCAL,
@@ -387,7 +392,9 @@ RTCError SdpOfferAnswerHandler::ApplyLocalDescription(
         const std::vector<StreamParams>& streams = channel->local_streams();
         transceiver->internal()->sender_internal()->set_stream_ids(
             streams[0].stream_ids());
-        // 给 RtpSenderInternal设置SetSsrc 【章节2.5】，videosource和encoder 绑定
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // 给 RtpSenderInternal设置SetSsrc ，videosource和encoder 绑定
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         transceiver->internal()->sender_internal()->SetSsrc(
             streams[0].first_ssrc());
       }
@@ -492,6 +499,12 @@ pc/sdp_offer_answer.cc
 ### 4.3 --SdpOfferAnswerHandler::UpdateSessionState
 
 pc/sdp_offer_answer.cc
+
+
+
+### 4.4 --RtpSenderBase.SetSsrc
+
+pc/rtp_sender.h
 
 
 

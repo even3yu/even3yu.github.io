@@ -14,7 +14,7 @@ categories: webrtc
 
 ---
 
-![]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/view.png)
+![]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/caller-set-local-description.jpg
 
 
 ![jsep-session-description]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/jsep-session-description.png)
