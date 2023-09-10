@@ -32,7 +32,7 @@ categories: webrtc
 
 ## 0. 调用堆栈
 
-![caller-set-local-description]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/caller-set-local-description.jpg)![]()
+![caller-set-local-description]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/caller-set-local-description.jpg)
 
 ## 1. PeerConnection::SetLocalDescription
 

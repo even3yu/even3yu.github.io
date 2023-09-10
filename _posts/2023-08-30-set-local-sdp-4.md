@@ -16,6 +16,7 @@ categories: webrtc
 
 ![]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/view.png)
 
+![caller-set-local-description]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/caller-set-local-description.jpg)
 
 ## 15. !!! RtpSenderBase.SetSsrc
 
