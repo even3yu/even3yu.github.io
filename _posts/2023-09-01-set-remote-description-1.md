@@ -15,15 +15,15 @@ categories: webrtc
 ---
 
 
-![setRemoteSDP](setRemoteDescription.assets/setRemoteSDP-6649445.svg)
+![setRemoteSDP]({{ site.url }}{{ site.baseurl }}/images/setRemoteDescription.assets/setRemoteSDP-6649445.svg)
 
 
 
-![videoencodesdp](setRemoteDescription.assets/videoencodesdp.svg)
+![videoencodesdp]({{ site.url }}{{ site.baseurl }}/images/setRemoteDescription.assets/videoencodesdp.svg)
 
-![videotrack](setRemoteDescription.assets/videotrack.svg)
+![videotrack]({{ site.url }}{{ site.baseurl }}/images/setRemoteDescription.assets/videotrack.svg)
 
-![setRemoteSDP](setRemoteDescription.assets/setRemoteSDP-6663142.svg)
+![setRemoteSDP]({{ site.url }}{{ site.baseurl }}/images/setRemoteDescription.assets/setRemoteSDP-6663142.svg)
 
 
 sdp是从callee 端接收到，所以SessionDescriptionInterface 是 answer。

@@ -1,0 +1,53 @@
+ARDClient->RTCPeerConnection: setLocalDescription
+RTCPeerConnection->PeerConnectionProxyWithInternal: setLocalDescription
+PeerConnectionProxyWithInternal->PeerConnection: setLocalDescription
+PeerConnection->SdpOfferAnswerHandler: setLocalDescription
+Note right of SdpOfferAnswerHandler: ChainOperation
+SdpOfferAnswerHandler->SdpOfferAnswerHandler: DoSetLocalDescription
+SdpOfferAnswerHandler->SdpOfferAnswerHandler: ApplyLocalDescription
+SdpOfferAnswerHandler->SdpOfferAnswerHandler: UpdateTransceiversAndDataChannels
+SdpOfferAnswerHandler->SdpOfferAnswerHandler: UpdateTransceiverChannel
+
+SdpOfferAnswerHandler->ChannelManager: CreateVoiceChannel
+Note right of ChannelManager: switch workthread
+ChannelManager->ChannelManager: CreateVoiceChannel
+ChannelManager->MediaEngine: media_engine
+VoiceEngine->MediaEngine:voice
+VoiceEngine->WebRtcVoiceEngine:CreateMediaChannel
+WebRtcVoiceEngine->WebRtcVoiceMediaChannel:WebRtcVoiceMediaChannel
+ChannelManager->VoiceChannel: VoiceChannel
+VoiceChannel->BaseChannel: BaseChannel
+
+SdpOfferAnswerHandler->ChannelManager: CreateVideoChannel
+Note right of ChannelManager: switch workthread
+ChannelManager->ChannelManager: CreateVideoChannel
+ChannelManager->VoiceChannel: VideoChannel
+VoiceChannel->BaseChannel: BaseChannel
+
+Note right of SdpOfferAnswerHandler: return to DoSetLocalDescription
+SdpOfferAnswerHandler->SdpOfferAnswerHandler: UpdateSessionState
+SdpOfferAnswerHandler->SdpOfferAnswerHandler: PushdownMediaDescription
+SdpOfferAnswerHandler->SdpOfferAnswerHandler: ApplyChannelUpdates
+SdpOfferAnswerHandler->BaseChannel: SetLocalContent
+BaseChannel->BaseChannel: SetLocalContent_w
+BaseChannel->VideoChannel: UpdateLocalStreams_w
+VideoChannel->VoiceMediaChannel: AddSendStream
+
+VoiceMediaChannel->WebRtcVideoSendStream: WebRtcVideoSendStream
+
+Note right of SdpOfferAnswerHandler: return to ApplyLocalDescription
+SdpOfferAnswerHandler->RtpSenderBase: SetSsrc
+RtpSenderBase->VideoRtpSender: SetSend
+VideoRtpSender->WebRtcVideoChannel: SetVideoSend
+WebRtcVideoChannel->WebRtcVideoChannel.WebRtcVideoSendStream: SetVideoSend
+
+
+
+
+
+
+
+SdpOfferAnswerHandler->JsepTransportController:MaybeStartGathering
+JsepTransportController->DtlsTransport:ice_transport
+DtlsTransport->P2PTransportChannel::MaybeStartGathering
+

@@ -14,7 +14,7 @@ categories: webrtc
 
 ---
 
-![](3.setLocalSDP.assets/view.png)
+![]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/view.png)
 
 
 
