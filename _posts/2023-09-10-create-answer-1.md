@@ -1,6 +1,6 @@
 ---
 layout: post
-title: webrtc create answer
+title: webrtc create answer-1
 date: 2023-09-10 23:11:00 +0800
 author: Fisher
 pin: True
@@ -23,13 +23,13 @@ categories: webrtc
 
 - 形成Offer：实际上是根据搜集的信息MediaSessionOptions，经过一系列的函数调用来构建Offer对象的过程。Offer SDP实质上是JsepSessionDescription对象，不过该对象中重要的成员SessionDescription承载了绝大多数信息。
 
-- 通告结果：不论Offer创建成功，还是失败，最终需要做两件事。一件是通告用户侧Offer创建成功还是失败；一件是触发操作链的下一个操作。这个是通过CreateSessionDescriptionObserverOperationWrapper对象封装创建Offer回调接口、封装操作链操作完成回调，并在CreateOffer过程中一直往下传递，直到创建失败或者成功的地方被触发，来实现的。
+- 通告结果：不论Offer创建成功，还是失败，最终需要做两件事。一件是通告用户侧Offer创建成功还是失败；一件是触发操作链的下一个操作。这个是通过CreateSessionDescriptionObserverOperationWrapper对象封装创建Offer回调接口、封装操作链操作完成回调，并在CreateAnswer过程中一直往下传递，直到创建失败或者成功的地方被触发，来实现的。
 
 - 此外：不论是搜集信息，还是形成Offer都需要参考当前已被应用的Offer中的信息，以便复用部分信息，并使得两次Offer中同样的mLine处于同样的位置。
 
-![createoffer-1](create-answer.assets/createoffer-1.png)SdpOfferAnswerHandler::GetOptionsForUnifiedPlanOffer()会遍历PC中所有的RtpTransceiver(RtpTransceiver是在addTrack的时候生成的)，**为每个RtpTransceiver创建一个媒体描述信息对象MediaDescriptionOptions**，在最终的生成的SDP对象中，**一个MediaDescriptionOptions就是一个m-line**。 根据由于之前的分析，一个Track对应一个RtpTransceiver，实质上在SDP中一个track就会对应到一个m-line。上述遍历形成所有媒体描述信息MediaDescriptionOptions会存入到MediaSessionOptions对象中，该对象在后续过程中一路传递，最终**在MediaSessionDescriptionFactory::CreateOffer()方法中被用来完成SDP创建**。
+![createoffer-1]({{ site.url }}{{ site.baseurl }}/images/create-answer-1.assets/createoffer-1.png)SdpOfferAnswerHandler::GetOptionsForUnifiedPlanOffer()会遍历PC中所有的RtpTransceiver(RtpTransceiver是在addTrack的时候生成的)，**为每个RtpTransceiver创建一个媒体描述信息对象MediaDescriptionOptions**，在最终的生成的SDP对象中，**一个MediaDescriptionOptions就是一个m-line**。 根据由于之前的分析，一个Track对应一个RtpTransceiver，实质上在SDP中一个track就会对应到一个m-line。上述遍历形成所有媒体描述信息MediaDescriptionOptions会存入到MediaSessionOptions对象中，该对象在后续过程中一路传递，最终**在MediaSessionDescriptionFactory::CreateAnswer()方法中被用来完成SDP创建**。
 
-另外MediaSessionDescriptionFactory::CreateOffer() 创建SDP过程中，会为每个媒体对象，即每个track：audio、video、data创建对应的MediaContent。上图右边展示了为视频track创建VideoContent过程，标黄的静态方法CreateStreamParamsForNewSenderWithSsrcs()会为每个RtpSender生成唯一的ssrc值。ssrc是个关键信息，正如之前分析，但需要说明的一点是此处并不会调用RtpSender->SetSsrc()方法，ssrc当前只存在于SDP信息中，等待SetLocalDescription()的解析。
+另外MediaSessionDescriptionFactory::CreateAnswer() 创建SDP过程中，会为每个媒体对象，即每个track：audio、video、data创建对应的MediaContent。上图右边展示了为视频track创建VideoContent过程，标黄的静态方法CreateStreamParamsForNewSenderWithSsrcs()会为每个RtpSender生成唯一的ssrc值。ssrc是个关键信息，正如之前分析，但需要说明的一点是此处并不会调用RtpSender->SetSsrc()方法，ssrc当前只存在于SDP信息中，等待SetLocalDescription()的解析。
 
 
 
@@ -38,7 +38,7 @@ categories: webrtc
 api/jsep.h
 
 ```cpp
-// CreateOffer and CreateAnswer callback interface.
+// CreateAnswer and CreateAnswer callback interface.
 class RTC_EXPORT CreateSessionDescriptionObserver
     : public rtc::RefCountInterface {
  public:
@@ -124,7 +124,7 @@ api/peer_connection_interface.h
 
 
 
-## 3. PeerConnection.CreateOffer
+## 3. PeerConnection.CreateAnswer
 
 pc/peer_connection.cc
 
@@ -140,7 +140,7 @@ void PeerConnection::CreateAnswer(CreateSessionDescriptionObserver* observer,
 
 2. 参数 CreateSessionDescriptionObserver* observer 就是【章节2】中创建的
 
-   注意：CreateSessionDescriptionObserver只是一个接口，没有具体实现。一般用户层需要继承，并实现CreateSessionDescriptionObserver的方法，以便用户侧感知CreateOffer状态。
+   注意：CreateSessionDescriptionObserver只是一个接口，没有具体实现。一般用户层需要继承，并实现CreateSessionDescriptionObserver的方法，以便用户侧感知CreateAnswer状态。
 
    另外，WebRTC内部提供了两个实现了CreateSessionDescriptionObserver接口的类，ImplicitCreateSessionDescriptionObserver && CreateSessionDescriptionObserverOperationWrapper。在后续分析过程中再来聊聊这两个实现所起的作用。
 
@@ -196,7 +196,7 @@ void SdpOfferAnswerHandler::CreateAnswer(
 
 - WebRTC中将CreateOffer、CreateAnswer、SetLocalDescription、SetRemoteDescription、AddIceCandidate这5个与SDP会话相关的API认为是一个Operation，**这些Operation必须是挨个执行，不能乱序，不能同时有两个交互执行**。因此，设计了一套操作链的接口，由OperationsChain类提供此功能。当链入一个操作时，如果队列中没有其他操作，那么该操作会被立马执行；若是操作链中存在操作，那么本操作就入队操作链，等待上一个操作执行完成之后，以回调的形式（即上述代码中的operations_chain_callback回调方法）来告知执行下一步操作。~~具体实现可见文章：WebRTC源码分析——操作链实现OperationsChain~~
 
-- CreateSessionDescriptionObserverOperationWrapper相当于一个封装了 "Offer操作结果回调 + 操作链操作完成回调"的一个对象，一直沿着CreateOffer调用链往下传，直到能够判断是否能成功创建Offer的地方，创建Offer这个操作完成的地方，然后去触发其承载的回调函数，以便告知上层操作结果，然后触发下一个操作。
+- CreateSessionDescriptionObserverOperationWrapper相当于一个封装了 "Offer操作结果回调 + 操作链操作完成回调"的一个对象，一直沿着CreateAnswer调用链往下传，直到能够判断是否能成功创建Offer的地方，创建Offer这个操作完成的地方，然后去触发其承载的回调函数，以便告知上层操作结果，然后触发下一个操作。
 
 - `rtc::WeakPtrFactory<PeerConnection> weak_ptr_factory_`：在构造PeerConnection时，传入了this指针。当从`weak_ptr_factory_`获取弱指针this_weak_ptr不存在时，意味着PC已经不存在了，也即当前会话已被关闭。这样的功能是由rtc::WeakPtrFactory && WeakPtr带来的，~~详见 WebRTC源码分析——弱指针WeakPtrFactory && WeakPtr~~。要注意的是weak_ptr_factory_必须声明在PC的最后，这样是为了：
 
@@ -257,9 +257,9 @@ void SdpOfferAnswerHandler::DoCreateAnswer(
 
 - 对入参和当前状态的一些判断（如源码所示共6点），若这些条件和状态不对，则PostCreateSessionDescriptionFailure方法将错误信息post出去，并且不再继续创建Offer的后续动作；
 
-- 获取MediaSessionOptions信息，然后调用WebRtcSessionDescriptionFactory::CreateOffer来实际创建Offer.
+- 获取MediaSessionOptions信息，然后调用WebRtcSessionDescriptionFactory::CreateAnswer来实际创建Offer.
 
-  ![media_session_option_value](create-answer.assets/media_session_option_value.png)
+  ![media_session_option_value]({{ site.url }}{{ site.baseurl }}/images/create-answer-1.assets/media_session_option_value.png)
 
 
 
@@ -281,13 +281,13 @@ api/peer_connection_interface.h
 
 
 
-#### 3.2.2 SdpOfferAnswerHandler.GetOptionsForAnswer
+#### 3.2.2 --SdpOfferAnswerHandler.GetOptionsForAnswer
 
 通过RTCOfferAnswerOptions 创建 MediaSessionOptions。
 MediaSessionOptions 除了一些公共部的一些属性， 还存放了每个 mline 特有的属性，多个mline以数组形式存放。
 参考【章节4】。
 
-#### 3.2.3 WebRtcSessionDescriptionFactory.CreateAnswer
+#### 3.2.3 --WebRtcSessionDescriptionFactory.CreateAnswer
 
 根据MediaSessionOptions 创建 JsepSessionDescription， 当然JsepSessionDescription 主要的属性 SessionDescription。
 参考【章节5】。
@@ -297,7 +297,7 @@ MediaSessionOptions 除了一些公共部的一些属性， 还存放了每个 m
 pc/sdp_offer_answer.cc
 
 ```cpp
-void SdpOfferAnswerHandler::GetOptionsForOffer(
+void SdpOfferAnswerHandler::GetOptionsForAnswer(
     const PeerConnectionInterface::RTCOfferAnswerOptions& offer_answer_options,
     cricket::MediaSessionOptions* session_options) {
 
@@ -307,11 +307,9 @@ void SdpOfferAnswerHandler::GetOptionsForOffer(
   //      bundle_enabled: 是否所有媒体数据都成为一个Bundle Gruop，从而复用一个底层传输通道
   //      raw_packetization_for_video：对sdp中所有video负载将产生
   //                    "a=packetization:<payload_type> raw"这样的属性描述。
-  //【章节3.4.2】
   ExtractSharedMediaSessionOptions(offer_answer_options, session_options);
 
   // 2. 为每个mline，创建MediaDescriptionOptions存入MediaSessionOptions
-  //【章节3.4.3】
   if (IsUnifiedPlan()) {
     GetOptionsForUnifiedPlanAnswer(offer_answer_options, session_options);
   } else {
@@ -320,13 +318,13 @@ void SdpOfferAnswerHandler::GetOptionsForOffer(
 
   ...
 
-  // 4. 将ice renomination标识赋值到每个mline对应的MediaDescription
+  // 3. 将ice renomination标识赋值到每个mline对应的MediaDescription
   for (auto& options : session_options->media_description_options) {
     options.transport_options.enable_ice_renomination =
         pc_->configuration()->enable_ice_renomination;
   }
 
-  // 5. 复制cname，加密算法选项，加密证书，extmap-allow-mixed属性
+  // 4. 复制cname，加密算法选项，加密证书，extmap-allow-mixed属性
   session_options->rtcp_cname = rtcp_cname_;
   session_options->crypto_options = pc_->GetCryptoOptions();
   session_options->pooled_ice_credentials =
@@ -337,13 +335,16 @@ void SdpOfferAnswerHandler::GetOptionsForOffer(
 }
 ```
 
+- 填充 cricket::MediaSessionOptions* session_options 对象
+- ExtractSharedMediaSessionOptions， 填充公共属性，
+- GetOptionsForUnifiedPlanAnswer，为每个mline，创建MediaDescriptionOptions存入MediaSessionOptions
+- session_options的rtcp_cname，crypto_options等
 
 
 
+### 4.0 !!! MediaSessionOptions和MediaDescriptionOptions类关系图
 
-### 4.0 MediaSessionOptions和MediaDescriptionOptions类关系图
-
-![media_session_option](create-answer.assets/media_session_option.png)
+![media_session_option]({{ site.url }}{{ site.baseurl }}/images/create-answer-1.assets/media_session_option.png)
 
 MediaSessionOptions提供了一个应该如何生成mLine的机制。一方面，MediaSessionOptions提供了适用于所有mLine的参数；另一方面，MediaSessionOptions对于每个具体的mLine，有差异性的参数使用 `std::vector<MediaDescriptionOptions> MediaSessionOptions::media_description_options`中的对应的那个MediaDescriptionOptions所提供的规则，注意`MediaSessionOptions::media_description_options`的下标和mLine在sdp中的顺序是一致的。
 
@@ -527,11 +528,7 @@ void SdpOfferAnswerHandler::GetOptionsForUnifiedPlanAnswer(
                                              /*stopped=*/true));
       }
     } else if (media_type == cricket::MEDIA_TYPE_UNSUPPORTED) {
-      RTC_DCHECK(content.rejected);
-      session_options->media_description_options.push_back(
-          cricket::MediaDescriptionOptions(media_type, content.name,
-                                           RtpTransceiverDirection::kInactive,
-                                           /*stopped=*/true));
+      ...
     } else {
       ...
     }
@@ -560,7 +557,7 @@ ContentInfo 主要管理 mline对应的相关信息， 存放在MediaContentDesc
 
 #### 关系图
 
-![jsep-session-description](create-answer.assets/jsep-session-description.png)
+![jsep-session-description]({{ site.url }}{{ site.baseurl }}/images/create-answer-1.assets/jsep-session-description.png)
 
 #### !!! 重要关系
 
@@ -661,13 +658,12 @@ GetMediaDescriptionOptionsForTransceiver(
 
 
 
-## 5. WebRtcSessionDescriptionFactory.CreateOffer
+## 5. WebRtcSessionDescriptionFactory.CreateAnswer
 
 pc\webrtc_session_description_factory.cc
-【章节3.2】doCreateOffer中调用的
 
 ```cpp
-void WebRtcSessionDescriptionFactory::CreateOffer(
+void WebRtcSessionDescriptionFactory::CreateAnswer(
     CreateSessionDescriptionObserver* observer,
     const cricket::MediaSessionOptions& session_options) {
   std::string error = "CreateAnswer";
@@ -680,7 +676,7 @@ void WebRtcSessionDescriptionFactory::CreateOffer(
   // 3.2 若证书请求状态是CERTIFICATE_WAITING，则请求入队，等待执行
   if (certificate_request_state_ == CERTIFICATE_WAITING) {
     create_session_description_requests_.push(request);
-   // 3.2 若证书请求状态是CERTIFICATE_SUCCEEDED已经成功状态或者CERTIFICATE_NOT_NEEDED
+   // 3.3 若证书请求状态是CERTIFICATE_SUCCEEDED已经成功状态或者CERTIFICATE_NOT_NEEDED
   //     不需要证书状态 ，则直接调用InternalCreateAnswer来处理生成Answer的请求
   } else {
     RTC_DCHECK(certificate_request_state_ == CERTIFICATE_SUCCEEDED ||
@@ -707,7 +703,7 @@ WebRtcSessionDescriptionFactory::certificate_request_state_ 成员的取值影�
   };
 ```
 
-### 5.2 CreateSessionDescriptionRequest
+### 5.2 !!! CreateSessionDescriptionRequest
 
 pc\webrtc_session_description_factory.h
 
@@ -789,7 +785,7 @@ pc\webrtc_session_description_factory.cc
   }
   ```
 
-因此，会在WebRtcSessionDescriptionFactory的OnMesaage方法中得到异步处理。最终是在SetCertificate完成证书的设置，状态更新为CERTIFICATE_SUCCEEDED，并发送SignalCertificateReady信号，由于CERTIFICATE_WAITING状态下，创建Offer的请求会排队，在SetCertificate中还会将排队的请求pop出来，调用InternalCreateOffer进行处理。
+因此，会在WebRtcSessionDescriptionFactory的OnMesaage方法中得到异步处理。最终是在SetCertificate完成证书的设置，状态更新为CERTIFICATE_SUCCEEDED，并发送SignalCertificateReady信号，由于CERTIFICATE_WAITING状态下，创建Offer的请求会排队，在SetCertificate中还会将排队的请求pop出来，调用InternalCreateAnswer进行处理。
 
 ```cpp
   void WebRtcSessionDescriptionFactory::OnMessage(rtc::Message* msg) {
@@ -919,7 +915,7 @@ pc\webrtc_session_description_factory.cc
 void WebRtcSessionDescriptionFactory::InternalCreateAnswer(
     CreateSessionDescriptionRequest request) {
   if (sdp_info_->remote_description()) {
-    // ？？？
+    // 1. dtls role的配置，以及ice_restart 的状态
     for (cricket::MediaDescriptionOptions& options :
          request.options.media_description_options) {
       // According to http://tools.ietf.org/html/rfc5245#section-9.2.1.1
@@ -939,12 +935,13 @@ void WebRtcSessionDescriptionFactory::InternalCreateAnswer(
   }
   
   ...
-    // 2. 创建SessionDescription对象
+  // 2. 创建SessionDescription对象
   // 2.1 使用MediaSessionDescriptionFactory::CreateAnswer来创建 
   // request.options 就是前面章节创建的 MediaSessionOptions
   //  const SdpStateProvider* sdp_info_; 就是SdpOfferAnswerHandler
-   // remote_description() 不为空，local_description()为空
+  // remote_description() 不为空，local_description()为空
     std::unique_ptr<cricket::SessionDescription> desc =
+    
       session_desc_factory_.CreateAnswer(
           sdp_info_->remote_description()
               ? sdp_info_->remote_description()->description()
@@ -981,7 +978,7 @@ void WebRtcSessionDescriptionFactory::InternalCreateAnswer(
 }
 ```
 
-- MediaSessionDescriptionFactory::CreateOffer来创建SessionDescription对象，它是JsepSessionDescription的一部分。
+- MediaSessionDescriptionFactory::CreateAnswer来创建SessionDescription对象，它是JsepSessionDescription的一部分。
 - 接着创建了最终的Answer SDP对象，JsepSessionDescription
 - 通过PostCreateSessionDescriptionSucceeded方法触发了用户侧回调 以及 操作链进入下一步操作。
 
@@ -989,11 +986,13 @@ void WebRtcSessionDescriptionFactory::InternalCreateAnswer(
 
 ### 6.0 关系图
 
-![jsep-session-description](create-answer.assets/jsep-session-description.png)
+![jsep-session-description]({{ site.url }}{{ site.baseurl }}/images/create-answer-1.assets/jsep-session-description.png)
 
 
 
 ### !!! --6.1 MediaSessionDescriptionFactory.CreateAnswer
+
+pc/media_session.cc
 
 根据MediaSessionOptions创建SessionDescription,为每个mLine创建对应的新的ContentInfo结构体。参考【章节7】
 
@@ -1079,789 +1078,6 @@ void WebRtcSessionDescriptionFactory::OnMessage(rtc::Message* msg) {
     default:
       RTC_NOTREACHED();
       break;
-  }
-}
-```
-
-
-
-## 7. ??? MediaSessionDescriptionFactory.CreateAnswer
-
-pc/media_session.cc
-
-根据MediaSessionOptions创建SessionDescription,为每个mLine创建对应的新的ContentInfo结构体
-
-```cpp
-// - session_options 是SdpOfferAnswerHandler.GetOptionsForAnswer准备好的
-// - current_description 是当前的会话描述内容，如果是第一次 CreateAnswer ，这个值为 nullptr，
-// 如果中途因为某些原因需要再次协商会话描述信息，这个值就是有意义的。
- std::unique_ptr<SessionDescription> MediaSessionDescriptionFactory::CreateOffer(
-    const MediaSessionOptions& session_options,
-    const SessionDescription* current_description) const {
-   // 1. 从已被应用的answer 和 当前MediaSessionOptions中抽取一些信息，
-  //    以便后续为每个mLine创建对应的新的ContentInfo结构体
-  // 1.1 当前已被应用的answer sdp中的mlinege个数必须比    
-  //    MediaSessionOptions.media_description_options要少或者等于。
-  //    实际上回顾GetOptionsForUnifiedPlanOffer方法搜集MediaSessionOptions
-  //    中的media_description_options过程，就保证了这点。
-
-   ...
-
-  // 1.2 获取ice的凭证：ice credential即是ice parameter，包含
-  //    ufrag，pwd，renomination三个参数
-  IceCredentialsIterator ice_credentials(
-      session_options.pooled_ice_credentials);
-
-   // 1.3 从已被应用的当前offer中(就是上次setLocalDescription的offer)，获取活动的ContentInfo
-  //    判断是否是活动的ContentInfo，必须是ContentInfo.rejected=fasle
-  //    并且对应的session_options.media_options的stopped=false
-   // 第一次进来，current_description 是null，所以这个流程不走
-  std::vector<const ContentInfo*> current_active_contents;
-  if (current_description) {
-    current_active_contents =
-        GetActiveContents(*current_description, session_options);
-  }
-
-  // 1.4 从活动的ContentInfo获取mLine的StreamParams，
-  //    注意一个mLine对应一个ContentInfo，一个ContentInfo可能含有多个StreamParams
-  //  typedef std::vector<StreamParams> StreamParamsVec;
-  StreamParamsVec current_streams =
-      GetCurrentStreamParams(current_active_contents);
-
-  // 1.5 从活动的ContentInfo中获取媒体编码器信息
-  // 1.5.1 获取编码器信息【章节3.6.1.3】
-  AudioCodecs offer_audio_codecs;
-  VideoCodecs offer_video_codecs;
-  RtpDataCodecs offer_rtp_data_codecs;
-  GetCodecsForOffer(
-      current_active_contents, &offer_audio_codecs, &offer_video_codecs,
-      session_options.data_channel_type == DataChannelType::DCT_SCTP
-          ? nullptr
-          : &offer_rtp_data_codecs);
-  // 1.5.2 根据session_options的信息对编码器进行过滤处理
-  if (!session_options.vad_enabled) {
-    // If application doesn't want CN codecs in offer.
-    StripCNCodecs(&offer_audio_codecs);
-  }
-  // 1.6 获取Rtp扩展头信息【章节3.6.1.】
-  AudioVideoRtpHeaderExtensions extensions_with_ids =
-      GetOfferedRtpHeaderExtensionsWithIds(
-          current_active_contents, session_options.offer_extmap_allow_mixed,
-          session_options.media_description_options);
-
-  // --------------------------------
-  // --------------------------------
-  // --------------------------------
-  // 2. 为每个mline创建对应的ContentInfo，添加到SessionDescription
-  // 2.1 创建SessionDescription对象
-  auto offer = std::make_unique<SessionDescription>();
-
-  // 2.2 迭代MediaSessionOptions中的每个MediaDescriptionOptions，创建Conteninfo，并添加到
-  //     新建SessionDescription对象
-  // Iterate through the media description options, matching with existing media
-  // descriptions in |current_description|.
-  // 2.2.1 循环迭代
-  // Iterate through the media description options, matching with existing media
-  // descriptions in |current_description|.
-  size_t msection_index = 0;
-  for (const MediaDescriptionOptions& media_description_options :
-       session_options.media_description_options) {
-    // 2.2.2 获取当前ContentInfo
-    //       要么存在于当前的offer sdp中，则从当前的offer sdp中获取即可
-    //       要么是新加入的媒体，还没有ContentInfo，因此为空
-    const ContentInfo* current_content = nullptr;
-    if (current_description &&
-        msection_index < current_description->contents().size()) {
-      // 从上次的offer中获取到current_content
-      current_content = &current_description->contents()[msection_index];
-      // Media type must match unless this media section is being recycled.
-      RTC_DCHECK(current_content->name != media_description_options.mid ||
-                 IsMediaContentOfType(current_content,
-                                      media_description_options.type));
-    }
-    // 2.2.3 根据媒体类别，分别调用不同的方法创建ContentInfo，并添加到SessionDescription
-    switch (media_description_options.type) {
-      case MEDIA_TYPE_AUDIO:
-        if (!AddAudioContentForOffer(media_description_options, session_options,
-                                     current_content, current_description,
-                                     extensions_with_ids.audio,
-                                     offer_audio_codecs, &current_streams,
-                                     offer.get(), &ice_credentials)) {
-          return nullptr;
-        }
-        break;
-      case MEDIA_TYPE_VIDEO:
-        // 【章节3.6.1.6】
-        if (!AddVideoContentForOffer(media_description_options, session_options,
-                                     current_content, current_description,
-                                     extensions_with_ids.video,
-                                     offer_video_codecs, &current_streams,
-                                     offer.get(), &ice_credentials)) {
-          return nullptr;
-        }
-        break;
-      case MEDIA_TYPE_DATA:
-        ...
-        break;
-      case MEDIA_TYPE_UNSUPPORTED:
-        ...
-        break;
-      default:
-        RTC_NOTREACHED();
-    }
-    ++msection_index;
-  }
-
-    // 3. 处理Bundle，如果session_options.bundle_enabled为真（默认为真），则需要将所有的
-  //    ContentInfo全都进入一个ContentGroup，同一个ContentGroup是复用同一个底层传输的
-  // Bundle the contents together, if we've been asked to do so, and update any
-  // parameters that need to be tweaked for BUNDLE.
-  if (session_options.bundle_enabled) {
-    // 3.1 创建ContentGroup，并将每个有效的(活动的)ContentInfo添加到ContentGroup
-    ContentGroup offer_bundle(GROUP_TYPE_BUNDLE);
-    for (const ContentInfo& content : offer->contents()) {
-      if (content.rejected) {
-        continue;
-      }
-      // TODO(deadbeef): There are conditions that make bundling two media
-      // descriptions together illegal. For example, they use the same payload
-      // type to represent different codecs, or same IDs for different header
-      // extensions. We need to detect this and not try to bundle those media
-      // descriptions together.
-      offer_bundle.AddContentName(content.name);
-    }
-   // 3.2 添加bundle到offer并更新bundle的传输通道信息、加密参数信息
-     if (!offer_bundle.content_names().empty()) {
-      offer->AddGroup(offer_bundle);
-      if (!UpdateTransportInfoForBundle(offer_bundle, offer.get())) {
-        RTC_LOG(LS_ERROR)
-            << "CreateOffer failed to UpdateTransportInfoForBundle.";
-        return nullptr;
-      }
-      if (!UpdateCryptoParamsForBundle(offer_bundle, offer.get())) {
-        RTC_LOG(LS_ERROR)
-            << "CreateOffer failed to UpdateCryptoParamsForBundle.";
-        return nullptr;
-      }
-    }
-  }
- // 4. 设置一些其他信息
-  // 4.1 设置msid信息
-  // The following determines how to signal MSIDs to ensure compatibility with
-  // older endpoints (in particular, older Plan B endpoints).
-  if (is_unified_plan_) {
-    // Be conservative and signal using both a=msid and a=ssrc lines. Unified
-    // Plan answerers will look at a=msid and Plan B answerers will look at the
-    // a=ssrc MSID line.
-    offer->set_msid_signaling(cricket::kMsidSignalingMediaSection |
-                              cricket::kMsidSignalingSsrcAttribute);
-  } else {
-    // Plan B always signals MSID using a=ssrc lines.
-    offer->set_msid_signaling(cricket::kMsidSignalingSsrcAttribute);
-  }
-
-  // 4.2 
-  offer->set_extmap_allow_mixed(session_options.offer_extmap_allow_mixed);
-
-  return offer;
-}
-```
-
-- 从已被应用的offer 和 当前MediaSessionOptions中抽取一些信息，以便后续为每个mLine创建对应的新的ContentInfo结构体。这些信息包括：IceParameters（用于ICE过程的ufrag、pwd等信息）、StreamParams（每个媒体源的参数，包括id(即track id)、ssrcs、ssrc_groups、cname等）、音视频数据的编码器信息（编码器的id、name、时钟clockrate、编码参数表params、反馈参数feedback_params）、Rtp扩展头信息（uri、id、encrypt）等。
-
-- 创建SessionDescription，利用上面步骤提供的信息 && MediaSessionOptions提供的信息为每个mline创建对应的ContentInfo，添加到SessionDescription。
-
-- 处理所有ContentInfo的bundle关系，Bundle the contents together。创建一个BUNDLE，将所有ContentInfo加入bundle并更新bundle的底层传输信息、加密信息。
-
-- 更新offer的其他信息：msid、extmap_allow_mixed等（行文至此，目前还不清楚这两个起什么作用，后续清楚了，再来更新）。
-
-### ---这部分是根据上次协商的offer 提取的相关信息----
-
-### 7.1 MediaSessionDescriptionFactory.GetActiveContents
-
-pc/media_session.cc
-
-```cpp
-static std::vector<const ContentInfo*> GetActiveContents(
-    const SessionDescription& description,
-    const MediaSessionOptions& session_options) {
-  std::vector<const ContentInfo*> active_contents;
-  for (size_t i = 0; i < description.contents().size(); ++i) {
-    RTC_DCHECK_LT(i, session_options.media_description_options.size());
-    const ContentInfo& content = description.contents()[i];
-    const MediaDescriptionOptions& media_options =
-        session_options.media_description_options[i];
-    // 正常使用
-    if (!content.rejected && !media_options.stopped &&
-        content.name == media_options.mid) {
-      active_contents.push_back(&content);
-    }
-  }
-  return active_contents;
-}
-```
-
-从上次 协商的sdp信息中，和当前的MediaSessionOptions，获取到在正常使用的mLine。
-
-
-
-### 7.2 MediaSessionDescriptionFactory.GetCurrentStreamParams
-
-pc/media_session.cc
-
-```cpp
-// Finds all StreamParams of all media types and attach them to stream_params.
-static StreamParamsVec GetCurrentStreamParams(
-    const std::vector<const ContentInfo*>& active_local_contents) {
-  StreamParamsVec stream_params;
-  for (const ContentInfo* content : active_local_contents) {
-    // media_description() 就说是返回 MediaContentDescription
-    for (const StreamParams& params : content->media_description()->streams()) {
-      stream_params.push_back(params);
-    }
-  }
-  return stream_params;
-}
-```
-
-从上一步中得到的active_local_contents， 来得到StreamParamsVec。
-
-
-
-### 7.3 MediaSessionDescriptionFactory.GetCodecsForOffer
-
-获取音视频数据的所支持的编码
-
-```cpp
- AudioCodecs offer_audio_codecs;
- VideoCodecs offer_video_codecs;
- DataCodecs offer_data_codecs;
-```
-
-```cpp
-void MediaSessionDescriptionFactory::GetCodecsForOffer(
-    const SessionDescription* current_description,
-    AudioCodecs* audio_codecs,
-    VideoCodecs* video_codecs,
-    DataCodecs* data_codecs) const {
-  UsedPayloadTypes used_pltypes;
-  audio_codecs->clear();
-  video_codecs->clear();
-  data_codecs->clear();
-
-  // First - get all codecs from the current description if the media type
-  // is used. Add them to |used_pltypes| so the payload type is not reused if a
-  // new media type is added.
-  if (current_description) {
-    MergeCodecsFromDescription(current_description, audio_codecs, video_codecs,
-                               data_codecs, &used_pltypes);
-  }
-
-  // Add our codecs that are not in |current_description|.
-  MergeCodecs<AudioCodec>(all_audio_codecs_, audio_codecs, &used_pltypes);
-  MergeCodecs<VideoCodec>(video_codecs_, video_codecs, &used_pltypes);
-  MergeCodecs<DataCodec>(data_codecs_, data_codecs, &used_pltypes);
-}
-```
-
-- 执行 clear() 的动作，避免指针指向了无效数据；
-- 如果 current_description 不为空，也就是不是第一次执行 CreateOffer ，那么执行 MergeCodecsFromDescription ，将current_description 中记录的编码信息存入 offer_xxx_codecs；
-- 执行 MergeCodecs，将本地支持的编码格式存入 offer_xxx_codecs。
-
-
-
-### 7.4 MediaSessionDescriptionFactory.GetOfferedRtpHeaderExtensionsWithIds
-
-### -------
-
-
-
-### 7.5 SessionDescription::SessionDescription
-
-pc/session_description.h
-
-
-### 7.6 !!! MediaSessionDescriptionFactory.AddVideoContentForOffer
-
-创建了VideoContentDescription，存入了ContentInfo， 并加入到SessionDescription
-
-```cpp
-// TODO(kron): This function is very similar to AddAudioContentForOffer.
-// Refactor to reuse shared code.
-bool MediaSessionDescriptionFactory::AddVideoContentForOffer(
-    const MediaDescriptionOptions& media_description_options,
-    const MediaSessionOptions& session_options,
-    const ContentInfo* current_content,
-    const SessionDescription* current_description,
-    const RtpHeaderExtensions& video_rtp_extensions,
-    const VideoCodecs& video_codecs,
-    StreamParamsVec* current_streams,
-    SessionDescription* desc,
-    IceCredentialsIterator* ice_credentials) const {
-  // Filter video_codecs (which includes all codecs, with correctly remapped
-  // payload types) based on transceiver direction.
-  // 根据RtpTransceiverDirection， 来获取codec
-  const VideoCodecs& supported_video_codecs =
-      GetVideoCodecsForOffer(media_description_options.direction);
-
-  VideoCodecs filtered_codecs;
-
-  
-  if (!media_description_options.codec_preferences.empty()) {
-    // Add the codecs from the current transceiver's codec preferences.
-    // They override any existing codecs from previous negotiations.
-    filtered_codecs = MatchCodecPreference(
-        media_description_options.codec_preferences, supported_video_codecs);
-  } else {
-    // Add the codecs from current content if it exists and is not rejected nor
-    // recycled.
-    if (current_content && !current_content->rejected &&
-        current_content->name == media_description_options.mid) {
-      RTC_CHECK(IsMediaContentOfType(current_content, MEDIA_TYPE_VIDEO));
-      const VideoContentDescription* vcd =
-          current_content->media_description()->as_video();
-      for (const VideoCodec& codec : vcd->codecs()) {
-        if (FindMatchingCodec<VideoCodec>(vcd->codecs(), video_codecs, codec,
-                                          nullptr)) {
-          filtered_codecs.push_back(codec);
-        }
-      }
-    }
-    // Add other supported video codecs.
-    VideoCodec found_codec;
-    for (const VideoCodec& codec : supported_video_codecs) {
-      if (FindMatchingCodec<VideoCodec>(supported_video_codecs, video_codecs,
-                                        codec, &found_codec) &&
-          !FindMatchingCodec<VideoCodec>(supported_video_codecs,
-                                         filtered_codecs, codec, nullptr)) {
-        // Use the |found_codec| from |video_codecs| because it has the
-        // correctly mapped payload type.
-        filtered_codecs.push_back(found_codec);
-      }
-    }
-  }
-
-  if (session_options.raw_packetization_for_video) {
-    for (VideoCodec& codec : filtered_codecs) {
-      if (codec.GetCodecType() == VideoCodec::CODEC_VIDEO) {
-        codec.packetization = kPacketizationParamRaw;
-      }
-    }
-  }
-
-  cricket::SecurePolicy sdes_policy =
-      IsDtlsActive(current_content, current_description) ? cricket::SEC_DISABLED
-                                                      : secure();
-  // 创建VideoContentDescription，
-  auto video = std::make_unique<VideoContentDescription>();
-  // 加密套件
-  std::vector<std::string> crypto_suites;
-  GetSupportedVideoSdesCryptoSuiteNames(session_options.crypto_options,
-                                        &crypto_suites);
-  // 【章节3.6.1.7】
-  if (!CreateMediaContentOffer(media_description_options, session_options,
-                               filtered_codecs, sdes_policy,
-                               GetCryptos(current_content), crypto_suites,
-                               video_rtp_extensions, ssrc_generator_,
-                               current_streams, video.get())) {
-    return false;
-  }
-
-  video->set_bandwidth(kAutoBandwidth);
-
-  bool secure_transport = (transport_desc_factory_->secure() != SEC_DISABLED);
-  SetMediaProtocol(secure_transport, video.get());
-
-  video->set_direction(media_description_options.direction);
-
-  // SessionDescription* desc,向SessionDescription 中添加Content
- // 添加ContentInfo和VideoContentDescription【章节3.6.1.8】
-  desc->AddContent(media_description_options.mid, MediaProtocolType::kRtp,
-                   media_description_options.stopped, std::move(video));
-  if (!AddTransportOffer(media_description_options.mid,
-                         media_description_options.transport_options,
-                         current_description, desc, ice_credentials)) {
-    return false;
-  }
-
-  return true;
-}
-```
-
-- 根据RtpTransceiverDirection， 来获取codec
-- 过滤 codec
-- 创建VideoContentDescription
-- 安全套件 `session_options.crypto_options`
-- 添加codec
-- 添加stream
-- 
-
-#### !!! ContentInfo::rejected
-
-pc/session_description.h
-这个值是 根据`media_description_options.stopped` 来确定的。
-
-
-
-#### MediaContentDescription
-
-pc/session_description.h
-
-#### MediaContentDescriptionImpl
-
-pc/session_description.h
-
-#### AudioContentDescription
-
-pc/session_description.h
-
-#### VideoContentDescription
-
-pc/session_description.h
-
-#### MediaSessionDescriptionFactory::GetVideoCodecsForOffer
-
-pc/media_session.cc
-
-```cpp
-const VideoCodecs& MediaSessionDescriptionFactory::GetVideoCodecsForOffer(
-    const RtpTransceiverDirection& direction) const {
-  switch (direction) {
-    // If stream is inactive - generate list as if sendrecv.
-    case RtpTransceiverDirection::kSendRecv:
-    case RtpTransceiverDirection::kStopped:
-    case RtpTransceiverDirection::kInactive:
-      return video_sendrecv_codecs_;
-    case RtpTransceiverDirection::kSendOnly:
-      return video_send_codecs_;
-    case RtpTransceiverDirection::kRecvOnly:
-      return video_recv_codecs_;
-  }
-  RTC_CHECK_NOTREACHED();
-}
-```
-
-
-
-```cpp
-MediaSessionDescriptionFactory::MediaSessionDescriptionFactory(
-    ChannelManager* channel_manager,
-    const TransportDescriptionFactory* transport_desc_factory,
-    rtc::UniqueRandomIdGenerator* ssrc_generator)
-    : MediaSessionDescriptionFactory(transport_desc_factory, ssrc_generator) {
-  channel_manager->GetSupportedAudioSendCodecs(&audio_send_codecs_);
-  channel_manager->GetSupportedAudioReceiveCodecs(&audio_recv_codecs_);
-  channel_manager->GetSupportedVideoSendCodecs(&video_send_codecs_);
-  channel_manager->GetSupportedVideoReceiveCodecs(&video_recv_codecs_);
-  channel_manager->GetSupportedDataCodecs(&rtp_data_codecs_);
-  ComputeAudioCodecsIntersectionAndUnion();
-  ComputeVideoCodecsIntersectionAndUnion();
-}
-```
-
-
-
-#### GetSupportedVideoSdesCryptoSuiteNames
-
-
-
-#### CreateMediaContentOffer
-
-
-
-#### SetMediaProtocol
-
-
-
-#### AddTransportOffer
-
-
-
-### 7.7 MediaSessionDescriptionFactory.CreateMediaContentOffer
-
-创建VideoContentDescription
-
-```cpp
-template <class C>
-static bool CreateMediaContentOffer(
-    const MediaDescriptionOptions& media_description_options,
-    const MediaSessionOptions& session_options,
-    const std::vector<C>& codecs,
-    const SecurePolicy& secure_policy,
-    const CryptoParamsVec* current_cryptos,
-    const std::vector<std::string>& crypto_suites,
-    const RtpHeaderExtensions& rtp_extensions,
-    UniqueRandomIdGenerator* ssrc_generator,
-    StreamParamsVec* current_streams,
-    MediaContentDescriptionImpl<C>* offer) {
-  offer->AddCodecs(codecs);
-  // 参考【章节3.6.1.9】
-  if (!AddStreamParams(media_description_options.sender_options,
-                       session_options.rtcp_cname, ssrc_generator,
-                       current_streams, offer)) {
-    return false;
-  }
-
-  return CreateContentOffer(media_description_options, session_options,
-                            secure_policy, current_cryptos, crypto_suites,
-                            rtp_extensions, ssrc_generator, current_streams,
-                            offer);
-}
-```
-
-
-
-#### CreateContentOffer
-
-```cpp
-// Create a media content to be offered for the given |sender_options|,
-// according to the given options.rtcp_mux, session_options.is_muc, codecs,
-// secure_transport, crypto, and current_streams. If we don't currently have
-// crypto (in current_cryptos) and it is enabled (in secure_policy), crypto is
-// created (according to crypto_suites). The created content is added to the
-// offer.
-static bool CreateContentOffer(
-    const MediaDescriptionOptions& media_description_options,
-    const MediaSessionOptions& session_options,
-    const SecurePolicy& secure_policy,
-    const CryptoParamsVec* current_cryptos,
-    const std::vector<std::string>& crypto_suites,
-    const RtpHeaderExtensions& rtp_extensions,
-    UniqueRandomIdGenerator* ssrc_generator,
-    StreamParamsVec* current_streams,
-    MediaContentDescription* offer) {
-  offer->set_rtcp_mux(session_options.rtcp_mux_enabled);
-  if (offer->type() == cricket::MEDIA_TYPE_VIDEO) {
-    offer->set_rtcp_reduced_size(true);
-  }
-
-  // Build the vector of header extensions with directions for this
-  // media_description's options.
-  RtpHeaderExtensions extensions;
-  for (auto extension_with_id : rtp_extensions) {
-    for (const auto& extension : media_description_options.header_extensions) {
-      if (extension_with_id.uri == extension.uri) {
-        // TODO(crbug.com/1051821): Configure the extension direction from
-        // the information in the media_description_options extension
-        // capability.
-        extensions.push_back(extension_with_id);
-      }
-    }
-  }
-  offer->set_rtp_header_extensions(extensions);
-
-  AddSimulcastToMediaDescription(media_description_options, offer);
-
-  if (secure_policy != SEC_DISABLED) {
-    if (current_cryptos) {
-      AddMediaCryptos(*current_cryptos, offer);
-    }
-    if (offer->cryptos().empty()) {
-      if (!CreateMediaCryptos(crypto_suites, offer)) {
-        return false;
-      }
-    }
-  }
-
-  if (secure_policy == SEC_REQUIRED && offer->cryptos().empty()) {
-    return false;
-  }
-  return true;
-}
-
-```
-
-#### SessionDescription.AddContent
-
-创建ContentInfo，并加入SessionDescription 的ContentInfos
-
-```cpp
-typedef std::vector<ContentInfo> ContentInfos;
-ContentInfos contents_;
-
-void SessionDescription::AddContent(
-    const std::string& name,
-    MediaProtocolType type,
-    bool rejected,
-    bool bundle_only,
-    std::unique_ptr<MediaContentDescription> description) {
-  ContentInfo content(type);
-  content.name = name;
-  content.rejected = rejected;
-  content.bundle_only = bundle_only;
-  content.set_media_description(std::move(description));
-  AddContent(std::move(content));
-}
-
-void SessionDescription::AddContent(ContentInfo&& content) {
-  if (extmap_allow_mixed()) {
-    // Mixed support on session level overrides setting on media level.
-    content.media_description()->set_extmap_allow_mixed_enum(
-        MediaContentDescription::kSession);
-  }
-  contents_.push_back(std::move(content));
-}
-```
-
-1. MediaContentDescription
-
-   ```cpp
-   // Describes a session description media section. There are subclasses for each
-   // media type (audio, video, data) that will have additional information.
-   class MediaContentDescription {
-   public:
-   MediaContentDescription() = default;
-   virtual ~MediaContentDescription() = default;
-   ...
-   }
-   ```
-
-2. AudioContentDescription
-
-   ```cpp
-   class AudioContentDescription : public MediaContentDescriptionImpl<AudioCodec> {
-   ...
-   }
-   ```
-
-3. VideoContentDescription
-
-   ```cpp
-   class VideoContentDescription : public MediaContentDescriptionImpl<VideoCodec> {
-   ...
-   }
-   ```
-
-#### MediaSessionDescriptionFactory.AddStreamParams
-
-创建StreamParams
-
-在章节【3.6.1.9】CreateMediaContentOffer中 调用
-
-```cpp
-template <class C>
-static bool AddStreamParams(
-    const std::vector<SenderOptions>& sender_options,
-    const std::string& rtcp_cname,
-    UniqueRandomIdGenerator* ssrc_generator,
-    StreamParamsVec* current_streams,
-    MediaContentDescriptionImpl<C>* content_description) {
-  // SCTP streams are not negotiated using SDP/ContentDescriptions.
-  if (IsSctpProtocol(content_description->protocol())) {
-    return true;
-  }
-
-  const bool include_rtx_streams =
-      ContainsRtxCodec(content_description->codecs());
-
-  const bool include_flexfec_stream =
-      ContainsFlexfecCodec(content_description->codecs());
-
-  for (const SenderOptions& sender : sender_options) {
-    // groupid is empty for StreamParams generated using
-    // MediaSessionDescriptionFactory.
-    StreamParams* param =
-        GetStreamByIds(*current_streams, "" /*group_id*/, sender.track_id);
-    if (!param) {
-      // This is a new sender.
-      StreamParams stream_param =
-          sender.rids.empty()
-              ?
-              // Signal SSRCs and legacy simulcast (if requested).
-              CreateStreamParamsForNewSenderWithSsrcs(
-                  sender, rtcp_cname, include_rtx_streams,
-                  include_flexfec_stream, ssrc_generator)
-              :
-              // Signal RIDs and spec-compliant simulcast (if requested).
-              CreateStreamParamsForNewSenderWithRids(sender, rtcp_cname);
-
-      content_description->AddStream(stream_param);
-
-      // Store the new StreamParams in current_streams.
-      // This is necessary so that we can use the CNAME for other media types.
-      current_streams->push_back(stream_param);
-    } else {
-      // Use existing generated SSRCs/groups, but update the sync_label if
-      // necessary. This may be needed if a MediaStreamTrack was moved from one
-      // MediaStream to another.
-      param->set_stream_ids(sender.stream_ids);
-      content_description->AddStream(*param);
-    }
-  }
-  return true;
-}
-```
-
-#### MediaSessionDescriptionFactory.CreateStreamParamsForNewSenderWithSsrcs
-
-![ssrc1](create-answer.assets/ssrc1.png)
-
-```cpp
-static StreamParams CreateStreamParamsForNewSenderWithSsrcs(
-    const SenderOptions& sender,
-    const std::string& rtcp_cname,
-    bool include_rtx_streams,
-    bool include_flexfec_stream,
-    UniqueRandomIdGenerator* ssrc_generator) {
-  StreamParams result;
-  result.id = sender.track_id;
-
-  // TODO(brandtr): Update when we support multistream protection.
-  if (include_flexfec_stream && sender.num_sim_layers > 1) {
-    include_flexfec_stream = false;
-    RTC_LOG(LS_WARNING)
-        << "Our FlexFEC implementation only supports protecting "
-           "a single media streams. This session has multiple "
-           "media streams however, so no FlexFEC SSRC will be generated.";
-  }
-  if (include_flexfec_stream &&
-      !webrtc::field_trial::IsEnabled("WebRTC-FlexFEC-03")) {
-    include_flexfec_stream = false;
-    RTC_LOG(LS_WARNING)
-        << "WebRTC-FlexFEC trial is not enabled, not sending FlexFEC";
-  }
-
-  result.GenerateSsrcs(sender.num_sim_layers, include_rtx_streams,
-                       include_flexfec_stream, ssrc_generator);
-
-  result.cname = rtcp_cname;
-  result.set_stream_ids(sender.stream_ids);
-
-  return result;
-}
-```
-
-#### StreamParams::GenerateSsrcs——生成ssrc
-
-```cpp
-void StreamParams::GenerateSsrcs(int num_layers,
-                                 bool generate_fid,
-                                 bool generate_fec_fr,
-                                 rtc::UniqueRandomIdGenerator* ssrc_generator) {
-  RTC_DCHECK_GE(num_layers, 0);
-  RTC_DCHECK(ssrc_generator);
-  std::vector<uint32_t> primary_ssrcs;
-  for (int i = 0; i < num_layers; ++i) {
-    uint32_t ssrc = ssrc_generator->GenerateId();
-    primary_ssrcs.push_back(ssrc);
-    add_ssrc(ssrc);
-  }
-
-  if (num_layers > 1) {
-    SsrcGroup simulcast(kSimSsrcGroupSemantics, primary_ssrcs);
-    ssrc_groups.push_back(simulcast);
-  }
-
-  if (generate_fid) {
-    for (uint32_t ssrc : primary_ssrcs) {
-      AddFidSsrc(ssrc, ssrc_generator->GenerateId());
-    }
-  }
-
-  if (generate_fec_fr) {
-    for (uint32_t ssrc : primary_ssrcs) {
-      AddFecFrSsrc(ssrc, ssrc_generator->GenerateId());
-    }
   }
 }
 ```
