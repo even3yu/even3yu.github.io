@@ -16,7 +16,7 @@ categories: webrtc
 
 ## 0. 前言
 
-、<img src="{{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/view.png" style="zoom: 67%;" />
+<img src="{{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/view.png" style="zoom: 67%;" />
 
 1. SdpOfferAnswerHandler::PushdownTransportDescription，创建了JsepTransport，DtlsTransport
    RtpTransport，SrtpTransport，DtlsSrtpTransport
@@ -744,7 +744,7 @@ RTCError JsepTransportController::ValidateAndMaybeUpdateBundleGroup(
 
 
 
-#### ContentGroup
+#### !!!ContentGroup
 
 pc/session_description.h
 
@@ -754,15 +754,22 @@ class ContentGroup {
 
   const std::string* ContentGroup::FirstContentName() const {
       return (!content_names_.empty()) ? &(*content_names_.begin()) : NULL;
-    }
+  }
+  
+  // 增删查
+  bool HasContentName(const std::string& content_name) const;
+  void AddContentName(const std::string& content_name);
+  bool RemoveContentName(const std::string& content_name);
 
+  // const char GROUP_TYPE_BUNDLE[] = "BUNDLE";
+  // semantics = "BUNDLE"
   std::string semantics_;
 
-    typedef std::vector<std::string> ContentNames;
+  typedef std::vector<std::string> ContentNames;
   ContentNames content_names_;
 }
 ```
-
+对应的 a=group : BUNDLE 0 1 2 3。
 
 
 ### 6.2 !!!--JsepTransportController.MaybeCreateJsepTransport
@@ -892,7 +899,7 @@ JsepTransportController::CreateJsepTransportDescription(
 
 
 
-### 6.7JsepTransportDescription::JsepTransportDescription
+### 6.7 ???JsepTransportDescription::JsepTransportDescription
 
 pc\jsep_transport.cc
 
@@ -1064,7 +1071,7 @@ RTCError JsepTransportController::MaybeCreateJsepTransport(
 
 ### transport关系图
 
-<img src={{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/transport.jpg />
+<img src="{{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/transport.jpg" />
 
 1. RtpTransport 继承关系
 

@@ -234,7 +234,7 @@ RTCError SdpOfferAnswerHandler::UpdateTransceiverChannel(
 
 3. 创建voice/video channel
 
-3.  **把voice/video channel 设置给 transceiver（RtpTransceiver），RtpTransceiver和BaseChannel就关联起来了**
+4.  **把voice/video channel 设置给 transceiver（RtpTransceiver），RtpTransceiver和BaseChannel就关联起来了**
 
 
 
@@ -307,6 +307,19 @@ void RtpTransceiver::SetChannel(cricket::ChannelInterface* channel) {
          senders_;
    ```
 
+#### !!!VideoRtpSender::SetMediaChannel
+
+pc/rtp_sender.cc
+
+```cpp
+void RtpSenderBase::SetMediaChannel(cricket::MediaChannel* media_channel) {
+  RTC_DCHECK(media_channel == nullptr ||
+             media_channel->media_type() == media_type());
+  media_channel_ = media_channel;
+}
+```
+
+把mediachannel 设置到 VideoRtpSender。
  
 
 ## 9. SdpOfferAnswerHandler::CreateVideoChannel
@@ -702,6 +715,7 @@ void MediaChannel::SetInterface(NetworkInterface* iface) {
 ```
 
 - BaseChannel 实现了`MediaChannel::NetworkInterface`;
+  这样 MediaChannel 的数据可以流向BaseChannel;
 
   ```cpp
   class MediaChannel : public sigslot::has_slots<> {
