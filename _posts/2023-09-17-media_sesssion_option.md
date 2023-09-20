@@ -19,7 +19,7 @@ categories: webrtc
 
 pc/media_session.h
 
-![media_session_option](CreateOffer.assets/media_session_option.png)
+![media_session_option](create-offer.assets/media_session_option.png)
 
 
 

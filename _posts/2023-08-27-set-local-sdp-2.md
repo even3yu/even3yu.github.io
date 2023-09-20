@@ -15,7 +15,7 @@ categories: webrtc
 ---
 
 
-![]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/caller-set-local-description.jpg)
+![]({{ site.url }}{{ site.baseurl }}/images/set-local-description.assets/caller-set-local-description.jpg)
 
 
 

@@ -16,7 +16,7 @@ categories: webrtc
 
 ## 0. 前言
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/view.png" style="zoom: 67%;" />
+<img src="{{ site.url }}{{ site.baseurl }}/images/set-local-description.assets/view.png" style="zoom: 67%;" />
 
 1. SdpOfferAnswerHandler::PushdownTransportDescription，创建了JsepTransport，DtlsTransport
    RtpTransport，SrtpTransport，DtlsSrtpTransport
@@ -32,7 +32,7 @@ categories: webrtc
 
 ## 0. 调用堆栈
 
-![caller-set-local-description]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/caller-set-local-description.jpg)
+![caller-set-local-description]({{ site.url }}{{ site.baseurl }}/images/set-local-description.assets/caller-set-local-description.jpg)
 
 ## 1. PeerConnection::SetLocalDescription
 
@@ -698,7 +698,7 @@ RTCError JsepTransportController::ApplyDescription_n(
 1. 赋值JsepTransportController.bundle_group_ 。
    由JsepTransportController.bundle_group_ 成员可知，实际应用中，SDP中一般只有一个bundle group。绝大多数情况下都是采用bundle形式进行传输，此时，这样可以减少底层Transport的数量，因此，也能减少需要分配的端口数。如下SDP的示例，4个mline都属于一个group，这个group的名字为默认的BUNDLE，其中0 1 2 3为4个mid值。这4个m section所代表的媒体将采用同一个JsepTransport
 
-![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/20200517222108730.png)
+![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/set-local-description.assets/20200517222108730.png)
 
 2. 遍历sdp中所有ContentInfo,也即m Section的表征，mline，针对每个 ContentInfo,(即每个sdp) 内容创建一个对应的 JsepTransport。那些情况需要创建，哪些不需要创建Transport：
    **a. 被拒绝的content是无效的，因此，不应该为其创建Transport；**
@@ -1071,7 +1071,7 @@ RTCError JsepTransportController::MaybeCreateJsepTransport(
 
 ### transport关系图
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/transport.jpg" />
+<img src="{{ site.url }}{{ site.baseurl }}/images/set-local-description.assets/transport.jpg" />
 
 1. RtpTransport 继承关系
 

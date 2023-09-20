@@ -15,15 +15,15 @@ categories: webrtc
 ---
 
 
-![setRemoteSDP]({{ site.url }}{{ site.baseurl }}/images/setRemoteDescription.assets/setRemoteSDP-6649445.svg)
+![setRemoteSDP]({{ site.url }}{{ site.baseurl }}/images/set-remote-description.assets/setRemoteSDP-6649445.svg)
 
 
 
-![videoencodesdp]({{ site.url }}{{ site.baseurl }}/images/setRemoteDescription.assets/videoencodesdp.svg)
+![videoencodesdp]({{ site.url }}{{ site.baseurl }}/images/set-remote-description.assets/videoencodesdp.svg)
 
-![videotrack]({{ site.url }}{{ site.baseurl }}/images/setRemoteDescription.assets/videotrack.svg)
+![videotrack]({{ site.url }}{{ site.baseurl }}/images/set-remote-description.assets/videotrack.svg)
 
-![setRemoteSDP]({{ site.url }}{{ site.baseurl }}/images/setRemoteDescription.assets/setRemoteSDP-6663142.svg)
+![setRemoteSDP]({{ site.url }}{{ site.baseurl }}/images/set-remote-description.assets/setRemoteSDP-6663142.svg)
 
 
 
@@ -501,7 +501,7 @@ void RtpParametersFromMediaDescription(
 }
 ```
 
-![RtpParameters-video](3.setLocalSDP.assets/RtpParameters-video.jpg)
+![RtpParameters-video](set-local-description.assets/RtpParameters-video.jpg)
 
 
 

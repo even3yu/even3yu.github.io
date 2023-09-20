@@ -14,13 +14,13 @@ categories: webrtc
 
 ---
 
-![caller-set-local-description]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/caller-set-local-description.jpg)
+![caller-set-local-description]({{ site.url }}{{ site.baseurl }}/images/set-local-description.assets/caller-set-local-description.jpg)
 
 
-![jsep-session-description]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/jsep-session-description.png)
+![jsep-session-description]({{ site.url }}{{ site.baseurl }}/images/set-local-description.assets/jsep-session-description.png)
 
 
-![img]({{ site.url }}{{ site.baseurl }}/images/3.setLocalSDP.assets/sessiondescription.png)
+![img]({{ site.url }}{{ site.baseurl }}/images/set-local-description.assets/sessiondescription.png)
 
 ## 11. SdpOfferAnswerHandler::UpdateSessionState
 
@@ -471,7 +471,7 @@ void RtpParametersFromMediaDescription(
 }
 ```
 
-![RtpParameters-video](3.setLocalSDP.assets/RtpParameters-video.jpg)
+![RtpParameters-video](set-local-description.assets/RtpParameters-video.jpg)
 
 
 
