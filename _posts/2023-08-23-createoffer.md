@@ -245,7 +245,7 @@ void SdpOfferAnswerHandler::DoCreateOffer(
 
   // 2 获取MediaSessionOptions信息，为创建Offer提供信息
   //   MediaSessionOptions包含了创建Offer时对每个mline都适用的公共规则，
-  //   并且为每个mLine都准备了一个MediaDescriptionOptions 【章节3.4】
+  //   并且为每个m-line都准备了一个MediaDescriptionOptions 【章节3.4】
   cricket::MediaSessionOptions session_options;
   GetOptionsForOffer(options, &session_options);
   // 3 执行WebRtcSessionDescriptionFactory::CreateOffer来创建Offer 【章节3.5】
@@ -380,7 +380,7 @@ SdpOfferAnswerHandler::GetReceivingTransceiversOfType(
 #### 3.2.2 SdpOfferAnswerHandler.GetOptionsForOffer
 
 通过RTCOfferAnswerOptions 创建 MediaSessionOptions。
-MediaSessionOptions 除了一些公共部的一些属性， 还存放了每个 mline 特有的属性，多个mline以数组形式存放。
+MediaSessionOptions 除了一些公共部的一些属性， 还存放了每个 m-line 特有的属性，多个mline以数组形式存放。
 参考【章节4】。
 
 #### 3.2.3 WebRtcSessionDescriptionFactory.CreateOffer
@@ -453,7 +453,7 @@ void SdpOfferAnswerHandler::GetOptionsForOffer(
 
 ![media_session_option]({{ site.url }}{{ site.baseurl }}/images/create-offer.assets/media_session_option.png)
 
-MediaSessionOptions提供了一个应该如何生成mLine的机制。一方面，MediaSessionOptions提供了适用于所有mLine的参数；另一方面，MediaSessionOptions对于每个具体的mLine，有差异性的参数使用 `std::vector<MediaDescriptionOptions> MediaSessionOptions::media_description_options`中的对应的那个MediaDescriptionOptions所提供的规则，注意`MediaSessionOptions::media_description_options`的下标和mLine在sdp中的顺序是一致的。
+MediaSessionOptions提供了一个应该如何生成m-line的机制。一方面，MediaSessionOptions提供了适用于所有m-line的参数；另一方面，MediaSessionOptions对于每个具体的m-line，有差异性的参数使用 `std::vector<MediaDescriptionOptions> MediaSessionOptions::media_description_options`中的对应的那个MediaDescriptionOptions所提供的规则，注意`MediaSessionOptions::media_description_options`的下标和m-line在sdp中的顺序是一致的。
 
 ### 4.1 MediaSessionOptions
 
@@ -503,8 +503,8 @@ MediaSessionOptions 属性分为两部分，
 
 - 公共的属性：vad_enabled，bundle_enabled，raw_packetization_for_video；
   `ExtractSharedMediaSessionOptions` 就是来处理共享属性的【章节3.4.2】。
-- mLine特有属性：就是每个mline特有的，分别放在各自创建MediaDescriptionOptions【章节3.4.3】。
-  `std::vector<MediaDescriptionOptions> media_description_options` 中元素MediaDescriptionOptions，**注意media_description_options的下标和mLine在sdp中的顺序是一致的**。
+- m-line特有属性：就是每个mline特有的，分别放在各自创建MediaDescriptionOptions【章节3.4.3】。
+  `std::vector<MediaDescriptionOptions> media_description_options` 中元素MediaDescriptionOptions，**注意media_description_options的下标和m-line在sdp中的顺序是一致的**。
 
 
 
@@ -717,7 +717,7 @@ void SdpOfferAnswerHandler::GetOptionsForUnifiedPlanOffer(
     }
     size_t mline_index;
     if (!recycleable_mline_indices.empty()) {
-      // 复用上面回收的下标，就是mline_index，mline
+      // 复用上面回收的下标，就是mline_index，m-line
       // 给mline_index对应的mline重新新建MediaDescriptionOptions
       // mid 是重新生成的
       mline_index = recycleable_mline_indices.front();
@@ -734,7 +734,7 @@ void SdpOfferAnswerHandler::GetOptionsForUnifiedPlanOffer(
               transceiver, mid_generator_.GenerateString(),
               /*is_create_offer=*/true));
     }
-    // 设置 mline index，下标
+    // 设置 m-line index，下标
     // See comment above for why CreateOffer changes the transceiver's state.
     transceiver->internal()->set_mline_index(mline_index);
   }
@@ -753,16 +753,28 @@ void SdpOfferAnswerHandler::GetOptionsForUnifiedPlanOffer(
 
   > 刚开始createoffer的时候，
   > local_contents 和 remote_contents 都是空的；
-  > transceivers 有2个,audio/video；
+  > transceivers 有2个, audio/video；
 
   这里会根据ContentInfos的数据，转换为 MediaDescriptionOptions 向量， 存放在session_options->media_description_options中；
 
 - 最终的目的，把 transceivers 转换为 MediaDescriptionOptions 向量， 存放在session_options->media_description_options中；
   首先使用上面找到记录在recycleable_mline_indices 的可重用的下标，如果没有了再新增下标；
 
-> **关于 mline index 下标 复用问题说明：**
+> **关于 m-line index 下标 复用问题说明：**
 >
-> 获取每个mline独享的参数MediaDescriptionOptions。本质上，每个mline的MediaDescriptionOptions信息可以从 transceiver 和 为其分配的mid 二者得来（上面的两个for循环），调用一个GetMediaDescriptionOptionsForTransceiver方法即可搞定。但为啥本方法会如此复杂呢？因为要考虑复用，之前可能已经进行过协商，但是没有达成一致，此时，就需要考虑这么样的情况：比方说，之前offer中包含3路流（1、2、3），协商时，2被自己或者对方拒绝。一方面，本地或者远端的SessionDescription对象中2所对应的内容被标记为rejected，另一方面transcervers_中的第二个transcerver会变成stopped，此时2处于可复用的状态。若不添加新流的情况下，再次协商，则只有1、3两路流是有效的，为了保持与前面的协商顺序一致，即之前的1、3仍位于1、3的位置，2会设置为inactive。若添加了新的轨道，再次协商时，之前的1、3仍位于1、3，2则会被新的轨道所在的transcerver复用。 
+> 获取每个mline独享的参数MediaDescriptionOptions。本质上，每个mline的MediaDescriptionOptions信息可以从 transceiver 和 为其分配的mid 二者得来（上面的两个for循环），调用一个GetMediaDescriptionOptionsForTransceiver方法即可搞定。但为啥本方法会如此复杂呢？因为要考虑复用，之前可能已经进行过协商，但是没有达成一致，此时，就需要考虑这么样的情况：比方说，之前offer中包含3路流（1、2、3），协商时，2被自己或者对方拒绝。一方面，本地或者远端的SessionDescription对象中2所对应的内容被标记为rejected，另一方面transcervers_中的第二个transcerver会变成stopped，此时2处于可复用的状态。若不添加新流的情况下，再次协商，则只有1、3两路流是有效的，为了保持与前面的协商顺序一致，即之前的1、3仍位于1、3的位置，2会设置为inactive。若添加了新的轨道，再次协商时，之前的1、3仍位于1、3，2则会被新的轨道所在的transcerver复用。
+
+> **关于set_mline_index**
+>
+> （1）根据transceiver，和上一次的协商好的localDescription，remoteDescription 。如果能够根据ContentInfo::mid，如果找到对应的transceiver， 且 `ContentInfo::rejection  && transceiver->stopping()` 这条件不满足，则会设置set_mline_index， **注意设置的值，是累加的**。
+>
+> （2）如果（1）中的有不可用的transceiver，则认为mline_index是可以复用的，遍历所有的transceiver，满足`transceiver->mid() || transceiver->stopping()` 则不需要绑定，因为在（1）中已经绑定。其他重新创建`MediaDescriptionOptions` 并设置 set_mline_index。
+
+
+
+#### \mid_generator_.GenerateString()
+
+这里生成了mid。
 
 
 
@@ -1189,7 +1201,7 @@ void WebRtcSessionDescriptionFactory::InternalCreateOffer(
 
 ### !!! 6.1 MediaSessionDescriptionFactory.CreateOffer
 
-根据MediaSessionOptions创建SessionDescription,为每个mLine创建对应的新的ContentInfo结构体。参考【章节7】
+根据MediaSessionOptions创建SessionDescription,为每个m-line创建对应的新的ContentInfo结构体。参考【章节7】
 
 ### !!! 6.2 JsepSessionDescription.JsepSessionDescription
 
@@ -1283,7 +1295,7 @@ void WebRtcSessionDescriptionFactory::OnMessage(rtc::Message* msg) {
 
 pc/media_session.cc
 
-根据MediaSessionOptions创建SessionDescription,为每个mLine创建对应的新的ContentInfo结构体
+根据MediaSessionOptions创建SessionDescription,为每个m-line创建对应的新的ContentInfo结构体
 
 ```cpp
 // - session_options 是SdpOfferAnswerHandler.GetOptionsForOffer准备好的
@@ -1293,7 +1305,7 @@ pc/media_session.cc
     const MediaSessionOptions& session_options,
     const SessionDescription* current_description) const {
    // 1. 从已被应用的offer 和 当前MediaSessionOptions中抽取一些信息，
-  //    以便后续为每个mLine创建对应的新的ContentInfo结构体
+  //    以便后续为每个m-line创建对应的新的ContentInfo结构体
   // 1.1 当前已被应用的offer sdp中的mlinege个数必须比    
   //    MediaSessionOptions.media_description_options要少或者等于。
   //    实际上回顾GetOptionsForUnifiedPlanOffer方法搜集MediaSessionOptions
@@ -1316,8 +1328,8 @@ pc/media_session.cc
         GetActiveContents(*current_description, session_options);
   }
 
-  // 1.4 从活动的ContentInfo获取mLine的StreamParams，
-  //    注意一个mLine对应一个ContentInfo，一个ContentInfo可能含有多个StreamParams
+  // 1.4 从活动的ContentInfo获取m-line的StreamParams，
+  //    注意一个m-line对应一个ContentInfo，一个ContentInfo可能含有多个StreamParams
   //  typedef std::vector<StreamParams> StreamParamsVec;
   StreamParamsVec current_streams =
       GetCurrentStreamParams(current_active_contents);
@@ -1352,8 +1364,6 @@ pc/media_session.cc
 
   // 2.2 迭代MediaSessionOptions中的每个MediaDescriptionOptions，创建Conteninfo，并添加到
   //     新建SessionDescription对象
-  // Iterate through the media description options, matching with existing media
-  // descriptions in |current_description|.
   // 2.2.1 循环迭代
   // Iterate through the media description options, matching with existing media
   // descriptions in |current_description|.
@@ -1461,7 +1471,7 @@ pc/media_session.cc
 }
 ```
 
-- 从已被应用的offer 和 当前MediaSessionOptions中抽取一些信息，以便后续为每个mLine创建对应的新的ContentInfo结构体。这些信息包括：IceParameters（用于ICE过程的ufrag、pwd等信息）、StreamParams（每个媒体源的参数，包括id(即track id)、ssrcs、ssrc_groups、cname等）、音视频数据的编码器信息（编码器的id、name、时钟clockrate、编码参数表params、反馈参数feedback_params）、Rtp扩展头信息（uri、id、encrypt）等。
+- 从已被应用的offer 和 当前MediaSessionOptions中抽取一些信息，以便后续为每个m-line创建对应的新的ContentInfo结构体。这些信息包括：IceParameters（用于ICE过程的ufrag、pwd等信息）、StreamParams（每个媒体源的参数，包括id(即track id)、ssrcs、ssrc_groups、cname等）、音视频数据的编码器信息（编码器的id、name、时钟clockrate、编码参数表params、反馈参数feedback_params）、Rtp扩展头信息（uri、id、encrypt）等。
 
 - 创建SessionDescription，利用上面步骤提供的信息 && MediaSessionOptions提供的信息为每个mline创建对应的ContentInfo，添加到SessionDescription。
 
@@ -1495,7 +1505,7 @@ static std::vector<const ContentInfo*> GetActiveContents(
 }
 ```
 
-从上次 协商的sdp信息中，和当前的MediaSessionOptions，获取到在正常使用的mLine。
+从上次 协商的sdp信息中，和当前的MediaSessionOptions，获取到在正常使用的m-line。
 
 
 
@@ -2089,8 +2099,8 @@ void StreamParams::GenerateSsrcs(int num_layers,
 6. Ssrc 是什么时候产生的
    参考【章节3.6.1.6】
 
-7. mline 和MediaSessionDecroption 是什么关系
-   mline 对应 一个MediaSessionDescrptions
+7. m-line 和MediaSessionDecroption 是什么关系
+   m-line 对应 一个MediaSessionDescrptions
    
    一个Track对应一个RtpTransceiver，实质上在SDP中一个track就会对应到一个m-line
    参考【章节3.4.3】SdpOfferAnswerHandler::GetOptionsForUnifiedPlanOffer()中

@@ -393,7 +393,7 @@ rtc::scoped_refptr<RtpReceiverInternal> RtpTransceiver::receiver_internal()
 // RtpTransceivers are not associated until they have a corresponding media
 // section set in SetLocalDescription or SetRemoteDescription. Therefore,
 // when setting a local offer we need a way to remember which transceiver was
-// used to create which media section in the offer. Storing the mline index
+// used to create which media section in the offer. Storing the m-line index
 // in CreateOffer is specified in JSEP to allow us to do that.
 absl::optional<size_t> mline_index() const { return mline_index_; }
 void set_mline_index(absl::optional<size_t> mline_index) {
@@ -474,7 +474,7 @@ void SdpOfferAnswerHandler::GetOptionsForUnifiedPlanOffer(
   const ContentInfos& remote_contents =
       (remote_description() ? remote_description()->description()->contents()
                             : no_infos);
-  // The mline indices that can be recycled. New transceivers should reuse these
+  // The m-line indices that can be recycled. New transceivers should reuse these
   // slots first.
   std::queue<size_t> recycleable_mline_indices;
 

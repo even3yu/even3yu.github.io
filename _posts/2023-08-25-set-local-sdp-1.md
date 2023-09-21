@@ -489,7 +489,7 @@ pc/sdp_offer_answer.cc
 创建了JsepTransport，DtlsTransport
 RtpTransport，SrtpTransport，DtlsSrtpTransport
 JsepTransportController，JsepTransportDescription。
-（mid， JsepTransport ）以这样的键值对存放，其中，如果Bundle 多个m Line， 那么以第一个mid 为key，共用JsepTransport；如果没有Bundle，那么每个mLine 都会生成JsepTransport；
+（mid， JsepTransport ）以这样的键值对存放，其中，如果Bundle 多个m-line， 那么以第一个mid 为key，共用JsepTransport；如果没有Bundle，那么每个m-line 都会生成JsepTransport；
 
 ### 4.2 --SdpOfferAnswerHandler.UpdateTransceiversAndDataChannels
 
@@ -604,7 +604,7 @@ RTCError JsepTransportController::ApplyDescription_n(
     merged_encrypted_extension_ids =
         MergeEncryptedHeaderExtensionIdsForBundle(description);
   }
-    // 1. 遍历sdp中所有ContentInfo,也即m Section的表征，mline
+    // 1. 遍历sdp中所有ContentInfo,也即m Section的表征，m-line
     // 针对每个 ContentInfo,(即每个sdp) 内容创建一个对应的 JsepTransport
   for (const cricket::ContentInfo& content_info : description->contents()) {
     // Don't create transports for rejected m-lines and bundled m-lines."
@@ -700,7 +700,7 @@ RTCError JsepTransportController::ApplyDescription_n(
 
 ![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/set-local-description.assets/20200517222108730.png)
 
-2. 遍历sdp中所有ContentInfo,也即m Section的表征，mline，针对每个 ContentInfo,(即每个sdp) 内容创建一个对应的 JsepTransport。那些情况需要创建，哪些不需要创建Transport：
+2. 遍历sdp中所有ContentInfo,也即m Section的表征，m-line，针对每个 ContentInfo,(即每个sdp) 内容创建一个对应的 JsepTransport。那些情况需要创建，哪些不需要创建Transport：
    **a. 被拒绝的content是无效的，因此，不应该为其创建Transport；**
    **b. 如果Content属于一个bundle，却又不是该bundle的第一个content，那么我们应该也要忽略该content**，“因为属于一个bundle的content共享一个Transport进行传输，在遍历该bundle的第一个content时会去创建这个共享的Transport。
    `MaybeCreateJsepTransport` 这里就创建 JsepTransport。
@@ -719,7 +719,7 @@ RTCError JsepTransportController::ValidateAndMaybeUpdateBundleGroup(
     SdpType type,
     const cricket::SessionDescription* description) {
 
-  // 1. 从 SessionDescription 获取 ContentGroup, 包含 mline name
+  // 1. 从 SessionDescription 获取 ContentGroup, 包含 m-line name
   const cricket::ContentGroup* new_bundle_group =
       description->GetGroupByName(cricket::GROUP_TYPE_BUNDLE);
 
@@ -744,7 +744,7 @@ RTCError JsepTransportController::ValidateAndMaybeUpdateBundleGroup(
 
 
 
-#### !!!ContentGroup
+#### !!! ContentGroup
 
 pc/session_description.h
 
@@ -769,7 +769,9 @@ class ContentGroup {
   ContentNames content_names_;
 }
 ```
+
 对应的 a=group : BUNDLE 0 1 2 3。
+
 
 
 ### 6.2 !!!--JsepTransportController.MaybeCreateJsepTransport

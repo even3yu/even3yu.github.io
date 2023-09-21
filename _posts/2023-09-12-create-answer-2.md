@@ -32,7 +32,7 @@ MediaSessionDescriptionFactory::CreateAnswer(
     const MediaSessionOptions& session_options,
     const SessionDescription* current_description) const {
    // 1. 从已被应用的offer 和 当前MediaSessionOptions中抽取一些信息，
-  //    以便后续为每个mLine创建对应的新的ContentInfo结构体
+  //    以便后续为每个m-line创建对应的新的ContentInfo结构体
   // 1.1 当前已被应用的offer sdp中的mlinege个数必须比    
   //    MediaSessionOptions.media_description_options要少或者等于。
   //    实际上回顾GetOptionsForUnifiedPlanOffer方法搜集MediaSessionOptions
@@ -52,7 +52,7 @@ MediaSessionDescriptionFactory::CreateAnswer(
   //
   // 第一次进来，current_description 是null，所以这个流程不走
   //！！！！！！！！
-  // 获取到当前current_description在正常使用的mLine
+  // 获取到当前current_description在正常使用的m-line
   // ！！！！！！！
   std::vector<const ContentInfo*> current_active_contents;
   if (current_description) {
@@ -60,8 +60,8 @@ MediaSessionDescriptionFactory::CreateAnswer(
         GetActiveContents(*current_description, session_options);
   }
 
-  // 1.4 从激活(不是stop或者reject)的ContentInfo获取mLine的StreamParams，
-  //    注意一个mLine对应一个ContentInfo，一个ContentInfo可能含有多个StreamParams
+  // 1.4 从激活(不是stop或者reject)的ContentInfo获取m-line的StreamParams，
+  //    注意一个m-line对应一个ContentInfo，一个ContentInfo可能含有多个StreamParams
   //  	typedef std::vector<StreamParams> StreamParamsVec;
   StreamParamsVec current_streams =
       GetCurrentStreamParams(current_active_contents);
@@ -166,7 +166,7 @@ MediaSessionDescriptionFactory::CreateAnswer(
     // offer_bundle，远端 ContentGroup bundle
     // offer_bundle->HasContentName(added.name)，
     //
-    // added.name 其实就是mid， mline index
+    // added.name 其实就是mid， m-line index
     if (!added.rejected && session_options.bundle_enabled && offer_bundle &&
         offer_bundle->HasContentName(added.name)) {
       answer_bundle.AddContentName(added.name);
@@ -204,11 +204,11 @@ MediaSessionDescriptionFactory::CreateAnswer(
 ```
 
 1. GetActiveContents， current_description就是上一次setLocalDescription 保存；
-   从current_description 获取到获取到在正常使用的mLine（content.rejected = fasle&& media_options.stopped = false）；
+   从current_description 获取到获取到在正常使用的m-line（content.rejected = fasle&& media_options.stopped = false）；
 
-2. 从1的中过滤出来ContentInfos，根据ContentInfo获取mLine的StreamParams，GetCurrentStreamParams；
+2. 从1的中过滤出来ContentInfos，根据ContentInfo获取m-line的StreamParams，GetCurrentStreamParams；
    
-   > 注意一个mLine对应一个ContentInfo，一个ContentInfo可能含有多个StreamParams。
+   > 注意一个m-line对应一个ContentInfo，一个ContentInfo可能含有多个StreamParams。
 
 3. GetCodecsForAnswer， 根据 本地从engine获取到的codec（MediaSessionDescriptionFactory 构造函数）和 从remote description获取到的 codec，取交集；
 
@@ -245,7 +245,7 @@ static std::vector<const ContentInfo*> GetActiveContents(
 }
 ```
 
-从上次 协商的sdp信息中，和当前的MediaSessionOptions，获取到在正常使用的mLine。
+从上次 协商的sdp信息中，和当前的MediaSessionOptions，获取到在正常使用的m-line。
 
 
 

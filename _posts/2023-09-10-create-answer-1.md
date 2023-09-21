@@ -25,7 +25,7 @@ categories: webrtc
 
 - 通告结果：不论Offer创建成功，还是失败，最终需要做两件事。一件是通告用户侧Offer创建成功还是失败；一件是触发操作链的下一个操作。这个是通过CreateSessionDescriptionObserverOperationWrapper对象封装创建Offer回调接口、封装操作链操作完成回调，并在CreateAnswer过程中一直往下传递，直到创建失败或者成功的地方被触发，来实现的。
 
-- 此外：不论是搜集信息，还是形成Offer都需要参考当前已被应用的Offer中的信息，以便复用部分信息，并使得两次Offer中同样的mLine处于同样的位置。
+- 此外：不论是搜集信息，还是形成Offer都需要参考当前已被应用的Offer中的信息，以便复用部分信息，并使得两次Offer中同样的m-line处于同样的位置。
 
 ![createoffer-1]({{ site.url }}{{ site.baseurl }}/images/create-answer-1.assets/createoffer-1.png)SdpOfferAnswerHandler::GetOptionsForUnifiedPlanOffer()会遍历PC中所有的RtpTransceiver(RtpTransceiver是在addTrack的时候生成的)，**为每个RtpTransceiver创建一个媒体描述信息对象MediaDescriptionOptions**，在最终的生成的SDP对象中，**一个MediaDescriptionOptions就是一个m-line**。 根据由于之前的分析，一个Track对应一个RtpTransceiver，实质上在SDP中一个track就会对应到一个m-line。上述遍历形成所有媒体描述信息MediaDescriptionOptions会存入到MediaSessionOptions对象中，该对象在后续过程中一路传递，最终**在MediaSessionDescriptionFactory::CreateAnswer()方法中被用来完成SDP创建**。
 
@@ -247,7 +247,7 @@ void SdpOfferAnswerHandler::DoCreateAnswer(
 
   // 2 获取MediaSessionOptions信息，为创建Offer提供信息
   //   MediaSessionOptions包含了创建Offer时对每个mline都适用的公共规则，
-  //   并且为每个mLine都准备了一个MediaDescriptionOptions 【章节3.4】
+  //   并且为每个m-line都准备了一个MediaDescriptionOptions 【章节3.4】
   cricket::MediaSessionOptions session_options;
   GetOptionsForAnswer(options, &session_options);
   // 3 执行WebRtcSessionDescriptionFactory::CreateAnswer来创建Offer 【章节3.5】
@@ -284,7 +284,7 @@ api/peer_connection_interface.h
 #### 3.2.2 --SdpOfferAnswerHandler.GetOptionsForAnswer
 
 通过RTCOfferAnswerOptions 创建 MediaSessionOptions。
-MediaSessionOptions 除了一些公共部的一些属性， 还存放了每个 mline 特有的属性，多个mline以数组形式存放。
+MediaSessionOptions 除了一些公共部的一些属性， 还存放了每个 m-line 特有的属性，多个mline以数组形式存放。
 参考【章节4】。
 
 #### 3.2.3 --WebRtcSessionDescriptionFactory.CreateAnswer
@@ -346,7 +346,7 @@ void SdpOfferAnswerHandler::GetOptionsForAnswer(
 
 ![media_session_option]({{ site.url }}{{ site.baseurl }}/images/create-answer-1.assets/media_session_option.png)
 
-MediaSessionOptions提供了一个应该如何生成mLine的机制。一方面，MediaSessionOptions提供了适用于所有mLine的参数；另一方面，MediaSessionOptions对于每个具体的mLine，有差异性的参数使用 `std::vector<MediaDescriptionOptions> MediaSessionOptions::media_description_options`中的对应的那个MediaDescriptionOptions所提供的规则，注意`MediaSessionOptions::media_description_options`的下标和mLine在sdp中的顺序是一致的。
+MediaSessionOptions提供了一个应该如何生成m-line的机制。一方面，MediaSessionOptions提供了适用于所有m-line的参数；另一方面，MediaSessionOptions对于每个具体的m-line，有差异性的参数使用 `std::vector<MediaDescriptionOptions> MediaSessionOptions::media_description_options`中的对应的那个MediaDescriptionOptions所提供的规则，注意`MediaSessionOptions::media_description_options`的下标和m-line在sdp中的顺序是一致的。
 
 ### 4.1 MediaSessionOptions
 
@@ -994,7 +994,7 @@ void WebRtcSessionDescriptionFactory::InternalCreateAnswer(
 
 pc/media_session.cc
 
-根据MediaSessionOptions创建SessionDescription,为每个mLine创建对应的新的ContentInfo结构体。参考【章节7】
+根据MediaSessionOptions创建SessionDescription,为每个m-line创建对应的新的ContentInfo结构体。参考【章节7】
 
 ### !!! 6.2 JsepSessionDescription.JsepSessionDescription
 
@@ -1111,8 +1111,8 @@ void WebRtcSessionDescriptionFactory::OnMessage(rtc::Message* msg) {
 6. Ssrc 是什么时候产生的
    参考【章节3.6.1.6】
 
-7. mline 和MediaSessionDecroption 是什么关系
-   mline 对应 一个MediaSessionDescrptions
+7. m-line 和MediaSessionDecroption 是什么关系
+   m-line 对应 一个MediaSessionDescrptions
 
    一个Track对应一个RtpTransceiver，实质上在SDP中一个track就会对应到一个m-line
    参考【章节3.4.3】SdpOfferAnswerHandler::GetOptionsForUnifiedPlanOffer()中

@@ -262,7 +262,7 @@ struct MediaDescriptionOptions {
 };
 ```
 
-对应sdp中的mLine。有几个mLine就有几个MediaDescriptionOptions。
+对应sdp中的m-line。有几个m-line就有几个MediaDescriptionOptions。
 
 ![](assets/2023-09-15-13-34-44-img_v2_a616c41c-bf61-42ac-b12e-b9552ab8d89g.jpg)
 
@@ -316,7 +316,7 @@ const char kMediaTypeData[] = "data";
 
 ### 3.2 std::string mid
 
-m line 的唯一id
+m-line 的唯一id
 
 ```js
 a=group:BUNDLE audio video
@@ -362,7 +362,7 @@ a=sendrecv
 ...
 ```
 
-如上，有两个mLine，一个是audio，一个video；
+如上，有两个m-line，一个是audio，一个video；
 
 - `a=mid:audio`的方向，recvonly
 - `a=mid:video`的方向，sendrecv

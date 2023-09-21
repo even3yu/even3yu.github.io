@@ -560,7 +560,7 @@ pc/sdp_offer_answer.cc
 创建了JsepTransport，DtlsTransport
 RtpTransport，SrtpTransport，DtlsSrtpTransport
 JsepTransportController，JsepTransportDescription。
-（mid， JsepTransport ）以这样的键值对存放，其中，如果Bundle 多个m Line， 那么以第一个mid 为key，共用JsepTransport；如果没有Bundle，那么每个mLine 都会生成JsepTransport；
+（mid， JsepTransport ）以这样的键值对存放，其中，如果Bundle 多个m-line， 那么以第一个mid 为key，共用JsepTransport；如果没有Bundle，那么每个m-line 都会生成JsepTransport；
 
 ### 4.2 --SdpOfferAnswerHandler.UpdateTransceiversAndDataChannels
 
@@ -780,7 +780,7 @@ RTCError JsepTransportController::ValidateAndMaybeUpdateBundleGroup(
     SdpType type,
     const cricket::SessionDescription* description) {
 
-  // 1. 从 SessionDescription 获取 ContentGroup, 包含 mline name
+  // 1. 从 SessionDescription 获取 ContentGroup, 包含 m-line name
   const cricket::ContentGroup* new_bundle_group =
       description->GetGroupByName(cricket::GROUP_TYPE_BUNDLE);
 
@@ -865,7 +865,7 @@ void JsepTransportController::HandleRejectedContent(
 }
 ```
 
-被reject的 m line，对其做处理
+被reject的 m-line，对其做处理
 
 - `std::map<std::string, cricket::JsepTransport*> mid_to_transport_;` 从列表中去处；
 - 如果是bundle 的first mid == rejectd的 mid，则 整个bundle中的mid都需要从`mid_to_transport_`列表中去处；重置bundle_group_；
