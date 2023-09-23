@@ -17,7 +17,7 @@ categories: webrtc
 
 ## 1. JsepSessionDescription
 
-![jsep-session-description]({{ site.url }}{{ site.baseurl }}/images/create-offer.assets/jsep-session-description.png)
+![jsep-session-description]({{ site.url }}{{ site.baseurl }}/images/create-offer-1.assets/jsep-session-description.png)
 
 ```cpp
 class JsepSessionDescription : public SessionDescriptionInterface {

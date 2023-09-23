@@ -21,7 +21,7 @@ pc/media_session.h
 
 
 
-![media_session_option]({{ site.url }}{{ site.baseurl }}/images/create-offer.assets/media_session_option.png)
+![media_session_option]({{ site.url }}{{ site.baseurl }}/images/create-offer-1.assets/media_session_option.png)
 
 
 
@@ -709,4 +709,4 @@ a=sendrecv
 
 ## JsepSessionDescription
 
-![jsep-session-description]({{ site.url }}{{ site.baseurl }}/images/create-offer.assets/jsep-session-description.png)
+![jsep-session-description]({{ site.url }}{{ site.baseurl }}/images/create-offer-1.assets/jsep-session-description.png)
