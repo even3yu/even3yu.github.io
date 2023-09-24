@@ -1,7 +1,7 @@
 ---
 layout: post
 title: webrtc create offer-2
-date: 2023-09-20 01:10:00 +0800
+date: 2023-09-23 01:10:00 +0800
 author: Fisher
 pin: True
 meta: Post
@@ -840,7 +840,7 @@ pc/session_description.h
 
 ### -------codec 协商----
 
-### 8.2 MediaSessionDescriptionFactory.NegotiateRtpTransceiverDirection
+### 8.1 MediaSessionDescriptionFactory.NegotiateRtpTransceiverDirection
 
 pc/media_session.cc
 
@@ -914,7 +914,7 @@ Init
 
 
 
-### 8.3 MediaSessionDescriptionFactory::GetVideoCodecsForOffer
+### 8.2 MediaSessionDescriptionFactory::GetVideoCodecsForOffer
 
 pc/media_session.cc
 
@@ -1004,7 +1004,7 @@ RtpTransceiverDirection RtpTransceiverDirectionReversed(
 
 
 
-### 8.4 MatchCodecPreference
+### 8.3 MatchCodecPreference
 
 pc/media_session.cc
 
@@ -1012,7 +1012,7 @@ pc/media_session.cc
 
 
 
-### 8.5 VideoContentDescription
+### 8.4 VideoContentDescription
 
 pc/session_description.h
 
@@ -1040,7 +1040,7 @@ VideoContentDescription
 
 
 
-### 8.6 !!!MediaSessionDescriptionFactory.GetSupportedVideoSdesCryptoSuiteNames
+### 8.5 !!!MediaSessionDescriptionFactory.GetSupportedVideoSdesCryptoSuiteNames
 
 pc/media_session.cc
 
@@ -1126,7 +1126,7 @@ const char CS_AEAD_AES_256_GCM[] = "AEAD_AES_256_GCM";
 
 
 
-### GetCryptos
+### 8.6 GetCryptos
 
 pc/media_session.cc
 
@@ -1149,7 +1149,7 @@ pc/media_session.cc
 
 
 
-### !!! MediaSessionDescriptionFactory.SetMediaProtocol
+### 8.8 !!! MediaSessionDescriptionFactory.SetMediaProtocol
 
 pc/media_session.cc
 
@@ -1170,7 +1170,11 @@ static void SetMediaProtocol(bool secure_transport,
 
 
 
-### 8.8 ???MediaSessionDescriptionFactory::AddTransportOffer
+### 8.9 ???MediaSessionDescriptionFactory::AddTransportOffer
+
+pc/media_session.cc
+
+## 9. ??? MediaSessionDescriptionFactory::AddTransportOffer
 
 pc/media_session.cc
 
@@ -1183,6 +1187,7 @@ bool MediaSessionDescriptionFactory::AddTransportOffer(
     IceCredentialsIterator* ice_credentials) const {
   if (!transport_desc_factory_)
     return false;
+  // 1. 
   const TransportDescription* current_tdesc =
       GetTransportDescription(content_name, current_desc);
   std::unique_ptr<TransportDescription> new_tdesc(
@@ -1192,6 +1197,7 @@ bool MediaSessionDescriptionFactory::AddTransportOffer(
     RTC_LOG(LS_ERROR) << "Failed to AddTransportOffer, content name="
                       << content_name;
   }
+  // 2. 
   offer_desc->AddTransportInfo(TransportInfo(content_name, *new_tdesc));
   return true;
 }
@@ -1201,121 +1207,39 @@ bool MediaSessionDescriptionFactory::AddTransportOffer(
 
 
 
-## 9. ??? MediaSessionDescriptionFactory::CreateTransportAnswer
-
-pc/media_session.cc
-
-```cpp
-std::unique_ptr<TransportDescription>
-MediaSessionDescriptionFactory::CreateTransportAnswer(
-    const std::string& content_name,
-    const SessionDescription* offer_desc,
-    const TransportOptions& transport_options,
-    const SessionDescription* current_desc,
-    bool require_transport_attributes,
-    IceCredentialsIterator* ice_credentials) const {
-  if (!transport_desc_factory_)
-    return NULL;
-  const TransportDescription* offer_tdesc =
-      GetTransportDescription(content_name, offer_desc);
-  const TransportDescription* current_tdesc =
-      GetTransportDescription(content_name, current_desc);
-  return transport_desc_factory_->CreateAnswer(offer_tdesc, transport_options,
-                                               require_transport_attributes,
-                                               current_tdesc, ice_credentials);
-}
- 
-```
-
-
-
-### TransportDescriptionFactory::CreateAnswer
-
-p2p/base/transport_description_factory.cc
-
-```cpp
-std::unique_ptr<TransportDescription> TransportDescriptionFactory::CreateAnswer(
-    const TransportDescription* offer,
-    const TransportOptions& options,
-    bool require_transport_attributes,
-    const TransportDescription* current_description,
-    IceCredentialsIterator* ice_credentials) const {
-  // TODO(juberti): Figure out why we get NULL offers, and fix this upstream.
-  if (!offer) {
-    RTC_LOG(LS_WARNING) << "Failed to create TransportDescription answer "
-                           "because offer is NULL";
-    return NULL;
-  }
-
-  auto desc = std::make_unique<TransportDescription>();
-  // Generate the ICE credentials if we don't already have them or ice is
-  // being restarted.
-  if (!current_description || options.ice_restart) {
-    IceParameters credentials = ice_credentials->GetIceCredentials();
-    desc->ice_ufrag = credentials.ufrag;
-    desc->ice_pwd = credentials.pwd;
-  } else {
-    desc->ice_ufrag = current_description->ice_ufrag;
-    desc->ice_pwd = current_description->ice_pwd;
-  }
-  desc->AddOption(ICE_OPTION_TRICKLE);
-  if (options.enable_ice_renomination) {
-    desc->AddOption(ICE_OPTION_RENOMINATION);
-  }
-
-  // Negotiate security params.
-  if (offer && offer->identity_fingerprint.get()) {
-    // The offer supports DTLS, so answer with DTLS, as long as we support it.
-    if (secure_ == SEC_ENABLED || secure_ == SEC_REQUIRED) {
-      // Fail if we can't create the fingerprint.
-      // Setting DTLS role to active.
-      ConnectionRole role = (options.prefer_passive_role)
-                                ? CONNECTIONROLE_PASSIVE
-                                : CONNECTIONROLE_ACTIVE;
-
-      if (!SetSecurityInfo(desc.get(), role)) {
-        return NULL;
-      }
-    }
-  } else if (require_transport_attributes && secure_ == SEC_REQUIRED) {
-    // We require DTLS, but the other side didn't offer it. Fail.
-    RTC_LOG(LS_WARNING) << "Failed to create TransportDescription answer "
-                           "because of incompatible security settings";
-    return NULL;
-  }
-
-  return desc;
-}
-```
-
 
 
 ## 10. ??? MediaSessionDescriptionFactory.CreateMediaContentOffer
 
-创建VideoContentDescription
+pc/media_session.cc
+
+填充VideoContentDescription
 
 ```cpp
 template <class C>
 static bool CreateMediaContentOffer(
-    const MediaDescriptionOptions& media_description_options,
-    const MediaSessionOptions& session_options,
-    const std::vector<C>& codecs,
-    const SecurePolicy& secure_policy,
-    const CryptoParamsVec* current_cryptos,
-    const std::vector<std::string>& crypto_suites,
+    const MediaDescriptionOptions& media_description_options, // local，对应m-line
+    const MediaSessionOptions& session_options, // local
+    const std::vector<C>& codecs, // 过滤出来的codec
+    const SecurePolicy& secure_policy, // 安全策略
+    const CryptoParamsVec* current_cryptos, // 根据上一次offer的 ContentInfo current_content，得到Cryptos
+    const std::vector<std::string>& crypto_suites, // local的加密套件
     const RtpHeaderExtensions& rtp_extensions,
-    UniqueRandomIdGenerator* ssrc_generator,
-    StreamParamsVec* current_streams,
-    MediaContentDescriptionImpl<C>* offer) {
+    UniqueRandomIdGenerator* ssrc_generator, // sscr 生成器
+    StreamParamsVec* current_streams, // 上一次offer的 stream parsms
+    MediaContentDescriptionImpl<C>* offer) { // 需要填充的VideoContentDescription
   
+  // 1. MediaContentDescriptionImpl 添加codecs
   offer->AddCodecs(codecs);
 
+  // 2. 根据sender_options， 生成streamParms
   if (!AddStreamParams(media_description_options.sender_options,
                        session_options.rtcp_cname, ssrc_generator,
                        current_streams, offer)) {
     return false;
   }
 
+  // 3. 
   return CreateContentOffer(media_description_options, session_options,
                             secure_policy, current_cryptos, crypto_suites,
                             rtp_extensions, ssrc_generator, current_streams,
@@ -1325,7 +1249,9 @@ static bool CreateMediaContentOffer(
 
 
 
-### MediaSessionDescriptionFactory.AddStreamParams
+### 10.1 MediaSessionDescriptionFactory.AddStreamParams
+
+pc/media_session.cc
 
 创建StreamParams
 
@@ -1386,6 +1312,8 @@ static bool AddStreamParams(
 
 
 #### MediaSessionDescriptionFactory.CreateStreamParamsForNewSenderWithSsrcs
+
+pc/media_session.cc
 
 ![ssrc1](create-offer-2.assets/ssrc1.png)
 
@@ -1465,7 +1393,9 @@ void StreamParams::GenerateSsrcs(int num_layers,
 
 
 
-### CreateContentOffer
+### 10.2 MediaSessionDescriptionFactory.CreateContentOffer
+
+pc/media_session.cc
 
 ```cpp
 // Create a media content to be offered for the given |sender_options|,
