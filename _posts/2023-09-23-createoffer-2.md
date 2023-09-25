@@ -14,6 +14,8 @@ categories: webrtc
 
 ---
 
+![jsep-session-description]({{ site.url }}{{ site.baseurl }}/images/create-offer-2.assets/jsep-session-description.png)
+
 
 ## 7. MediaSessionDescriptionFactory.CreateOffer
 
@@ -1187,9 +1189,11 @@ bool MediaSessionDescriptionFactory::AddTransportOffer(
     IceCredentialsIterator* ice_credentials) const {
   if (!transport_desc_factory_)
     return false;
-  // 1. 
+  // 1. current_desc 从根据content_name 找到TransportDescription
+  //  	首次 current_desc = null
   const TransportDescription* current_tdesc =
       GetTransportDescription(content_name, current_desc);
+  // 创建TransportDescription，
   std::unique_ptr<TransportDescription> new_tdesc(
       transport_desc_factory_->CreateOffer(transport_options, current_tdesc,
                                            ice_credentials));
@@ -1197,19 +1201,61 @@ bool MediaSessionDescriptionFactory::AddTransportOffer(
     RTC_LOG(LS_ERROR) << "Failed to AddTransportOffer, content name="
                       << content_name;
   }
-  // 2. 
+  // 2. 添加到 SessionDescription::transport_infos 数组中
   offer_desc->AddTransportInfo(TransportInfo(content_name, *new_tdesc));
   return true;
 }
 ```
 
+- 创建TransportDescription， 赋值ice_ufrag，ice_pwd，以及option；
+- TransportDescription添加到SessionDescription::transport_infos 数组中；
 
 
 
+### 9.1 TransportDescriptionFactory::CreateOffer
+
+p2p/base/transport_description_factory.cc
+
+```cpp
+std::unique_ptr<TransportDescription> TransportDescriptionFactory::CreateOffer(
+    const TransportOptions& options,
+    const TransportDescription* current_description,
+    IceCredentialsIterator* ice_credentials) const {
+  auto desc = std::make_unique<TransportDescription>();
+
+  // Generate the ICE credentials if we don't already have them.
+  if (!current_description || options.ice_restart) {
+    IceParameters credentials = ice_credentials->GetIceCredentials();
+    desc->ice_ufrag = credentials.ufrag;
+    desc->ice_pwd = credentials.pwd;
+  } else {
+    desc->ice_ufrag = current_description->ice_ufrag;
+    desc->ice_pwd = current_description->ice_pwd;
+  }
+  // ！！！！
+  desc->AddOption(ICE_OPTION_TRICKLE);
+  if (options.enable_ice_renomination) {
+    desc->AddOption(ICE_OPTION_RENOMINATION);
+  }
+
+  // If we are trying to establish a secure transport, add a fingerprint.
+  if (secure_ == SEC_ENABLED || secure_ == SEC_REQUIRED) {
+    // Fail if we can't create the fingerprint.
+    // If we are the initiator set role to "actpass".
+    if (!SetSecurityInfo(desc.get(), CONNECTIONROLE_ACTPASS)) {
+      return NULL;
+    }
+  }
+
+  return desc;
+}
+```
+
+创建TransportDescription， 对应属性填充
 
 
 
-## 10. ??? MediaSessionDescriptionFactory.CreateMediaContentOffer
+## 10. MediaSessionDescriptionFactory.CreateMediaContentOffer
 
 pc/media_session.cc
 
@@ -1239,7 +1285,7 @@ static bool CreateMediaContentOffer(
     return false;
   }
 
-  // 3. 
+  // 3. MediaContentDescriptionImpl填充属性，加密套件，rtp_extensions等
   return CreateContentOffer(media_description_options, session_options,
                             secure_policy, current_cryptos, crypto_suites,
                             rtp_extensions, ssrc_generator, current_streams,
@@ -1247,7 +1293,9 @@ static bool CreateMediaContentOffer(
 }
 ```
 
-
+1. MediaContentDescriptionImpl 添加codecs
+2. 根据sender_options， 生成streamParms
+3.  MediaContentDescriptionImpl填充属性，加密套件，rtp_extensions等
 
 ### 10.1 MediaSessionDescriptionFactory.AddStreamParams
 
@@ -1274,12 +1322,18 @@ static bool AddStreamParams(
   const bool include_flexfec_stream =
       ContainsFlexfecCodec(content_description->codecs());
 
+  // 遍历sender_options
   for (const SenderOptions& sender : sender_options) {
     // groupid is empty for StreamParams generated using
     // MediaSessionDescriptionFactory.
+    // 根据sender.track_id 找到对应的 StreamParams
     StreamParams* param =
         GetStreamByIds(*current_streams, "" /*group_id*/, sender.track_id);
     if (!param) {
+      // 创建先的StreamParams
+      // (1)sender.rids为空，就是rtpId， CreateStreamParamsForNewSenderWithSsrcs
+      //		第一次rids为空，这是在createOffer的时候会赋值；第二次协商offer的时候，会赋值
+      // (2)sender.rids 不为空， CreateStreamParamsForNewSenderWithRids
       // This is a new sender.
       StreamParams stream_param =
           sender.rids.empty()
@@ -1292,6 +1346,7 @@ static bool AddStreamParams(
               // Signal RIDs and spec-compliant simulcast (if requested).
               CreateStreamParamsForNewSenderWithRids(sender, rtcp_cname);
 
+      // MediaContentDescriptionImpl::AddStream， StreamParams添加到 MediaContentDescriptionImpl
       content_description->AddStream(stream_param);
 
       // Store the new StreamParams in current_streams.
@@ -1301,6 +1356,8 @@ static bool AddStreamParams(
       // Use existing generated SSRCs/groups, but update the sync_label if
       // necessary. This may be needed if a MediaStreamTrack was moved from one
       // MediaStream to another.
+      // 如果在current_streams，就是上一次协商的offer中找到StreamParams，
+      // 则直接添加到MediaContentDescriptionImpl
       param->set_stream_ids(sender.stream_ids);
       content_description->AddStream(*param);
     }
@@ -1309,9 +1366,18 @@ static bool AddStreamParams(
 }
 ```
 
+- SenderOptions 数组，创建StreamParams；根据track_id创建对应的StreamParams；
+- 在上一次协商的StreamParamsVec* current_streams，找到不到对应的StreamParams， 则心创建StreamParams，否则就直接使用上次的对象；
+- 根据sender.rids，为空则，`CreateStreamParamsForNewSenderWithSsrcs`；否则 `CreateStreamParamsForNewSenderWithRids`；
+
+> **rid**
+>
+> rid，就是rtpId
+> ...
 
 
-#### MediaSessionDescriptionFactory.CreateStreamParamsForNewSenderWithSsrcs
+
+### 10.2 !!! MediaSessionDescriptionFactory.CreateStreamParamsForNewSenderWithSsrcs
 
 pc/media_session.cc
 
@@ -1342,6 +1408,7 @@ static StreamParams CreateStreamParamsForNewSenderWithSsrcs(
         << "WebRTC-FlexFEC trial is not enabled, not sending FlexFEC";
   }
 
+  // 产生ssrc
   result.GenerateSsrcs(sender.num_sim_layers, include_rtx_streams,
                        include_flexfec_stream, ssrc_generator);
 
@@ -1351,6 +1418,8 @@ static StreamParams CreateStreamParamsForNewSenderWithSsrcs(
   return result;
 }
 ```
+
+- 对StreamParams 赋值
 
 
 
@@ -1393,7 +1462,7 @@ void StreamParams::GenerateSsrcs(int num_layers,
 
 
 
-### 10.2 MediaSessionDescriptionFactory.CreateContentOffer
+### 10.3 !!! MediaSessionDescriptionFactory.CreateContentOffer
 
 pc/media_session.cc
 
@@ -1435,12 +1504,15 @@ static bool CreateContentOffer(
   offer->set_rtp_header_extensions(extensions);
 
   AddSimulcastToMediaDescription(media_description_options, offer);
-
+	// 需要加密
   if (secure_policy != SEC_DISABLED) {
+    // 根据上一次offer的 ContentInfo current_content，得到Cryptos
+    // 添加到MediaContentDescription* offer
     if (current_cryptos) {
       AddMediaCryptos(*current_cryptos, offer);
     }
     if (offer->cryptos().empty()) {
+      // 如果offer->cryptos()为空，则 需要crypto_suites，
       if (!CreateMediaCryptos(crypto_suites, offer)) {
         return false;
       }
@@ -1455,7 +1527,89 @@ static bool CreateContentOffer(
 
 ```
 
+- 填充RtpHeaderExtensions
+- 填充加密套件，如果需要加密传输rtp数据
 
+
+
+#### MediaContentDescription.AddMediaCryptos
+
+pc/media_session.cc
+
+```cpp
+void AddMediaCryptos(const CryptoParamsVec& cryptos,
+                     MediaContentDescription* media) {
+  for (const CryptoParams& crypto : cryptos) {
+    media->AddCrypto(crypto);
+  }
+}
+```
+
+- MediaContentDescription 填充CryptoParams
+
+
+
+#### MediaContentDescription.CreateMediaCryptos
+
+pc/media_session.cc
+
+```cpp
+bool CreateMediaCryptos(const std::vector<std::string>& crypto_suites,
+                        MediaContentDescription* media) {
+  // 创建加密套件
+  CryptoParamsVec cryptos;
+  for (const std::string& crypto_suite : crypto_suites) {
+    if (!AddCryptoParams(crypto_suite, &cryptos)) {
+      return false;
+    }
+  }
+  // MediaContentDescription 填充CryptoParams
+  AddMediaCryptos(cryptos, media);
+  return true;
+}
+```
+
+
+
+```cpp
+static bool AddCryptoParams(const std::string& cipher_suite,
+                            CryptoParamsVec* cryptos_out) {
+  int size = static_cast<int>(cryptos_out->size());
+
+  cryptos_out->resize(size + 1);
+  return CreateCryptoParams(size, cipher_suite, &cryptos_out->at(size));
+}
+```
+
+
+
+```cpp
+static bool CreateCryptoParams(int tag,
+                               const std::string& cipher,
+                               CryptoParams* crypto_out) {
+  int key_len;
+  int salt_len;
+  if (!rtc::GetSrtpKeyAndSaltLengths(rtc::SrtpCryptoSuiteFromName(cipher),
+                                     &key_len, &salt_len)) {
+    return false;
+  }
+
+  int master_key_len = key_len + salt_len;
+  std::string master_key;
+  if (!rtc::CreateRandomData(master_key_len, &master_key)) {
+    return false;
+  }
+
+  RTC_CHECK_EQ(master_key_len, master_key.size());
+  std::string key = rtc::Base64::Encode(master_key);
+
+  crypto_out->tag = tag;
+  crypto_out->cipher_suite = cipher;
+  crypto_out->key_params = kInline;
+  crypto_out->key_params += key;
+  return true;
+}
+```
 
 
 
@@ -1494,6 +1648,12 @@ static bool CreateContentOffer(
   	// offer_recv && wants_send， 远端支持接收，本地支持发送，本地才支持发送
     // offer_send && wants_recv， 远端支持接收，本地支持发送，本地才支持接收
   ```
+
+
+
+## 13. 关于crypto的协商
+
+
 
 
 
