@@ -24,9 +24,12 @@ categories: webrtc
 
 - 通告结果：不论Offer创建成功，还是失败，最终需要做两件事。一件是通告用户侧Offer创建成功还是失败；一件是触发操作链的下一个操作。这个是通过CreateSessionDescriptionObserverOperationWrapper对象封装创建Offer回调接口、封装操作链操作完成回调，并在CreateOffer过程中一直往下传递，直到创建失败或者成功的地方被触发，来实现的。
 
-- 此外：不论是搜集信息，还是形成Offer都需要参考当前已被应用的Offer中的信息，以便复用部分信息，并使得两次Offer中同样的mLine处于同样的位置。
+- 此外：不论是搜集信息，还是形成Offer都需要参考当前已被应用的Offer中的信息，以便复用部分信息，并使得两次Offer中同样的m-line处于同样的位置。
 
-![createoffer-1]({{ site.url }}{{ site.baseurl }}/images/create-offer-1.assets/createoffer-1.png)SdpOfferAnswerHandler::GetOptionsForUnifiedPlanOffer()会遍历PC中所有的RtpTransceiver(RtpTransceiver是在addTrack的时候生成的)，**为每个RtpTransceiver创建一个媒体描述信息对象MediaDescriptionOptions**，在最终的生成的SDP对象中，**一个MediaDescriptionOptions就是一个m-line**。 根据由于之前的分析，一个Track对应一个RtpTransceiver，实质上在SDP中一个track就会对应到一个m-line。上述遍历形成所有媒体描述信息MediaDescriptionOptions会存入到MediaSessionOptions对象中，该对象在后续过程中一路传递，最终**在MediaSessionDescriptionFactory::CreateOffer()方法中被用来完成SDP创建**。
+![createoffer-1]({{ site.url }}{{ site.baseurl }}/images/create-offer-1.assets/createoffer-1.png)
+
+![createoffer-1]({{ site.url }}{{ site.baseurl }}/images/create-offer-1.assets/create-offer.jpg)
+SdpOfferAnswerHandler::GetOptionsForUnifiedPlanOffer()会遍历PC中所有的RtpTransceiver(RtpTransceiver是在addTrack的时候生成的)，**为每个RtpTransceiver创建一个媒体描述信息对象MediaDescriptionOptions**，在最终的生成的SDP对象中，**一个MediaDescriptionOptions就是一个m-line**。 根据由于之前的分析，一个Track对应一个RtpTransceiver，实质上在SDP中一个track就会对应到一个m-line。上述遍历形成所有媒体描述信息MediaDescriptionOptions会存入到MediaSessionOptions对象中，该对象在后续过程中一路传递，最终**在MediaSessionDescriptionFactory::CreateOffer()方法中被用来完成SDP创建**。
 
 另外MediaSessionDescriptionFactory::CreateOffer() 创建SDP过程中，会为每个媒体对象，即每个track：audio、video、data创建对应的MediaContent。上图右边展示了为视频track创建VideoContent过程，标黄的静态方法CreateStreamParamsForNewSenderWithSsrcs()会为每个RtpSender生成唯一的ssrc值。ssrc是个关键信息，正如之前分析，但需要说明的一点是此处并不会调用RtpSender->SetSsrc()方法，ssrc当前只存在于SDP信息中，等待SetLocalDescription()的解析。
 
@@ -123,7 +126,7 @@ api/peer_connection_interface.h
 
 
 
-## 3. PeerConnection.CreateOffer
+## 3. PeerConnection::CreateOffer
 
 pc/peer_connection.cc
 
@@ -150,7 +153,7 @@ void PeerConnection::CreateOffer(CreateSessionDescriptionObserver* observer,
 
 
 
-### 3.1 SdpOfferAnswerHandler.CreateOffer
+### 3.1 SdpOfferAnswerHandler::CreateOffer
 
 pc/sdp_offer_answer.cc
 
@@ -207,7 +210,7 @@ void SdpOfferAnswerHandler::CreateOffer(
 
 
 
-### 3.2 SdpOfferAnswerHandler.DoCreateOffer
+### 3.2 SdpOfferAnswerHandler::DoCreateOffer
 
 pc/sdp_offer_answer.cc
 
@@ -261,7 +264,7 @@ void SdpOfferAnswerHandler::DoCreateOffer(
 
 
 
-#### 3.2.1 SdpOfferAnswerHandler.HandleLegacyOfferOptions
+#### 3.2.1 SdpOfferAnswerHandler::HandleLegacyOfferOptions
 
 pc/sdp_offer_answer.cc
 
@@ -377,18 +380,18 @@ SdpOfferAnswerHandler::GetReceivingTransceiversOfType(
 }
 ```
 
-#### 3.2.2 SdpOfferAnswerHandler.GetOptionsForOffer
+#### 3.2.2 SdpOfferAnswerHandler::GetOptionsForOffer
 
 通过RTCOfferAnswerOptions 创建 MediaSessionOptions。
 MediaSessionOptions 除了一些公共部的一些属性， 还存放了每个 m-line 特有的属性，多个mline以数组形式存放。
 参考【章节4】。
 
-#### 3.2.3 WebRtcSessionDescriptionFactory.CreateOffer
+#### 3.2.3 --WebRtcSessionDescriptionFactory::CreateOffer
 
 根据MediaSessionOptions 创建 JsepSessionDescription， 当然JsepSessionDescription 主要的属性 SessionDescription。
 参考【章节5】。
 
-## 4. !!! SdpOfferAnswerHandler.GetOptionsForOffer
+## 4. !!! SdpOfferAnswerHandler::GetOptionsForOffer
 
 pc/sdp_offer_answer.cc
 
@@ -577,7 +580,7 @@ struct MediaDescriptionOptions {
 
 
 
-### 4.3 SdpOfferAnswerHandler.ExtractSharedMediaSessionOptions
+### 4.3 ExtractSharedMediaSessionOptions
 
 pc/sdp_offer_answer.cc
 
@@ -600,7 +603,7 @@ void ExtractSharedMediaSessionOptions(
 对MediaSessionOptions共享属性进行赋值。
 
 
-### 4.4 !!! SdpOfferAnswerHandler.GetOptionsForUnifiedPlanOffer
+### 4.4 !!! SdpOfferAnswerHandler::GetOptionsForUnifiedPlanOffer
 
 pc/sdp_offer_answer.cc
 
@@ -772,7 +775,7 @@ void SdpOfferAnswerHandler::GetOptionsForUnifiedPlanOffer(
 
 
 
-#### \mid_generator_.GenerateString()
+#### mid_generator_.GenerateString()
 
 这里生成了mid。
 
@@ -811,7 +814,7 @@ GetOptionsForUnifiedPlanAnswer， 对于transceiver不存在的的，stopped = t
 
 
 
-### 4.4 GetMediaDescriptionOptionsForTransceiver
+### 4.5 GetMediaDescriptionOptionsForTransceiver
 
 src\pc\sdp_offer_answer.cc
 
@@ -891,7 +894,7 @@ GetMediaDescriptionOptionsForTransceiver(
 
 
 
-## 5. WebRtcSessionDescriptionFactory.CreateOffer
+## 5. WebRtcSessionDescriptionFactory::CreateOffer
 
 pc\webrtc_session_description_factory.cc
 【章节3.2】doCreateOffer中调用的

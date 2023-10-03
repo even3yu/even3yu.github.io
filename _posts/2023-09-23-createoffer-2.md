@@ -14,10 +14,11 @@ categories: webrtc
 
 ---
 
-![jsep-session-description]({{ site.url }}{{ site.baseurl }}/images/create-offer-2.assets/jsep-session-description.png)
+![jsep-session-description]({{ site.url }}{{ site.baseurl }}/images/create-offer-1.assets/jsep-session-description.png)
 
 
-## 7. MediaSessionDescriptionFactory.CreateOffer
+
+## 7. MediaSessionDescriptionFactory::CreateOffer
 
 pc/media_session.cc
 
@@ -308,7 +309,7 @@ private:
 
 
 
-### 7.3 MediaSessionDescriptionFactory.GetCodecsForOffer
+### 7.3 MediaSessionDescriptionFactory::GetCodecsForOffer
 
 获取音视频数据的所支持的编码
 
@@ -559,7 +560,7 @@ static void MergeCodecs(const std::vector<C>& reference_codecs,
 
 ### 7.4 MediaSessionDescriptionFactory.GetOfferedRtpHeaderExtensionsWithIds
 
-
+pc/session_description.h
 
 ### ----end------
 
@@ -841,80 +842,6 @@ pc/session_description.h
 
 
 ### -------codec 协商----
-
-### 8.1 MediaSessionDescriptionFactory.NegotiateRtpTransceiverDirection
-
-pc/media_session.cc
-
-```cpp
-static RtpTransceiverDirection NegotiateRtpTransceiverDirection(
-    RtpTransceiverDirection offer,
-    RtpTransceiverDirection wants) {
-  // 远端支持发送
-  bool offer_send = webrtc::RtpTransceiverDirectionHasSend(offer);
-  // 远端支持接收
-  bool offer_recv = webrtc::RtpTransceiverDirectionHasRecv(offer);
-  // 本地想支持发送
-  bool wants_send = webrtc::RtpTransceiverDirectionHasSend(wants);
-  // 本地想支持接收
-  bool wants_recv = webrtc::RtpTransceiverDirectionHasRecv(wants);
-  // ！！！！！！！！！！！！！！！！
-  // 取与，
-	// offer_recv && wants_send， 远端支持接收，本地支持发送，本地才支持发送
-  // offer_send && wants_recv， 远端支持接收，本地支持发送，本地才支持接收
-  return webrtc::RtpTransceiverDirectionFromSendRecv(offer_recv && wants_send,
-                                                     offer_send && wants_recv);
-}
-
-RtpTransceiverDirection RtpTransceiverDirectionFromSendRecv(bool send,
-                                                            bool recv) {
-  if (send && recv) {
-    return RtpTransceiverDirection::kSendRecv;
-  } else if (send && !recv) {
-    return RtpTransceiverDirection::kSendOnly;
-  } else if (!send && recv) {
-    return RtpTransceiverDirection::kRecvOnly;
-  } else {
-    return RtpTransceiverDirection::kInactive;
-  }
-}
-```
-
-**本端接收的数据的，所以 direct 就是Recv；**
-**远端接收发送数据，所以 direct 是send recv；**
-**这样远端和本地进行协商，得到本端的方向就是 就是recv；**
-
-api/rtp_transceiver_direction.h
-
-```cpp
-enum class RtpTransceiverDirection {
-  kSendRecv,
-  kSendOnly,
-  kRecvOnly,
-  kInactive,
-  kStopped,
-};
-```
-
-![engine-codc-of-direct](create-offer-2.assets/engine-codec-of-direct.jpg)
-
-
-
-```
-视频打开
-remote sdp direct = SendRecv, 这是为什么？？？ 
-local sdp direct =  Recv
-=========》
-Recv
-
-视频关闭的时候
-remote sdp direct = Recv, 这是为什么？？？ 
-local sdp direct =  Recv
-=========》
-Init
-```
-
-
 
 ### 8.2 MediaSessionDescriptionFactory::GetVideoCodecsForOffer
 
