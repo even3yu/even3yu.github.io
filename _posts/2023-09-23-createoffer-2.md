@@ -906,7 +906,7 @@ const VideoCodecs& MediaSessionDescriptionFactory::GetVideoCodecsForOffer(
 
 
 
-![negotiate-direct](create-offer-2.assets/negotiate-direct.jpg)
+![negotiate-direct]({{ site.url }}{{ site.baseurl }}/images/create-offer-2.assets/negotiate-direct.jpg)
 
 #### RtpTransceiverDirectionReversed
 
@@ -1308,7 +1308,7 @@ static bool AddStreamParams(
 
 pc/media_session.cc
 
-![ssrc1](create-offer-2.assets/ssrc1.png)
+![ssrc1]({{ site.url }}{{ site.baseurl }}/images/create-offer-2.assets/ssrc1.png)
 
 ```cpp
 static StreamParams CreateStreamParamsForNewSenderWithSsrcs(
