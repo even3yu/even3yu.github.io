@@ -544,7 +544,7 @@ bool GetSrtpKeyAndSaltLengths(int crypto_suite,
 
 
 
-## 8. !!! SelectCrypto???
+## 8. !!! SelectCrypto
 
 pc/media_session.cc
 
@@ -553,6 +553,9 @@ pc/media_session.cc
 // 80-bit SHA1 HMAC. For audio 32-bit HMAC is tolerated (if enabled) unless
 // bundle is enabled because it is low overhead.
 // Pick the crypto in the list that is supported.
+
+																// SdpOfferAnswerHandler.GetOptionsForUnifiedPlanAnswer 从remoteOffer中
+																// 得到的数据
 static bool SelectCrypto(const MediaContentDescription* offer, // 远端支持的加密套件？？？？
                          bool bundle,
                          const webrtc::CryptoOptions& crypto_options, // 本地支持的加密套件配置
