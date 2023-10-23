@@ -1,3 +1,20 @@
+---
+layout: post
+title: rtp ntp
+date: 2023-10-09 18:30:00 +0800
+author: Fisher
+pin: True
+meta: Post
+categories: webrtc rtp
+---
+
+
+* content
+{:toc}
+
+---
+
+
 ## 1. NTP协议简介
 
 **网络时间协议**NTP(Network Time Protocol)的主要开发者是美国特拉华大学的MILLS David L教授设计实现的，由时间协议、ICMP时间戳消息及IP时间戳选项发展而来。NTP用于将计算机客户或服务器的时间与另一服务器同步，使用层次式时间分布模型。在配置时，NTP可以利用冗余服务器和多条网络路径来获得时间的高准确性和高可靠性。即使客户机在长时间无法与某一时间服务器相联系的情况下,仍可提供高准确度时间。
