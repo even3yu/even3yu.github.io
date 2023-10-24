@@ -113,6 +113,7 @@ auto seconds = std::chrono::duration_cast<std::chrono::seconds>(
 | 毫秒（ms） | std::chrono::milliseconds | 10的3次 |
 | 微秒（us） | std::chrono::microseconds | 10的6次 |
 | 纳秒（ns） | std::chrono::nanoseconds  | 10的9次 |
+| 皮秒（ps） | std::chrono::picoseconds  | 10的12次 |
 
 
 
