@@ -1,6 +1,6 @@
 ---
 layout: post
-title: rtcp NACK
+title: rtcp nack
 date: 2023-11-17 20:10:00 +0800
 author: Fisher
 pin: True
@@ -33,7 +33,7 @@ NACK 模块总体的发送策略为：对于每一个因为不连续而被判为
 3. 发送端会从历史队列中取出数据重发。
 
 
-![300](rtcp-fb-nack-2.assets/nack.png)
+![300]({{ site.url }}{{ site.baseurl }}/images/rtcp-fb-nack-2.assets/nack.png)
 
 
 
@@ -80,7 +80,7 @@ NACK 报文的定义在 [[rfc4585\]](https://link.zhihu.com/?target=https%3A//to
 
 RTCP 的反馈报文包头定义如下，FMT 和 PT 决定了该报文的类型，FCI 则是该类型报文的具体负载：
 
-![img](rtcp-fb-nack-2.assets/nack-reprort.webp)
+![img]({{ site.url }}{{ site.baseurl }}/images/rtcp-fb-nack-2.assets/nack-reprort.webp)
 
 协议规定的 NACK 反馈报文的 PT= 205，FMT=1，FCI 的格式如下（可以附带多个 FCI，通过 header 的 length 字段来标示其长度）：
 
@@ -118,7 +118,7 @@ a=rtpmap:97 rtx/90000
 ## 5. !!! 抓包
 
 ack rtcp报文格式如上图所示，pt=205。Packet identifier(PID) 为丢包起始参考值，Bitmap of Lost Packets(BLP)为16位的bitmap，对应为1的为表示丢包数据，具体如下抓包分析：
-![在这里插入图片描述](rtcp-fb-nack-2.assets/nack-wireshark.png)
+![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/rtcp-fb-nack-2.assets/nack-wireshark.png)
 
 - Packet identifier(PID)为176。
 - Bitmap of Lost Packets(BLP)：0x6ae1。

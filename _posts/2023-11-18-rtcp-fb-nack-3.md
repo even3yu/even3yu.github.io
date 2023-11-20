@@ -1,7 +1,6 @@
-
 ---
 layout: post
-title: rtcp NACK 流程及代码解读
+title: rtcp nack 流程及代码解读
 date: 2023-11-18 20:10:00 +0800
 author: Fisher
 pin: True
@@ -21,7 +20,7 @@ categories: webrtc rtp nack
 
 ### 1.1 视频发送数据流
 
-![在这里插入图片描述](rtcp-fb-nack-3.assets/video-send.png)
+![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/rtcp-fb-nack-3.assets/video-send.png)
 
 ### 1.2 调用堆栈
 
@@ -320,7 +319,7 @@ void RtpPacketHistory::CullOldPackets(int64_t now_ms) {
 
 ### 2.1 rtp接收数据流程
 
-![在这里插入图片描述](rtcp-fb-nack-3.assets/nack.png)
+![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/rtcp-fb-nack-3.assets/nack.png)
 
 
 
@@ -542,7 +541,7 @@ https://www.jianshu.com/p/6413cf2e8aca
 
 ### 2.3 nack请求的发送时机
 
-![在这里插入图片描述](rtcp-fb-nack-3.assets/nack-request.png)
+![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/rtcp-fb-nack-3.assets/nack-request.png)
 
 有两个地方触发nack，用红方框框出来了
 
@@ -556,7 +555,7 @@ https://www.jianshu.com/p/6413cf2e8aca
 
 ### 3.1 rtcp数据流
 
-![在这里插入图片描述](rtcp-fb-nack-3.assets/nack-response.png)
+![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/rtcp-fb-nack-3.assets/nack-response.png)
 
 ```less
 RTCPReceiver::IncomingPacket  modules/rtp_rtcp/source/rtcp_receiver.cc
