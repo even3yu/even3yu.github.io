@@ -969,3 +969,9 @@ nack线程会间隔20ms检测一次， kProcessIntervalMs 默认为20ms，
 [webrtc QOS方法一.3(发送端NACK实现)](https://blog.csdn.net/CrystalShaw/article/details/119176101)
 
 [webrtc在发送端缓存RTP包的方法 RTPPacketHistory](https://blog.csdn.net/dong_beijing/article/details/81143074)
+
+[WebRTC之NACK、RTX 在什么时机判断丢包发送NACK请求和RTX丢包重传](https://blog.csdn.net/Poisx/article/details/125038945)
+
+[WebRtc Video Receiver(三)-NACK丢包重传原理](https://www.jianshu.com/p/6413cf2e8aca)
+
+[WebRTC之视频NackModule](https://blog.csdn.net/momo0853/article/details/87288580)
