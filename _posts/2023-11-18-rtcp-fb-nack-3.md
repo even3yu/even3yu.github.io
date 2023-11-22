@@ -323,22 +323,29 @@ void RtpPacketHistory::CullOldPackets(int64_t now_ms) {
 
 
 
-### 2.2 nack对报序号的管理
-
-接收到rtp数据包后，会调用nack模块对报序号进行记录，同时检测是否需要nack请求
-
-#### NackModule2::OnReceivedPacket
+### NackModule2::OnReceivedPacket
 
 modules/video_coding/nack_module2.cc
 
 ```cpp
+int NackModule2::OnReceivedPacket(uint16_t seq_num, bool is_keyframe) {
+  RTC_DCHECK_RUN_ON(worker_thread_);
+  return OnReceivedPacket(seq_num, is_keyframe, false);
+}
+```
+
+
+
+```cpp
+// is_recovered 就是恢复，重发的包, fec 或者 nack
 int NackModule2::OnReceivedPacket(uint16_t seq_num,
                                     bool is_keyframe,
                                     bool is_recovered) {
   RTC_DCHECK_RUN_ON(worker_thread_);
-  bool is_retransmitted = true;
-
+ bool is_retransmitted = true;
+	// 没有初始化，首收到包
   if (!initialized_) {
+    // 保存当前收到的最新包
     newest_seq_num_ = seq_num;
     if (is_keyframe)
       keyframe_list_.insert(seq_num);
@@ -350,13 +357,25 @@ int NackModule2::OnReceivedPacket(uint16_t seq_num,
   // that packet has never been Nacked.
   if (seq_num == newest_seq_num_)
     return 0;
-  //如果接收的报序号小于之前接收到的，可能是乱序的包，可能是重传包
-  //如果nack列表有，则清除
+  // 如果接收的报序号小于之前接收到的，可能是乱序的包，可能是重传包
+  // 如果nack列表有，则清除
+  // 即不是第一个包和重复包就判断包顺序 seq_num在newest_seq_num之前就要删除了  
+  // 如果是上次处理前面的包， 这个包已经失效了， 如果还在nack列表中， 需要删除的
+  // 说明这个包晚到达了 
+  //
+  // AheadOf， newest_seq_num_ > seq_num
+  // newest_seq_num_ = 43，seq_num = 39
+	// 发现 39 比 43来的晚
+	// 可能是晚到
   if (AheadOf(newest_seq_num_, seq_num)) {
     // An out of order packet has been received.
+    // nack_list_ 存放的是没有收到的包的序号，即丢包的序号
+    // 从nack_list_这里找到39的包
     auto nack_list_it = nack_list_.find(seq_num);
     int nacks_sent_for_packet = 0;
+    // 找到该包了
     if (nack_list_it != nack_list_.end()) {
+      // 从nack_list_ 删除该包，同时增加retries
       nacks_sent_for_packet = nack_list_it->second.retries;
       nack_list_.erase(nack_list_it);
     }
@@ -371,13 +390,18 @@ int NackModule2::OnReceivedPacket(uint16_t seq_num,
     keyframe_list_.insert(seq_num);
 
   // And remove old ones so we don't accumulate keyframes.
+  // kMaxPacketAge = 10 000;
+  // 返回集合中第一个不小于 key=seq_num - kMaxPacketAge  的元素的迭代器指针
+  // 如果 key 大于 set 容器中的最大值
+  // 找到最小边界点，超出10000个就要删除之前的数据， 这个是实时系统
   auto it = keyframe_list_.lower_bound(seq_num - kMaxPacketAge);
   if (it != keyframe_list_.begin())
     keyframe_list_.erase(keyframe_list_.begin(), it);
-
+  // 如何判断是否找回来的包？？？  恢复包
   if (is_recovered) {
     recovered_list_.insert(seq_num);
 
+    // 是否超出项 超出删除，包序号间隔超过最大的10000
     // Remove old ones so we don't accumulate recovered packets.
     auto it = recovered_list_.lower_bound(seq_num - kMaxPacketAge);
     if (it != recovered_list_.begin())
@@ -386,16 +410,26 @@ int NackModule2::OnReceivedPacket(uint16_t seq_num,
     // Do not send nack for packets recovered by FEC or RTX.
     return 0;
   }
-
+	// 判断是否丢包，然后记录丢包的序号，将其插入到`nack_list_`，该函数为判断丢包的核心。
+  // 什么情况会走到这边：
+  //     1、不是第一个包
+  //     2. 不是一个重复的包
+  //     3、不是在new_seq_num之前的包
+  //     4、不是一个恢复包
+  // 有两种情况会走到这边
+  //     1、  上一次处理的包的后面的一个包，有序的包
+  //     2、  上一次处理的包 后面隔好几个包  
   AddPacketsToNack(newest_seq_num_ + 1, seq_num);
+  // 更新最新收到的seq_num
   newest_seq_num_ = seq_num;
 
   // Are there any nacks that are waiting for this seq_num.
-  //获取nack序号，如果有则触发nack
+  // 8. 根据kSeqNumOnly模式，获取当前可以发送nack申请的数据；
   std::vector<uint16_t> nack_batch = GetNackBatch(kSeqNumOnly);
   if (!nack_batch.empty()) {
     // This batch of NACKs is triggered externally; the initiator can
     // batch them with other feedback messages.
+    // 如果有丢包，则发起 nack 请求, 放入pacer模块中
     nack_sender_->SendNack(nack_batch, /*buffering_allowed=*/true);
   }
 
@@ -403,11 +437,39 @@ int NackModule2::OnReceivedPacket(uint16_t seq_num,
 }
 ```
 
-这部分逻辑主要是收到包，查一下是不是乱序的，可能是网络造成乱序，也可能是重发过来的，收到了就把nack list里面的记录删掉
+1. 是否第一次收到数据包，记录`initialized_`; 保存最新seq_num，`newest_seq_num_`;
+
+2. seq_num 落后于 `newest_seq_num_`，说明这个是乱序的包，后收到的，或者是恢复的包，收到了就把nack list里面的记录删掉；
+
+   使用`AheadOf(newest_seq_num_, seq_num)`函数，判断`newest_seq_num_`是否在`seq_num`之前。`AheadOf`函数的核心原理是检测两个包之间的距离，该函数帮助我们做了seq 环绕问题的处理。在没有环绕问题的情况下，假设seq 从0~2^16-1,在这个范围内传输，若在传输过程中出现了丢包，看如下log
+
+   ```js
+   newest_seq_num_:36 seq_num:37 is_keyframe:0 is_recovered: 0 AheadOf(newest_seq_num_, seq_num) : 0
+   newest_seq_num_:37 seq_num:38 is_keyframe:0 is_recovered: 0 AheadOf(newest_seq_num_, seq_num) : 0
+   newest_seq_num_:38 seq_num:41 is_keyframe:0 is_recovered: 0 AheadOf(newest_seq_num_, seq_num) : 0
+   newest_seq_num_:41 seq_num:42 is_keyframe:0 is_recovered: 0 AheadOf(newest_seq_num_, seq_num) : 0
+   newest_seq_num_:42 seq_num:43 is_keyframe:0 is_recovered: 0 AheadOf(newest_seq_num_, seq_num) : 0
+   newest_seq_num_:43 seq_num:40 is_keyframe:0 is_recovered: 1 AheadOf(newest_seq_num_, seq_num) : 1
+   newest_seq_num_:43 seq_num:39 is_keyframe:0 is_recovered: 1 AheadOf(newest_seq_num_, seq_num) : 1
+   newest_seq_num_:43 seq_num:44 is_keyframe:0 is_recovered: 0 AheadOf(newest_seq_num_, seq_num) : 0   
+   ```
+
+   根据上述的调试信息不难看出，**假设上一次已经收到了43号包，32号包到44号包之间，丢了39号和40号包**，丢了后会发送nack重传或者依据fec进行恢复，如上述log信息,当上一次收到的包为43号包的时候，然后本次收到了40号（前面丢了的）包，此时`AheadOf(43, 40)`将返回true，事实上43号包也是在40号包之前接收到的,可以看出在未有环绕的情况下如果`AheadOf(a, b)`函数当a > b的时候返回true。
+
+   当`AheadOf(newest_seq_num_, seq_num)`成立的条件下会根据当前的seq_num从`nack_list_`寻找对应的seq,此处表示已经收到了重传包，所以要将其从`nack_list_`容器中进行清除，最后返回该恢复包请求重传或恢复的次数。
+
+3. `seq_num > newest_seq_num_`， 则先清理下`keyframe_list_` 和 `recovered_list_` 的包，使得包序号的间隔不超过`kMaxPacketAge= 10 000`;  查过则删除；
+   对于H264数据而言，通俗的理解就是`keyframe_list_`容器记录了当前传入过来的P帧所对应的gop。
+
+4. 当前传入的包， is_recovered为true时，也就是该包时由RTX或FEC恢复过来的，此时会将该seq插入到`recovered_list_`，同时会删除过期的记录，删除原理和`keyframe_list_`的删除一致。如上述调试，39号和40号包会被记录到`recovered_list_`。
+
+5. 判断丢包，如果 `newest_seq_num_ + 1 ==seq_num ` 则 就是没有丢包，否则就是丢包，需要加入到nack list中，AddPacketsToNack 做的就是这个事情；
+
+6. 根据`kSeqNumOnly` 模式获取nack 请求,`GetNackBatch`，发送nack‘请求`SendNack`;
 
 
 
-#### NackModule2::AddPacketsToNack
+### NackModule2::AddPacketsToNack
 
 modules/video_coding/nack_module2.cc
 
@@ -416,33 +478,42 @@ void NackModule2::AddPacketsToNack(uint16_t seq_num_start,
                                      uint16_t seq_num_end) {
   // Called on worker_thread_.
   // Remove old packets.
-  //kMaxPacketAge=1000,删除超出队列数量，删除最老的
+  // kMaxPacketAge=1000, 删除 包间隔超过kMaxPacketAge
   auto it = nack_list_.lower_bound(seq_num_end - kMaxPacketAge);
   nack_list_.erase(nack_list_.begin(), it);
 
   // If the nack list is too large, remove packets from the nack list until
   // the latest first packet of a keyframe. If the list is still too large,
   // clear it and request a keyframe.
-  //nack_list 的最大容量为 kMaxNackPackets = 1000, 
-  //如果满了会删除最后一个 KeyFrame 之前的所有nacked 序号, 
-  //如果删除之后还是满的那么清空 nack_list 并请求KeyFrame
+  // nack_list 的最大容量为 kMaxNackPackets = 1000, 
+  // 如果满了会删除最老的一个 KeyFrame 之前的所有nack 序号, 
+  // 如果还是满继续删除下一个 KeyFrame
+  // 如果删除完所有 KeyFrame 之后还是满的那么清空 nack_list 并请求KeyFrame
+  //
+  // num_new_nacks = 开始seq_num_start到结束seq_num_end之间有多大距离
   uint16_t num_new_nacks = ForwardDiff(seq_num_start, seq_num_end);
+  // nack_list_.size() 现有的nack请求个数 + 新增的num_new_nacks
   if (nack_list_.size() + num_new_nacks > kMaxNackPackets) {
+    // 一直删除关键帧之前的所有的nack请求，直到满足 最大个数kMaxNackPackets
     while (RemovePacketsUntilKeyFrame() &&
            nack_list_.size() + num_new_nacks > kMaxNackPackets) {
     }
 
+    // 删除完全部的KeyFrame，还是存在超过kMaxNackPackets，则清空，请求关键帧
     if (nack_list_.size() + num_new_nacks > kMaxNackPackets) {
       nack_list_.clear();
       RTC_LOG(LS_WARNING) << "NACK list full, clearing NACK"
                              " list and requesting keyframe.";
+      // 请求关键帧
       keyframe_request_sender_->RequestKeyFrame();
       return;
     }
   }
 
+  // 遍历seq_num_start 到seq_num_end 之间 是否有丢包 有的话 就放到nack_list_中
   for (uint16_t seq_num = seq_num_start; seq_num != seq_num_end; ++seq_num) {
     // Do not send nack for packets that are already recovered by FEC or RTX
+    // 是否已经通过FEC或者RTX恢复了 该包 恢复了 就不需要放到nack_list_列表中去哈
     if (recovered_list_.find(seq_num) != recovered_list_.end())
       continue;
     NackInfo nack_info(seq_num, seq_num + WaitNumberOfPackets(0.5),
@@ -453,14 +524,27 @@ void NackModule2::AddPacketsToNack(uint16_t seq_num_start,
 }
 ```
 
-我们可以看到AddPacketsToNack()函数主要实现了：
-nack_list 的最大容量为 kMaxNackPackets = 1000, 如果满了会删除最后一个 KeyFrame 之前的所有nacked 序号, 如果删除之后还是满的那么清空 nack_list 并请求KeyFrame。
+1. kMaxPacketAge=1000, 删除 包间隔超过kMaxPacketAge
 
-#### NackModule2::GetNackBatch
+2. nack_list 的最大容量为 kMaxNackPackets = 1000, 如果`nack_list_.size() + num_new_nacks > kMaxNackPackets`超过了，则如下处理：
+   如果满了会删除最老的一个 KeyFrame 之前的所有nacked 序号；
+   如果还是满继续删除下一个 KeyFrame，以此一直反复直到满足个数为止；
+   如果删除完所有 KeyFrame 之后还是满的那么清空 nack_list 并请求KeyFrame；
+
+3. 遍历seq_num_start 到seq_num_end 之间 是否有丢包 有的话 就放到`nack_list_`中， 如果已经通过FEC或者RTX恢复了 该包 恢复了 就不需要放到`nack_list_`列表中去;
+
+   ```cpp
+       NackInfo nack_info(seq_num, seq_num + WaitNumberOfPackets(0.5),
+                          clock_->TimeInMilliseconds());
+   ```
+
+   
+
+### NackModule2::GetNackBatch
 
 modules/video_coding/nack_module2.cc
 
-获取需要nack的
+获取需要nack。
 
 ```cpp
 std::vector<uint16_t> NackModule2::GetNackBatch(NackFilterOptions options) {
@@ -473,17 +557,21 @@ std::vector<uint16_t> NackModule2::GetNackBatch(NackFilterOptions options) {
   Timestamp now = clock_->CurrentTime();
   std::vector<uint16_t> nack_batch;
   auto it = nack_list_.begin();
-  //遍历nack
+  // 遍历nack_list_
   while (it != nack_list_.end()) {
-    //初始化rtt为重发延时间隔
+    // 初始化rtt为重发延时间隔
     TimeDelta resend_delay = TimeDelta::Millis(rtt_ms_);
-    //如果使用了nack的配置
+    // !!!!!!!!!!
+    // 如果使用了nack的配置 backoff_settings_，
+		// 设置重发的时间间隔默认为一个rtt，可以配置`backoff_settings_->min_retry_interval`
+		// 超过一次的重发，则每次延时增大25%，1.25的n次幂
+    // !!!!!!!!!!
     if (backoff_settings_) {
-      //设置最大的重发延时间隔
+      // 设置最大的重发延时间隔
       resend_delay =
           std::max(resend_delay, backoff_settings_->min_retry_interval);
      // 如果重试次数超过了1次，则重新计算幂指后的重发延迟间隔（避免重试频繁）
-     //每次延时增大25%，1.25的n次幂
+     // 每次延时增大25%，1.25的n次幂
       if (it->second.retries > 1) {
         TimeDelta exponential_backoff =
             std::min(TimeDelta::Millis(rtt_ms_), backoff_settings_->max_rtt) *
@@ -491,27 +579,39 @@ std::vector<uint16_t> NackModule2::GetNackBatch(NackFilterOptions options) {
         resend_delay = std::max(resend_delay, exponential_backoff);
       }
     }
-   // 判断当前包seq_num是否该发送了（即超过了最大发送延迟时间）
+    
+    // 判断当前包seq_num是否该发送了（即超过了send_nack_delay_ms_， 延迟多久发送nack请求）
+    // send_nack_delay_ms_ 默认为0， 可修改, WebRTC-SendNackDelayMs
     bool delay_timed_out =
         now.ms() - it->second.created_at_time >= send_nack_delay_ms_;
-    // 判断基于rtt延迟时间时是否该发送了（即超过了重发延迟时间）
+    
+    // 判断基于rtt延迟时间时是否该发送了（即超过了重发时间间隔），定时发送模式kTimeOnly模式
     bool nack_on_rtt_passed =
         now.ms() - it->second.sent_at_time >= resend_delay.ms();
-    // 判断基于序列号时是否该发送了（即超过了重发延迟时间）
+    
+    // 发送模式kSeqNumOnly模式
     bool nack_on_seq_num_passed =
-         // 初次发送时有效，避免重复重发
+         // it->second.sent_at_time == -1表示初次发送， 初次发送时有效，避免重复重发
+				 // 基于需要发送，只会发送一次 
         it->second.sent_at_time == -1 &&
         // 当前包序列号比较老
         AheadOrAt(newest_seq_num_, it->second.send_at_seq_num);
-    // 如果该发送了
+   
+    // 超过包创建的时间+delay_timed_out，kSeqNumOnly模式，
+		//							第一次发送（sent_at_time == -1）且 send_at_seq_num比newest_seq_num_老
+    // delay_timed_out + consider_seq_num + nack_on_seq_num_passed
+    // 
+		// 超过包创建的时间+delay_timed_out，kTimeOnly模式，
+		//							时间间隔超过resend_delay=默认是一个rtt，根据配置会发生改变
+    // delay_timed_out + consider_timestamp + nack_on_rtt_passed
     if (delay_timed_out && ((consider_seq_num && nack_on_seq_num_passed) ||
                             (consider_timestamp && nack_on_rtt_passed))) {
-       // 当前包seq_num加入到nack list
+       // 当前包seq_num加入到nack_batch
       nack_batch.emplace_back(it->second.seq_num);
       ++it->second.retries; // 累积重试次数
-        // 设置发送时间
+        // 更新发送时间
       it->second.sent_at_time = now.ms();
-      // 超过最大重试次数了则从nack_list_移除
+      // 超过最大重试次数了则从nack_list_移除， kMaxNackRetries = 10
       if (it->second.retries >= kMaxNackRetries) {
         RTC_LOG(LS_WARNING) << "Sequence number " << it->second.seq_num
                             << " removed from NACK list due to max retries.";
@@ -527,9 +627,56 @@ std::vector<uint16_t> NackModule2::GetNackBatch(NackFilterOptions options) {
 }
 ```
 
-1、delay_timed_out ：加入nacklist的时间大于要发送nack的延时
-2、nack_on_rtt_passed ：该序号上次发送NACK的时间到当前时间要超过前面计算出来的延时。
-3：nack_on_seq_num_passed ：确定有最新的包序号比这个大，是被丢失的
+1. 遍历nack_list_
+
+2. 设置同一个包，两次发送nack请求的时间间隔
+
+   ```cpp
+   		// 初始化rtt为包发送nack请求的时间间隔
+       TimeDelta resend_delay = TimeDelta::Millis(rtt_ms_);
+       // !!!!!!!!!!
+       // 如果使用了nack的配置 backoff_settings_，
+   		// 设置重发的时间间隔默认为一个rtt，可以配置`backoff_settings_->min_retry_interval`
+   		// 超过一次的重发，则每次延时增大25%，1.25的n次幂
+       // !!!!!!!!!!
+       if (backoff_settings_) {
+         // 设置最大的重发延时间隔
+         resend_delay =
+             std::max(resend_delay, backoff_settings_->min_retry_interval);
+        // 如果重试次数超过了1次，则重新计算幂指后的重发延迟间隔（避免重试频繁）
+        // 每次延时增大25%，1.25的n次幂
+         if (it->second.retries > 1) {
+           TimeDelta exponential_backoff =
+               std::min(TimeDelta::Millis(rtt_ms_), backoff_settings_->max_rtt) *
+               std::pow(backoff_settings_->base, it->second.retries - 1);
+           resend_delay = std::max(resend_delay, exponential_backoff);
+         }
+       }
+   ```
+
+3. 判断当前包seq_num，加入nacklist的时间间隔即超过了`send_nack_delay_ms_`，` send_nack_delay_ms_` 默认为0, 可修改, WebRTC-SendNackDelayMs
+   `bool delay_timed_out = now.ms() - it->second.created_at_time >= send_nack_delay_ms_;
+
+4. `nack_on_rtt_passed`，超过了重发时间间隔，基于定时发送模式kTimeOnly模式
+
+   ```cpp
+   bool nack_on_rtt_passed =
+           now.ms() - it->second.sent_at_time >= resend_delay.ms();
+   ```
+
+5. `nack_on_seq_num_passed`， kSeqNumOnly模式，第一次发送 且 确实是丢包；
+
+   ```cpp
+   
+       bool nack_on_seq_num_passed =
+            // it->second.sent_at_time == -1表示初次发送， 初次发送时有效，避免重复重发
+   				 // 基于需要发送，只会发送一次 
+           it->second.sent_at_time == -1 &&
+           // 当前包序列号比较老
+           AheadOrAt(newest_seq_num_, it->second.send_at_seq_num);
+   ```
+
+6. 满足3+4活着3+5的条件，就发起nack请求，更新请求次数和发送请求的时间；如果超过请求的最大次数kMaxNackRetries=10，则不再请求；
 
 
 
@@ -539,15 +686,25 @@ https://zhuanlan.zhihu.com/p/338409893
 
 https://www.jianshu.com/p/6413cf2e8aca
 
-### 2.3 nack请求的发送时机
+### 2.3 nack 发送的策略
 
 ![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/rtcp-fb-nack-3.assets/nack-request.png)
 
-有两个地方触发nack，用红方框框出来了
+有两个地方触发nack，用红方框框出来。
+两种发送处理在NackModule2::GetNackBatch()里面,一处在创建模块的时候就会启动的定时任务里定时调用,一处在NackModule2:: OnReceivedPacket()检查完包连续性后就会立即调用.
 
-#### 当收到rtp数据，nack模块会记录包序号，包类型
+![img](rtcp-fb-nack-3.assets/f232880557615d88be28c0d0457c0112.png)
 
-#### 线程定期检测是否存在丢包，需要nack请求
+#### 2.3.1 当收到rtp数据，nack模块会记录包序号，包类型
+
+NackModule2::GetNackBatch(kSeqNumOnly) ： kSeqNumOnly 根据序列号判断是否发送nack
+仅在第一次发送的时会用到序列号方式,延迟发送时间为kDefaultSendNackDelayMs(0ms), 所以基本是入nack_lisk后就立即发送了(可以作为优化点之一后面提), 发送后会更新nack_list[seq].send_at_time = now(), 供后续定时任务判断是否超时。https://blog.csdn.net/qq_17308321/article/details/129948951![img](rtcp-fb-nack-3.assets/dbafd9672a34b20c94917089414edfe4.jpeg)
+
+
+#### 2.3.2 线程定期检测是否存在丢包，需要nack请求
+
+NackModule2::GetNackBatch(kTimeOnly) ：kTimeOnly 根据时间判断是否发送nack,在没有打开补偿配置的情况下间隔为一个rtt时间,rtt会动态更新(默认频率1000ms), 初始值为kDefaultRttMs(100ms), 再次发送的时间 resend_delay 默认为一个rtt 时间,即一个rtt时间后没有收到重传回来的nack,就继续发送, 实验阶段增加了补偿配置,可以动态延长resend_delay 延迟, 可以作为改进方案之一, 后面有提.
+![img](rtcp-fb-nack-3.assets/67e151e3afca258d98d47dc1705d41ff.jpeg)
 
 
 
