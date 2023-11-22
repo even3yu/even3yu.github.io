@@ -71,10 +71,14 @@ H.264 Baseline profile、Extended profile和Main profile都是针对8位样本�
 ffmpeg -i input.mp4 -profile:v baseline -level 3.0 output.mp4 ffmpeg -i input.mp4 -profile:v main -level 4.2 output.mp4
 ```
 
+## 3. Apple 设备对不同profile的支持。 
 
+![这里写图片描述]({{ site.url }}{{ site.baseurl }}/images/sdp-about-profile-level-id.assets/apple-prfile.png)
 
 ## 参考
 
 [关于H.264 profile-level-id](https://blog.csdn.net/u012587637/article/details/108767639)
 
 https://cloud.tencent.com/developer/article/2020442
+
+[H264编码profile & level控制](https://www.cnblogs.com/tinywan/p/6402007.html)
