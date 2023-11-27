@@ -107,7 +107,7 @@ RTP Fixed Header结构如下，其中前12字节内容必须包含的。
 
 #### 1.1.1 抓包
 
-![img](rtp-header-extesion-1.assets/one-byte-wireshark.png)
+![img]({{ site.url }}{{ site.baseurl }}/images/rtp-header-extesion-1.assets/one-byte-wireshark.png)
 
 - `Defined by profile`字段为0xBEDE，表示One-Byte Header，
 - `Extension length`为1，表示Header Extension长度为`1x4`字节，
@@ -192,11 +192,11 @@ RTP Fixed Header结构如下，其中前12字节内容必须包含的。
 
 #### 1.2.2 抓包
 
-![在这里插入图片描述](rtp-header-extesion-1.assets/tow-bytes-wireshark.png)
+![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/rtp-header-extesion-1.assets/tow-bytes-wireshark.png)
 
 
 
-![在这里插入图片描述](rtp-header-extesion-1.assets/tow-bytes-wireshark-2.png)
+![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/rtp-header-extesion-1.assets/tow-bytes-wireshark-2.png)
 
 - 扩展为 9*4 = 36 字节
 - 第一个扩展， 2个字节的扩展头 + 2字节数据
@@ -249,7 +249,7 @@ constexpr ExtensionInfo kExtensions[] = {
 
 
 
-![img](rtp-header-extesion-1.assets/webrtc-extension.webp)
+![img]({{ site.url }}{{ site.baseurl }}/images/rtp-header-extesion-1.assets/webrtc-extension.webp)
 
 
 
@@ -305,7 +305,7 @@ a=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id
 
 ### 3.2 抓包
 
-![img](rtp-header-extesion-1.assets/head-extension-wireshark.png)
+![img]({{ site.url }}{{ site.baseurl }}/images/rtp-header-extesion-1.assets/head-extension-wireshark.png)
 
 该RTP包共有4个Header extension，这四个Header extension ID分别为：2，3，4，10。根据示例SDP，可知分别是：abs-send-time，transport-wide-cc-extensions，mid，rtp-stream-id扩展。
 
