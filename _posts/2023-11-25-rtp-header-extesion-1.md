@@ -114,7 +114,7 @@ RTP Fixed Header结构如下，其中前12字节内容必须包含的。
 - 对于Header Extension：ID为3，Lengh为2（data为三个字节）。
   一个字节的 header extension头 + data 为三个字节。
 
-![image-20231127144529653](image-20231127144529653.png)
+![one-byte-example]({{ site.url }}{{ site.baseurl }}/images/rtp-header-extesion-1.assets/one-byte-example.jpg)
 
 - 构造相关代码位于`RtpPacket::AllocateRawExtension`中，分配扩展
 - 解析相关代码位于`RtpPacket::ParseBuffer`中。解析扩展
