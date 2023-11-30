@@ -21,10 +21,17 @@ categories: webrtc sdp
 ```c
 a=rtpmap:125 H264/90000
 a=fmtp:125 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f
-123
 ```
 
-如上，packetization-mode=1，profile=42，level=e0，id=1f(固定，不做分析)。下面主要分析 packetization-mode、profile 和 level 三个字段。
+如上，packetization-mode=1，profile=42，level=1f，(e0不做分析)。下面主要分析 packetization-mode、profile 和 level 三个字段。
+
+- `level-asymmetry-allowed=1`指明通信双方使用的H264Level是否要保持一致，0必须一致，1可以不一致。
+- `packetization-mode`指明经H264编码后的视频数据如何打包：0单包、1非交错包、2交错包。三种打包模式中，模式0和模式1用于低延迟的实时通信领域。
+    - 模式0的含义是每个包就是一帧视频数据。
+    - 模式1是可以将视频帧拆分成多个顺序的RTP包发送，接收端收到数据包后再按顺序将其还原。
+- `profile-level-id`由三部分组成，即profile_idc、profile_iop以及level_idc，每个组成占8位，因此可以推测出profile_idc=42、profile_iop=e0、level-idc=1f
+
+[参考 profile-level-id 文章](https://blog.csdn.net/hzb869168467/article/details/122147530)
 
 ### 1.1 packetization-mode(协商打包模式)：
 
@@ -82,3 +89,5 @@ ffmpeg -i input.mp4 -profile:v baseline -level 3.0 output.mp4 ffmpeg -i input.mp
 https://cloud.tencent.com/developer/article/2020442
 
 [H264编码profile & level控制](https://www.cnblogs.com/tinywan/p/6402007.html)
+
+[H.264视频Profile-level-id字段解析](https://blog.csdn.net/A18373279153/article/details/118383229)
