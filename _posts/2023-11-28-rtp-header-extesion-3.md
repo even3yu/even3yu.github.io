@@ -19,7 +19,7 @@ categories: webrtc rtp rtpxh
 
 modules/rtp_rtcp/source/rtp_packet.h
 
-```
+```cpp
   using ExtensionType = RTPExtensionType;
   using ExtensionManager = RtpHeaderExtensionMap;
   
@@ -91,7 +91,32 @@ bool RtpPacket::ParseBuffer(const uint8_t* buffer, size_t size) {
   // 偏移到csrs之后；
   payload_offset_ = kFixedHeaderSize + number_of_crcs * 4;
 
+/* padding size 最后一个字节
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|V=2|P|X|  CC   |M|     PT      |       sequence number         |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                           timestamp                           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           synchronization source (SSRC) identifier            |
++=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+|            contributing source (CSRC) identifiers             |
+|                             ....                              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|One-byte eXtensions id = 0xbede|       length in 32bits        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                          Extensions                           |
+|                             ....                              |
++=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+|                          Payload                              |
+|         ....               : padding...                       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        padding             | padding size   |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+*/
   if (has_padding) {
+    //填充解析，填充大小放在最后一个字节
     padding_size_ = buffer[size - 1];
     if (padding_size_ == 0) {
       RTC_LOG(LS_WARNING) << "Padding was set, but padding size is zero";
@@ -493,3 +518,7 @@ rtc::ArrayView<uint8_t> RtpPacket::AllocateRawExtension(int id, size_t length) {
 }
 ```
 
+## 参考
+[padding size](https://even3yu.github.io/2023/10/08/rtp/#6-rtp-扩展)
+
+[WebRTC之RTP封装与解封装](https://blog.csdn.net/yinshipin007/article/details/129299612)
