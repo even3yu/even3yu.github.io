@@ -55,18 +55,23 @@ RTP Fixed Header结构如下，其中前12字节内容必须包含的。
 ```
 
 如果 RTP 标准头部 X 位为1，就表示CSRC后面还有一些额外的 RTP 扩展头，上面的定义中允许使用 16-bit 长度作为 identifier，16-bit 长度作为 header extension 长度说明。
-这种定义方式存在两个缺点：① 一个 RTP packet 只能携带一个 header extension； ② 其次，没有给出如何分配 16-bit header extension identifier 以避免冲突。
+**这种定义方式存在两个缺点**：
+
+-  一个 RTP packet 只能携带一个 header extension； 
+
+- 没有给出如何分配 16-bit header extension identifier 以避免冲突。
+
 基于以上两个缺点，rfc5285 对 header extension 做了拓展，支持两种类型的拓展头 One-byte Header 和 Two-byte Header
 
 
 
-### 1.1 One-byte Header
+### 1.1 !!! One-byte Header
 
 ```less
    0                   1                   2                   3
    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |       0xBE    |    0xDE       |           length =3           |
+  |       0xBE    |    0xDE       |           length = 3 （32bit）|
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |  ID   | L=0   |     data      |  ID   |  L=1  |   data...
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -78,7 +83,7 @@ RTP Fixed Header结构如下，其中前12字节内容必须包含的。
 
 - 2个字节 为固定为 0XBEDE 标志，意味着这是一个 one-byte 扩展，
 
-- length = 3 说明 header extension 的总长度为 3 * 32bit = 96bit = 12byte
+- length = 3 说明 header extension 的总长度为 3 * 32bit = 96bit = 12byte， **这里length 是以32bit为单位的**；
 
   ```less
   第一个 一个字节的 header extension头 + 1个字节的data----》 	2个字节
@@ -105,6 +110,15 @@ RTP Fixed Header结构如下，其中前12字节内容必须包含的。
 
 
 
+#### 1.1.0 !!! 注意点
+
+- One-byte Header, length 是**以32bit= 4Byte为单位长度的**；
+- 每个扩展头，首个byte，前 4 位是这个扩展头的 ID， **这就说明最多只能放16个扩展头**；
+- 每个扩展头，首个byte，后四位是 data 的长度 -1，就是**数据长度是 len+1** ，数据最大能放16个字节的数据，超过就不行；
+- **还需要做4字节对齐**，需要增加padding；
+
+
+
 #### 1.1.1 抓包
 
 ![img]({{ site.url }}{{ site.baseurl }}/images/rtp-header-extesion-1.assets/one-byte-wireshark.png)
@@ -125,6 +139,8 @@ RTP Fixed Header结构如下，其中前12字节内容必须包含的。
 
 先算头，再算pad
 
+
+
 ### 1.2 Two-bytes Header
 
 扩展头为two-byte的情况下， RTP头后的第一个16 bit 如下所示， 一个0x100 + appbits， appbits 可以用来填充应用层级别的数据
@@ -144,7 +160,7 @@ RTP Fixed Header结构如下，其中前12字节内容必须包含的。
    0                   1                   2                   3
    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |       0x10    |    0x00       |           length=3            |
+  |       0x10    |    0x00       |         length = 3 （32bit）   |
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |      ID       |     L=0       |     ID        |     L=1       |
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -154,9 +170,9 @@ RTP Fixed Header结构如下，其中前12字节内容必须包含的。
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
-- 可以看到开头为 0x100 + 0x0， 
+- 可以看到开头为 0x100 + 0x0，后4个bit，就是appbits，不同应用可以根据自定义通常设置为0，接收方忽略该值；
 
-- length=3 表示接下来有 3 个 32bit 长度，
+- length=3 表示接下来有 3 个 32bit 长度，**这里length 是以32bit为单位的**；
 
 - 扩展头和数据，扩展头除了 ID 和 L 相对于 one-byte header **从 4bits 变成了 8bits** ，参考 rfc8285 4.3 节 two-byte 中 **L 表示了真实的长度，不同于 one-byte 中需要进行 +1 计算**。
 
@@ -184,11 +200,20 @@ RTP Fixed Header结构如下，其中前12字节内容必须包含的。
 
 
 
+#### 1.2.1 注意点
+
+- Two-byte Header, length 是**以32bit= 4Byte为单位长度的**；
+- 每个扩展头 ID 和 L 相对于 one-byte header **从 4bits 变成了 8bits**
+- two-byte 中 **L 表示了真实的长度，不同于 one-byte 中需要进行 +1 计算**。
+- **还需要做4字节对齐**，需要增加padding；
+
+
+
 #### 1.2.1 extmap-allow-mixed
 
-使用两字节，必须sdp 允许 ExtmapAllowMixed
+使用两字节，必须sdp 允许 ExtmapAllowMixed， 在sdp配置。
 
-
+ 
 
 #### 1.2.2 抓包
 
