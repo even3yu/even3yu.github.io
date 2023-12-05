@@ -1,0 +1,92 @@
+---
+layout: post
+title: android api
+date: 2023-12-01 21:10:00 +0800
+author: Fisher
+pin: True
+meta: Post
+categories: android
+---
+
+
+* content
+{:toc}
+
+---
+
+
+# [Android API Levels](https://apilevels.com/)
+
+This is an overview of all Android versions and their corresponding identifiers for Android developers. Anyone is welcome to open [an issue or pull request](https://github.com/ebelinski/apilevels). Happy developing!
+
+| Version                                                      | SDK / API level                                            | [Version code](https://developer.android.com/reference/kotlin/android/os/Build.VERSION_CODES) | Codename                                          | Cumulative usage [1](https://apilevels.com/#fn:1) | Year[4](https://apilevels.com/#fn:4) |
+| ------------------------------------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------- | ------------------------------------------------- | ------------------------------------ |
+| **[Android 14](https://developer.android.com/about/versions/14)** | Level 34                                                   | `UPSIDE_DOWN_CAKE`                                           | Upside Down Cake [2](https://apilevels.com/#fn:2) | —                                                 | 2023                                 |
+| `targetSdk` [will need to be 34+](https://developer.android.com/google/play/requirements/target-sdk) for new apps and app updates by August 31, 2024. |                                                            |                                                              |                                                   |                                                   |                                      |
+| **[Android 13](https://developer.android.com/about/versions/13)** | Level 33                                                   | `TIRAMISU`                                                   | Tiramisu [2](https://apilevels.com/#fn:2)         | 36.5%                                             | 2022                                 |
+| `targetSdk` [must be 33+](https://developer.android.com/google/play/requirements/target-sdk) for new apps and app updates since August 31, 2023. |                                                            |                                                              |                                                   |                                                   |                                      |
+| **[Android 12](https://developer.android.com/about/versions/12)** | Level 32 **Android 12L**                                   | `S_V2`                                                       | Snow Cone [2](https://apilevels.com/#fn:2)        | 54.7%                                             |                                      |
+| Level 31 **Android 12**                                      | `S`                                                        | 2021                                                         |                                                   |                                                   |                                      |
+| **[Android 11](https://developer.android.com/about/versions/11)** | Level 30                                                   | `R`                                                          | Red Velvet Cake [2](https://apilevels.com/#fn:2)  | 72.5%                                             | 2020                                 |
+| **[Android 10](https://developer.android.com/about/versions/10)** | Level 29                                                   | `Q`                                                          | Quince Tart [2](https://apilevels.com/#fn:2)      | 81.9%                                             | 2019                                 |
+| **[Android 9](https://developer.android.com/about/versions/pie)** | Level 28                                                   | `P`                                                          | Pie                                               | 88.5%                                             | 2018                                 |
+| **[Android 8](https://developer.android.com/about/versions/oreo)** | Level 27 **Android 8.1**                                   | `O_MR1`                                                      | Oreo                                              | 90.8%                                             | 2017                                 |
+| Level 26 **Android 8.0**                                     | `O`                                                        | 94.0%                                                        |                                                   |                                                   |                                      |
+| **[Android 7](https://developer.android.com/about/versions/nougat)** | Level 25 **Android 7.1**                                   | `N_MR1`                                                      | Nougat                                            | 94.5%                                             | 2016                                 |
+| Level 24 **Android 7.0**                                     | `N`                                                        | 96.1%                                                        |                                                   |                                                   |                                      |
+| **[Android 6](https://developer.android.com/about/versions/marshmallow)** | Level 23                                                   | `M`                                                          | Marshmallow                                       | 97.7%                                             | 2015                                 |
+| **[Android 5](https://developer.android.com/about/versions/lollipop)** | Level 22 **Android 5.1**                                   | `LOLLIPOP_MR1`                                               | Lollipop                                          | 98.6%                                             |                                      |
+| Level 21 **Android 5.0**                                     | `LOLLIPOP`, `L`                                            | 99.1%                                                        | 2014                                              |                                                   |                                      |
+| [Jetpack Compose](https://developer.android.com/jetpack/compose) requires a `minSdk` of 21 or higher.Google Play services [will not support Android versions](https://android-developers.googleblog.com/2023/07/google-play-services-discontinuing-updates-for-kitkat.html) below API level 21 starting in August 2023. |                                                            |                                                              |                                                   |                                                   |                                      |
+| **Android 4**                                                | Level 20 **Android 4.4W** [3](https://apilevels.com/#fn:3) | `KITKAT_WATCH`                                               | KitKat                                            | 99.4%                                             |                                      |
+| Level 19 **Android 4.4**                                     | `KITKAT`                                                   | 2013                                                         |                                                   |                                                   |                                      |
+| Google Play services beyond v21.33.56 (the last version despite what the blog states) [does not support Android versions](https://android-developers.googleblog.com/2021/07/google-play-services-discontinuing-jelly-bean.html) below API level 19. |                                                            |                                                              |                                                   |                                                   |                                      |
+| Level 18 **Android 4.3**                                     | `JELLY_BEAN_MR2`                                           | Jelly Bean                                                   | 99.4%                                             |                                                   |                                      |
+| Level 17 **Android 4.2**                                     | `JELLY_BEAN_MR1`                                           | 99.4%                                                        | 2012                                              |                                                   |                                      |
+| Level 16 **Android 4.1**                                     | `JELLY_BEAN`                                               | 99.4%                                                        |                                                   |                                                   |                                      |
+| Google Play services beyond v14.8.39 (the last version despite what the blog states) [does not support Android versions](https://android-developers.googleblog.com/2018/12/google-play-services-discontinuing.html) below API level 16. |                                                            |                                                              |                                                   |                                                   |                                      |
+| Level 15 **Android 4.0.3 – 4.0.4**                           | `ICE_CREAM_SANDWICH_MR1`                                   | Ice Cream Sandwich                                           | 99.8%                                             | 2011                                              |                                      |
+| Level 14 **Android 4.0.1 – 4.0.2**                           | `ICE_CREAM_SANDWICH`                                       |                                                              |                                                   |                                                   |                                      |
+| [Jetpack](https://developer.android.com/jetpack)/[AndroidX](https://developer.android.com/jetpack/androidx) libraries [require](https://developer.android.com/topic/libraries/support-library#api-versions) a `minSdk` of 14 or higher. |                                                            |                                                              |                                                   |                                                   |                                      |
+| **Android 3**                                                | Level 13 **Android 3.2**                                   | `HONEYCOMB_MR2`                                              | Honeycomb                                         | *No data*                                         |                                      |
+| Level 12 **Android 3.1**                                     | `HONEYCOMB_MR1`                                            |                                                              |                                                   |                                                   |                                      |
+| Level 11 **Android 3.0**                                     | `HONEYCOMB`                                                |                                                              |                                                   |                                                   |                                      |
+| **Android 2**                                                | Level 10 **Android 2.3.3 – 2.3.7**                         | `GINGERBREAD_MR1`                                            | Gingerbread                                       |                                                   |                                      |
+| Level 9 **Android 2.3.0 – 2.3.2**                            | `GINGERBREAD`                                              | 2010                                                         |                                                   |                                                   |                                      |
+| Level 8 **Android 2.2**                                      | `FROYO`                                                    | Froyo                                                        |                                                   |                                                   |                                      |
+| Level 7 **Android 2.1**                                      | `ECLAIR_MR1`                                               | Eclair                                                       |                                                   |                                                   |                                      |
+| Level 6 **Android 2.0.1**                                    | `ECLAIR_0_1`                                               | 2009                                                         |                                                   |                                                   |                                      |
+| Level 5 **Android 2.0**                                      | `ECLAIR`                                                   |                                                              |                                                   |                                                   |                                      |
+| **Android 1**                                                | Level 4 **Android 1.6**                                    | `DONUT`                                                      | Donut                                             |                                                   |                                      |
+| Level 3 **Android 1.5**                                      | `CUPCAKE`                                                  | Cupcake                                                      |                                                   |                                                   |                                      |
+| Level 2 **Android 1.1**                                      | `BASE_1_1`                                                 | Petit Four                                                   |                                                   |                                                   |                                      |
+| Level 1 **Android 1.0**                                      | `BASE`                                                     | *None*                                                       | 2008                                              |                                                   |                                      |
+
+## Definitions
+
+#### Gradle files
+
+| Kotlin variable | Groovy variable     | Definition                                                   |
+| --------------- | ------------------- | ------------------------------------------------------------ |
+| `minSdk`        | `minSdkVersion`     | The minimum SDK version your app will support, defined in `build.gradle`. For example, if your `minSdk` is 26, this SDK version corresponse to API Level 26 and Android 8, so your app will only run on devices with Android 8 or higher. |
+| `targetSdk`     | `targetSdkVersion`  | The SDK version that your app targets, defined in `build.gradle`. This should always be the same as `compileSdk`. |
+| `compileSdk`    | `compileSdkVersion` | The SDK version that your app compiles against, defined in `build.gradle`. Android Studio uses this SDK version to build your AABs and APKs. This should always be the same as `targetSdk`. |
+
+#### Code files
+
+| Variable                | Definition                                                   |
+| ----------------------- | ------------------------------------------------------------ |
+| `Build.VERSION.SDK_INT` | The SDK version of the Android OS currently running on the user's device. For example, on a device running Android 11, this value will be `30` (aka `Build.VERSION_CODES.R`), even if the target and compile SDK of the app is different. |
+
+## Footnotes
+
+1. Cumulative usage distribution figures were last updated on **November 14, 2023** using data from [Statcounter GlobalStats](https://gs.statcounter.com/android-version-market-share/mobile-tablet/worldwide) and [this script](https://github.com/ebelinski/apilevels/blob/main/meta/android-usage-generator.swift). These figures may have changed significantly since the last update. You may update the figures yourself with a [pull request](https://github.com/ebelinski/apilevels). [↩](https://apilevels.com/#fnref:1)
+2. The codenames for Android 10 and above in the table are the internal codenames. Beginning with Android 10, Google dropped the usage of codenames publicly. [↩](https://apilevels.com/#fnref:2)
+3. Android 4.4W is the first Android release for Android Wear. [↩](https://apilevels.com/#fnref:3)
+4. The years represent the year of first stable release of each version. The release dates are from [`android.os.Build.VERSION_CODES`](https://developer.android.com/reference/android/os/Build.VERSION_CODES#constants_1) including later versions' years from the [Official Android blog](https://blog.google/products/android/) ([12](https://blog.google/products/android/android-12/), [12L](https://blog.google/products/android/12l-larger-screens/), [13](https://blog.google/products/android/android-13/), [14](https://blog.google/products/android/android-14/)) [↩](https://apilevels.com/#fnref:4)
+
+## See also
+
+- [Build.VERSION_CODES](https://developer.android.com/reference/android/os/Build.VERSION_CODES) official reference
+- [Codenames, Tags, and Build Numbers](https://source.android.com/setup/start/build-numbers)
+- https://apilevels.com
