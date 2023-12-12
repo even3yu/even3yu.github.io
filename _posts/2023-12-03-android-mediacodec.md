@@ -23,9 +23,7 @@ MediaCodec 是 从API 16 后引入的处理音视频编解码的类，它可以�
 
 ## 2. !!! MediaCodec的编解码流程
 
-
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20200724095204116.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTE0MTg5NDM=,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/android-mediacodec.assets/mediacodec-flow.png)
 
 
 MediaCodec 的数据分为两个部分，从数据的输入到编解码后的数据的输出：
@@ -76,7 +74,7 @@ MediaCodec 的数据分为两个部分，从数据的输入到编解码后的数
 
 周期图如下：
 
-![mediacodec_states](/Users/yu/Downloads/mediacodec_states.svg)
+![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/android-mediacodec.assets/mediacodec_states.svg)
 
  如图可以看到：
 
@@ -179,7 +177,7 @@ mediaCodec.setParameters(param);
     - 从输出buffer中获取数据进行处理。
 - 处理完毕后，release MediaCodec 对象。
 
-![img](https://pic4.zhimg.com/80/v2-4cca4f9067cfc4889d6503a284f9faab_720w.webp)
+![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/android-mediacodec.assets/decode.webp)
 
 ### 7.2 解码流程
 
@@ -242,7 +240,7 @@ abstract class BaseDecode implements Runnable {
 
 解码流程根据这张图 
 
-![img](https://pic4.zhimg.com/80/v2-12788fbc9e427b84a44abf95b5c576ff_720w.webp)
+![在这里插入图片描述]({{ site.url }}{{ site.baseurl }}/images/android-mediacodec.assets/mediacodec-flow.png)
 
 #### **7.3.1 输入**
 
