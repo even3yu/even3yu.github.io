@@ -141,19 +141,32 @@ Camera1Capturer		Camera2Capturer
 
 #### 4.2.2 堆栈
 
+#### 
+
 ```less
 CameraCapturer.startCapture
 CameraCapturer.createSessionInternal
-Camera1Capturer.createCameraSession				Camera2Capturer.createCameraSession
-Camera1Session.create											Camera2Session.create
-Camera1Session.Camera1Session							Camera2Session.Camera2Session
-Camera1Session.startCapturing							Camera2Session.start
-Camera1Session.listenForTextureFrames			Camera2Session.openCamera
-																					Camera2Session.CameraStateCallback
-																					Camera2Session.CameraStateCallback.onOpened
-																					Camera2Session.CaptureSessionCallback.onConfigured
+Camera1Capturer.createCameraSession				
+Camera1Session.create											
+Camera1Session.Camera1Session							
+Camera1Session.startCapturing							
+Camera1Session.listenForTextureFrames																					
 ```
 
+
+
+```less
+CameraCapturer.startCapture
+CameraCapturer.createSessionInternal
+Camera2Capturer.createCameraSession
+Camera2Session.create
+Camera2Session.Camera2Session
+Camera2Session.start
+Camera2Session.openCamera
+Camera2Session.CameraStateCallback
+Camera2Session.CameraStateCallback.onOpened
+Camera2Session.CaptureSessionCallback.onConfigured
+```
 
 
 #### 4.2.3 Camera1Capturer.createCameraSession
