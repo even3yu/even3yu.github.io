@@ -17,13 +17,82 @@ categories: webrtc android codec
 
 关于编解码，FFMpeg不香吗，为什么要吊死在Android的MediaCodec上？对于这个问题，我也很无奈，FFMpeg很香，但是因为包体积、效率等问题引发的工作业务的需要，使我不得不在Android MediaCodec的摧残下苟且偷生。MediaCodec的api比较简单，用来写demo毫无难度，让人痛不欲生的是它的兼容性问题。使用MediaCodec遇到的问题，往往都是和机型、版本、某类媒体文件相关的问题。
 
-## 1. 编码器或者解码器Config时候崩溃
+## 1. 编码器或者解码器Config时候崩溃，分辨率过大
 
 这个问题对于MediaCodec的使用者来说应该是一个比较普遍的问题了，在MediaCodec进行config崩溃，往往会给出具体的崩溃信息，**比较常见的是格式不支持，最多的是宽高不支持或者编解码器数量限制**。
 
 一个手机能够解码或者编码视频能力是有限的，在手机的/etc/media_codec.xml中是有说明的，比如使用一个15年左右的低端机型去解码1080p的视频，大概率会失败。当然，时代发展，限制的低端机型也大多支持1080p，那不妨解码4k视频试试。
 
 另外，在现在的一些能够支持1080p解码的机型上，使用MediaCodec同时解码两路1080p视频也会出现config失败的问题，比如SM-J250f、SM-J700f等手机。这种情况，就只能避免这么使用了，引入软解，或者把1080p视频先转成小视频等。
+
+
+
+### 如何获取当前手机支持的解码最大分辨率
+
+每个手机下都有这样一个文件，/system/etc/media_codecs.xml (your path)。或者 /system/vendor/etc/media_codecs.xml这是一个xml文件，可以直接看到MediaCodecs–>Decoders节点下的各个视频格式的支持情况，以**华为荣耀7x Android 8.0 **为例
+
+```xml
+<Decoders>
+    <MediaCodec name="OMX.hisi.video.decoder.avc" type="video/avc">
+        <Quirk name="needs-flush-on-all-ports"/>
+      <!-- min max res -->
+        <Limit name="size" min="128x128" max="4096x2304" />
+        <Limit name="alignment" value="2x2" />
+        <Limit name="block-size" value="16x16" />
+        <Limit name="blocks-per-second" min="1" max="972000" />
+        <Limit name="bitrate" range="1-100000000" />
+        <Feature name="adaptive-playback"/>
+        <Quirk name="requires-allocate-on-input-ports"/>
+        <Ouirk name="requires-allocate-on-output-ports" />
+        <Limit name="concurrent-instances" max="16" />
+    </MediaCodec>
+    <MediaCodec name="OMX.hisi.video.decoder.avc.secure" type="video/avc">
+        <Quirk name="needs-flush-on-all-ports"/>
+        <Limit name="size" min="128x128" max="4096x2304" />
+        <Limit name="alignment" value="2x2" />
+        <Limit name="block-size" value="16x16" />
+        <Limit name="blocks-per-second" min="1" max="972000" />
+        <Limit name="bitrate" range="1-100000000" />
+        <Feature name="adaptive-playback"/>
+        <Feature name="secure-playback" required="true" />
+        <Quirk name="requires-allocate-on-input-ports"/>
+        <Quirk name="requires-allocate-on-output-ports"/>
+        <Limit name="concurrent-instances" max="1" />
+    </MediaCodec>
+</Decoders>
+```
+
+
+
+### 获取解码视频的宽和高
+
+```java
+//获得音视频的配置器MediaFormat
+private static MediaFormat getFormat(String path,boolean isVideo) {
+	try {
+	     MediaExtractor mediaExtractor = new MediaExtractor();
+	     mediaExtractor.setDataSource(path);
+	     int trackCount = mediaExtractor.getTrackCount();
+	     for (int i = 0; i < trackCount; i++) {
+	         MediaFormat trackFormat = mediaExtractor.getTrackFormat(i);
+	         if (trackFormat.getString(MediaFormat.KEY_MIME).startsWith(isVideo ? "video/" :"audio/")) {
+	             return mediaExtractor.getTrackFormat(i);
+	         }
+	     }
+	 } catch (IOException e) {
+	     e.printStackTrace();
+	 }
+	 return null;
+}
+//单独获取宽高
+MediaFormat newFormat =  getFormat(path,true);
+int videoWidth = newFormat.getInteger(MediaFormat.KEY_WIDTH);
+int videoHeight = newFormat.getInteger(MediaFormat.KEY_HEIGHT);
+//结合编码时获取宽高
+MediaFormat newFormat = mMediaCodec.getOutputFormat();
+int videoWidth = newFormat.getInteger(MediaFormat.KEY_WIDTH);
+int videoHeight = newFormat.getInteger(MediaFormat.KEY_HEIGHT);
+```
 
 
 
@@ -97,7 +166,20 @@ MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar
 
 
 
-## 8. 编码器支持特性相当有限
+## 8. 编码器支持特性相当有限, level、profile设置
+
+由于视频编码后显示的数据质量偏低，所以需要调整质量。这个时候需要在这个设置level、profile
+
+Profile是对视频压缩特性的描述（CABAC呀、颜色采样数等等）。
+Level是对视频本身特性的描述（码率、分辨率、fps）。
+简单来说，Profile越高，就说明采用了越高级的压缩特性。
+Level越高，视频的码率、分辨率、fps越高
+
+```java
+// 不支持设置Profile和Level，而应该采用默认设置
+mediaFormat.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileHigh); 
+mediaFormat.setInteger("level", MediaCodecInfo.CodecProfileLevel.AVCLevel41); // Level 4.1
+```
 
 如果使用MediaCodec来编码H264视频流，对于H264格式来说，会有一些针对压缩率以及码率相关的视频质量设置，典型的诸如Profile(baseline, main, high)，Profile Level, Bitrate mode(CBR, CQ, VBR)，合理配置这些参数可以让我们在同等的码率下，获得更高的压缩率，从而提升视频的质量，Android也提供了对应的API进行设置，可以设置到MediaFormat中这些设置项:
 
@@ -154,6 +236,35 @@ MediaCodec这个API在设计的时候，过于贴近HAL层，这在很多Soc的�
 文档上写着三种支持三种码率模式，CQ的意思是尽量保证帧率，保证图片质量；CBR 则是尽量保证每一帧的码率，但在一些动作比较大的Video中，就很容易模糊；VBR 则是前两者之间一个中庸的方案。
 但是，绝大多数机型都只支持 VRB 一种。
 
+MediaCodec中的bitrate mode，设置之前想确认下CBR是否支持，那么会调用isBitrateModeSupported()判断
+
+```java
+// MediaCodecInfo.java
+public boolean isBitrateModeSupported(int mode) {
+    for (Feature feat: bitrates) {
+        if (mode == feat.mValue) {
+            return (mBitControl & (1 << mode)) != 0;
+        }
+    }
+    return false;
+}
+```
+
+**mode是否支持从bitrates判断**
+
+```java
+private static final Feature[] bitrates = new Feature[] {
+    new Feature("VBR", BITRATE_MODE_VBR, true),
+    new Feature("CBR", BITRATE_MODE_CBR, false),
+    new Feature("CQ",  BITRATE_MODE_CQ,  false)
+};
+```
+
+大部分是不支持的，可以通过xml查看，位置：vendor/etc/media_codecs.xml
+
+另外，在默认情况下，如果上层没有主动设置bitrate_mode的话，返回的是VBR。 也就是默认采用VBR 关于VBR CQ CBR区别，可查看[Android原生编解码接口 MediaCodec 之——完全解析中的流控](https://blog.csdn.net/gb702250823/article/details/81627503)。
+
+
 ### 解决方法
 
 网易有相关文章，没找到。通过`BitrateAdjuster` 解决。
@@ -171,6 +282,72 @@ MediaCodec这个API在设计的时候，过于贴近HAL层，这在很多Soc的�
 
 
 
+## 12. 关键帧
+
+MediaCodec 有两种方式触发输出关键帧，
+
+- 由配置时设置的 KEY_FRAME_RATE 和KEY_I_FRAME_INTERVAL参数自动触发;
+- 运行过程中通过 setParameters 手动触发输出关键帧。
+
+### 自动触发输出关键帧
+
+在MediaCodec硬编码中设置Ｉ(关键帧)时间间隔，在 api 中是这么设置的
+
+```java
+mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);  //关键帧间隔时间 单位s
+```
+
+**自动触发实际是按照帧数触发的**，例如设置帧率为 20 fps，关键帧间隔为 1s ，那就会每 20桢输出一个关键帧，**一旦实际帧率低于配置帧率，那就会导致关键帧间隔时间变长**。**由于 MediaCodec 启动后就不能修改配置帧率/关键帧间隔了，所以如果希望改变关键帧间隔帧数，就必须重启编码器**。
+
+### 手动触发输出关键帧
+
+```java
+if (System.currentTimeMillis() - timeStamp >= 1000) {//1000毫秒后，设置参数
+	timeStamp = System.currentTimeMillis();
+	if (Build.VERSION.SDK_INT >= 23) {
+		Bundle params = new Bundle();
+		params.putInt(MediaCodec.PARAMETER_KEY_REQUEST_SYNC_FRAME, 0);
+		mMediaCodec.setParameters(params);
+	}
+｝
+```
+
+### 关键帧踩坑
+
+有时候你会发现自动触发关键帧方式失效了。
+
+- 经排查发现真正的原因是在于视频的输入源，如果是通过Camera的PreviewCallback的方式来获取视频数据再喂给MediaCodec的方式是无法控制输出关键帧的数量的。
+
+- 发现当选择支持颜色格式为`yuv420p`的编码器时，KEY_I_FRAME_INTERVAL 设置无效；
+  选择支持`yuv420sp`的编码器时，KEY_I_FRAME_INTERVAL 设置有效；
+
+- 想要控制输出输出关键帧数量就必须通过调用MediaCodec.createInputSurface()方法获取输入Surface，再通过Opengl渲染后喂给MediaCodec才能真正控制关键帧的数量。
+
+```java
+//判断输出数据是否为关键帧的方法：
+boolean keyFrame = (bufferInfo.flags & MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0;
+```
+
+
+
+## 13. 部分机型MediaCodec.dequeueOutputBuffer一直报IllegalStateException
+
+部分机型会一直卡在`MediaCodec.INFO_TRY_AGAIN_LATER`中，有的原因也是因为这个
+**该机型硬解码最大配置分辨率低于当前视频流的分辨率**
+
+
+
+## 14. 部分机型输出的数据太短，或者为0
+
+取出 output buffer 后，要手动设置 position 和 limit（api19以下必须设置），有些设备的编码器不会设置这两个值，导致无法正确取出数据；取出 input buffer 后，要手动调用 clear。参见 [bigflake FAQ #11](https://bigflake.com/mediacodec/#q11)
+
+
+
+## 15. 关于BufferInfo中的presentationTimeUs设置
+
+如果不正确设置presentationTimeUs，有的设备的编码器会丢掉输入桢，或者输出图像质量很差，参见[bigflake FAQ #8](https://bigflake.com/mediacodec/#q8);
+MediaCodec 使用的是微秒，大多数java 使用毫秒和纳秒，单位要处理好
+
 
 
 ## 参考
@@ -178,3 +355,5 @@ MediaCodec这个API在设计的时候，过于贴近HAL层，这在很多Soc的�
 [Android MediaCodec踩坑笔记](https://blog.csdn.net/junzia/article/details/106036509)
 
 [(Android-RTC-8)分析HardwareVideoEncoder—BitrateAdjuster](https://blog.csdn.net/a360940265a/article/details/122583855)
+
+[Android原生编解码接口 MediaCodec 之——踩坑](https://blog.csdn.net/gb702250823/article/details/81669684)
