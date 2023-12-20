@@ -25,12 +25,50 @@ categories: opengl
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/android-coordinate-system.assets/opengl-cs-v.png" alt="img" style="zoom:50%;" />
 
+顶点坐标是从-1到-1，坐标是x向右，y向上
+
+ 比如顶点坐标：
+
+```java
+static float vertexVertices[] = {  
+        -1f, -1f,   /*左下角*/
+        1f, -1f,    /*右下角*/
+        -1f,  1f,   /*左上角*/
+        1f,  1f,    /*右上角*/
+    };
+```
  
 
 ## 3. OpenGL 纹理坐标系 
 
  <img src="{{ site.url }}{{ site.baseurl }}/images/android-coordinate-system.assets/opengl-cs-texture.png" alt="img" style="zoom:50%;" />
 
+纹理坐标是从0到1，它的坐标是x向右，y向下
+当纹理坐标和顶点坐标的4个点相对应时，纹理图片是原始的位置
+
+纹理坐标
+
+```java
+static float textureVertices[] = {  
+        0.0f,  1f,      /*左下角*/
+        1f,  1f,         /*右下角*/
+        0.0f,  0.0f,   /*左上角*/
+        1f,  0.0f,      /*右上角*/
+    };
+```
+
+而对应的，如果用以下的纹理坐标，图片显示的与原始的会上下颠倒：
+
+```java
+static float textureVertices[] = {  
+	0.0f,  0.0f,   /*左上角*/
+        1f,  0.0f,      /*右上角*/        
+        0.0f,  1f,      /*左下角*/
+        1f,  1f,         /*右下角*/  
+    };
+```
+
+https://blog.csdn.net/tomorrow_opal/article/details/70143093
 
 
 ## 4. 世界坐标系（World Coordinates）
