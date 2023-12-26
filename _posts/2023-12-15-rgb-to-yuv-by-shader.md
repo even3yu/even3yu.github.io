@@ -333,10 +333,10 @@ private static class ShaderCallbacks implements GlGenericDrawer.ShaderCallbacks 
     // V = 0.5 * R - 0.418688 * G - 0.0813124 * B + 0.5
     // To map the Y-values to range [16-235] and U- and V-values to range [16-240], the matrix has
     // been multiplied with matrix:
-    // {{219 / 255, 0, 0, 16 / 255},
+    // {219 / 255, 0, 0, 16 / 255},
     // {0, 224 / 255, 0, 16 / 255},
     // {0, 0, 224 / 255, 16 / 255},
-    // {0, 0, 0, 1}}
+    // {0, 0, 0, 1}
     private static final float[] yCoeffs =
         new float[] {0.256788f, 0.504129f, 0.0979059f, 0.0627451f};
     private static final float[] uCoeffs =
