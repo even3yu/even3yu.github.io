@@ -21,6 +21,36 @@ categories: audio
 
 
 
+```less
+-----------------------------     --------------------------     ---------------------------
+|                           |     |                        | ==> | webrtc::AudioProcessing |
+| webrtc::AudioDeviceModule | ==> | webrtc::AudioTransport |     ---------------------------
+|                           |     |                        |          ｜｜
+-----------------------------     --------------------------          ｜｜
+                                                                      ｜｜
+                                          +=+=========================+=+
+                                          | |
+                                          \ /
+                                           |
+                    -----------------------------------------------     ---------------------
+                    | webrtc::AudioSender/webrtc::AudioSendStream | ==> | webrtc::Transport |
+                    -----------------------------------------------     ---------------------
+                                                                                ｜｜
+                                                                                \ /
+                                                 -------------------------------------------
+                                                 | cricket::MediaChannel::NetworkInterface |
+                                                 -------------------------------------------
+```
+
+- `AudioDeviceModule` 用于控制各个操作系统平台的音频设备，主要用来做音频的采集和播放。
+- `webrtc::AudioTransport` 是一个适配和胶水模块，它把 `AudioDeviceModule` 的音频数据采集和 `webrtc::AudioProcessing` 的音频数据处理及 `webrtc::AudioSender`/`webrtc::AudioSendStream` 的音频数据编码和发送控制粘起来，`webrtc::AudioTransport` 把采集的音频数据送给 `webrtc::AudioProcessing` 处理，之后再把处理后的数据给到 `webrtc::AudioSender`/`webrtc::AudioSendStream` 编码发送出去。
+- `webrtc::AudioProcessing` 用于做音频数据处理，如降噪、自动增益控制和回声消除等。
+- `webrtc::AudioSender`/`webrtc::AudioSendStream` 用于对音频数据做编码，比如 OPUS、AAC 等，RTP 打包和发送控制。
+- `webrtc::Transport` 也是一个适配和胶水模块，它把 `webrtc::AudioSender`/`webrtc::AudioSendStream` 得到的 RTP 和 RTCP 包发送给后面的网络接口模块。
+- `cricket::MediaChannel::NetworkInterface` 用于实现真正地把 RTP 和 RTCP 包通过底层的网络接口和协议发送，如 UDP 等，ICE 的作用即为创建一个工作良好的网络接口模块实例。
+
+
+
 ### 0.1 结构图
 
 ![这里写图片描述]({{ site.url }}{{ site.baseurl }}/images/audio-pipeline.assets/abstract.png)
@@ -44,7 +74,7 @@ categories: audio
 后面的 RtpPacket 数据将会在 SendControllerThread 中被处理，SendControllerThread 主要用于发送状态及窗口拥塞的控制，最后数据通过消息的形式（type: MSG_SEND_RTP_PACKET）发送到 Webrtc 三大线程之一的网络线程（Network Thread），再往后就是发送给网络。到此整个发送过程结束。
 
 
-### 0.4 播放端调用堆栈
+### 0.4 接收端调用堆栈
 
 ![img]({{ site.url }}{{ site.baseurl }}/images/audio-pipeline.assets/audio-recv-pipeline.png)
 

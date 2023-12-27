@@ -22,6 +22,13 @@ categories: audio
 
 数据流转中心 AudioTransportImpl 实现了采集数据处理接口 RecordDataIsAvailbale和播放数据处理接口 NeedMorePlayData。RecordDataIsAvailbale 负责采集音频数据的处理和将其分发到所有的发送 Streams。NeedMorePlayData 负责混音所有接收到的 Streams，然后输送给 APM 作为一路参考信号处理，最后将其重采样到请求输出的采样率。
 
+`webrtc::AudioTransport` 是一个适配和胶水模块，它把 `AudioDeviceModule` 的音频数据采集和 `webrtc::AudioProcessing` 的音频数据处理及 `webrtc::AudioSender`/`webrtc::AudioSendStream` 的音频数据编码和发送控制粘起来，`webrtc::AudioTransport` 把采集的音频数据送给 `webrtc::AudioProcessing` 处理，之后再把处理后的数据给到 `webrtc::AudioSender`/`webrtc::AudioSendStream` 编码发送出去。
+https://www.jianshu.com/p/64d40d7ca74a
+
+
+
+
+
 ## 1. ??? RecordedDataIsAvailable 内部主要流程
 
 1. 由硬件采集过来的音频数据，直接重采样到发送采样率; 降低或者提高音频的通道数
@@ -43,6 +50,15 @@ categories: audio
    最后`SendAudioData`阶段，先遍历`sending_streams_`除了第一个`AudioSendStream`，新建`AudioFrame`拷贝`audio_frame`数据，这里必须要拷贝，因为每个`AudioSendStream`都独立编码处理音频帧，而第一个`AudioSendStream`不需要拷贝数据直接将`audio_frame`提交给其处理。
 
 https://www.jianshu.com/p/3254fbbc381c
+
+
+
+>  **为什么需要发送多份数据**
+>
+> `webrtc::AudioTransport` 支持把录制获得的同一份数据同时发送给多个 `webrtc::AudioSender`/`webrtc::AudioSendStream`，`webrtc::AudioSendStream` 用于管理音频数据的编码和编码数据的发送控制，这也就意味着，WebRTC 的音频数据处理管线，支持同时把录制获得的音频数据，以不同的编码方式和编码数据发送控制机制及策略发送到不同的网络，比如一路发送到基于 UDP 传输的 RTC 网络，另一路发送到基于 TCP 传输的 RTMP 网络。
+>
+> https://www.jianshu.com/p/64d40d7ca74a
+> 
 
 
 
@@ -152,7 +168,7 @@ int32_t AudioTransportImpl::RecordedDataIsAvailable(
 
 
 
-### RemixAndResample
+### 1.1 RemixAndResample
 
 audio/remix_resample.cc
 
@@ -160,7 +176,7 @@ audio/remix_resample.cc
 
 
 
-### AudioSendStream::SendAudioData
+### 1.2 AudioSendStream::SendAudioData
 
 audio/audio_send_stream.cc
 
@@ -189,15 +205,13 @@ void AudioSendStream::SendAudioData(std::unique_ptr<AudioFrame> audio_frame) {
 
 
 
-#### AudioSendStream
+#### 1.2.1 AudioSendStream
 
 ```less
 AudioSender
 webrtc::AudioSendStream
 internal::AudioSendStream
 ```
-
-
 
 
 
@@ -288,3 +302,5 @@ AudioDeviceModule 播放和采集的数据，总会通过 AudioDeviceBuffer 拿�
 https://worktile.com/kb/p/5925
 
 https://www.jianshu.com/p/3254fbbc381c
+
+https://www.jianshu.com/p/64d40d7ca74a
