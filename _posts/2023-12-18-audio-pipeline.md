@@ -54,7 +54,9 @@ categories: audio
 ## 1. 音频采集
 
 1. [webrtc 支持外部语音输入（虚拟设备）](https://even3yu.github.io/2023/07/26/virtual-audio-device/)
-2. 
+2. [音频采集](https://even3yu.github.io/2023/12/19/audio-capture/)
+
+![img]({{ site.url }}{{ site.baseurl }}/images/audio-pipeline.assets/start-stop-device.png)
 
 ## 2. AudioDevcieModule
 
@@ -158,4 +160,6 @@ PullRenderData
 [[WebRTC架构分析]本地音频数据录制和播放](https://zhuanlan.zhihu.com/p/131380603)
 
 [WebRTC 系列之音频的那些事](https://worktile.com/kb/p/5925)
+
+[WebRTC ADM 源码流程分析](https://blog.csdn.net/netease_im/article/details/123088666)
 
