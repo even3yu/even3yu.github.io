@@ -31,7 +31,7 @@ categories: audio
 
 ![WebRTC 系列之音频的那些事]({{ site.url }}{{ site.baseurl }}/images/audio-pipeline.assets/class-1.png)
 
-![img](audio-pipeline.assets/class-2.png)
+![img]({{ site.url }}{{ site.baseurl }}/images/audio-pipeline.assets/class-2.png)
 
 ## 1. 音频采集
 
