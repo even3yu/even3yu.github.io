@@ -5,7 +5,7 @@ date: 2023-12-07 20:10:00 +0800
 author: Fisher
 pin: True
 meta: Post
-categories: webrtc android SurfaceTexture
+categories: webrtc android surfaceTexture video
 ---
 
 
