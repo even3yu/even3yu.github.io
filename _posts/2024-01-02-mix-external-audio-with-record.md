@@ -101,16 +101,9 @@ void SetLocalAudioMixedTrack(webrtc::AudioRecordTrackInterface* track) override;
 
 void WebRtcVoiceEngine::SetLocalAudioMixedTrack(webrtc::AudioRecordTrackInterface* track) {
   RTC_DCHECK(worker_thread_checker_.IsCurrent());
-  webrtc::AudioDeviceModule* pAdm = adm();
-  if (pAdm) {
-    webrtc::AudioTransport* pTransport = pAdm->GetAudioTransport();
-    if (pTransport) {
-      pTransport->SetLocalAudioMixedTrack(track);
-    } 
-  } 
+  audio_state()->audio_transport()->SetLocalAudioMixedTrack(track);
 }
 ```
-
 
 
 ## 6. AudioTransport
