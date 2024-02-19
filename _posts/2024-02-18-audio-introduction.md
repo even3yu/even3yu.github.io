@@ -473,7 +473,7 @@ media/engine/webrtc_voice_engine.cc
 
 #### 对象组成
 
-![audio-send-stream-.png](audio-introduction.assets/audio-send-stream-.png)
+![audio-send-stream-.png]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/audio-send-stream-.png)
 
 
 
