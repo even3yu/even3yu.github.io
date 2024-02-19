@@ -17,7 +17,7 @@ categories: webrtc audio
 
 ## 1. 概览
 
-![Audio Pipeline]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/audio-state.png)
+![Audio Pipeline]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/audio-state.png)
 
 | 模块                                        | 说明                                                         |
 | ------------------------------------------- | ------------------------------------------------------------ |
@@ -30,7 +30,7 @@ categories: webrtc audio
 
 
 
-![img]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/audio-send-stream)
+![img]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/audio-send-stream)
 
 这个图中的箭头表示数据流动的方向，数据在各个模块中处理的先后顺序为自左向右。
 
@@ -111,11 +111,11 @@ categories: webrtc audio
 
 ## 3. 数据流向
 
-[audio pipeline (even3yu.github.io)]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/https://even3yu.github.io/2023/12/18/audio-pipeline/)
+[audio pipeline (even3yu.github.io)]({{ site.url }}{{ site.baseurl }}/images/https://even3yu.github.io/2023/12/18/audio-pipeline/)
 
-[WebRTC 的音频数据编码及发送控制管线 - 简书 (jianshu.com)]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/https://www.jianshu.com/p/64d40d7ca74a)
+[WebRTC 的音频数据编码及发送控制管线 - 简书 (jianshu.com)]({{ site.url }}{{ site.baseurl }}/images/https://www.jianshu.com/p/64d40d7ca74a)
 
-![audio]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/audio_transportimpl.jpeg)
+![audio]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/audio_transportimpl.jpeg)
 
 
 
@@ -123,9 +123,9 @@ categories: webrtc audio
 
 ## 4. 发送端调用堆栈
 
-[audio pipeline (even3yu.github.io)]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/https://even3yu.github.io/2023/12/18/audio-pipeline/#1-音频采集)
+[audio pipeline (even3yu.github.io)]({{ site.url }}{{ site.baseurl }}/images/https://even3yu.github.io/2023/12/18/audio-pipeline/#1-音频采集)
 
-![img]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/audio-send-pipeline.png)
+![img]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/audio-send-pipeline.png)
 
 上图是音频数据发送的核心流程，主要是核心函数的调用及线程的切换。PCM 数据从硬件设备中被采集出来，在采集线程做些简单的数据封装会很快进入 APM 模块做相应的 3A 处理，从流程上看 APM 模块很靠近原始 PCM 数据，这一点对 APM 的处理效果有非常大的帮助，感兴趣的同学可以深入研究下 APM 相关的知识。之后数据就会被封装成一个 Task，投递到一个叫 rtp_send_controller 的线程中，到此采集线程的工作就完成了，采集线程也能尽快开始下一轮数据的读取，这样能最大限度的减小对采集的影响，尽快读取新的 PCM 数据，防止 PCM 数据丢失或带来不必要的延时。
 
@@ -137,7 +137,7 @@ categories: webrtc audio
 
 ## 5. 接收端调用堆栈
 
-![img]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/audio-recv-pipeline.png)
+![img]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/audio-recv-pipeline.png)
 
 上图是音频数据接收及播放的核心流程。网络线程（Network Thread）负责从网络接收 RTP 数据，随后异步给工作线程（Work Thread）进行解包及分发。如果接收多路音频，那么就有多个 ChannelReceive，每个的处理流程都一样，最后未解码的音频数据存放在 NetEq 模块的 packet_buffer_ 中。与此同时播放设备线程不断的从当前所有音频 ChannelReceive 获取音频数据（10ms 长度），进而触发 NetEq 请求解码器进行音频解码。对于音频解码，WebRTC 提供了统一的接口，具体的解码器只需要实现相应的接口即可，比如 WebRTC 默认的音频解码器 opus 就是如此。当遍历并解码完所有 ChannelReceive 中的数据，后面就是通过 AudioMixer 混音，混完后交给 APM 模块处理，处理完最后是给设备播放。
 
@@ -151,33 +151,33 @@ categories: webrtc audio
 
 #### 6.1.1 对象结构
 
-![audio-device-buffer]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/audio-device-buffer.png)
+![audio-device-buffer]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/audio-device-buffer.png)
 
 
 
 ### 6.2 AudioDeviceGeneric
 
-[webrtc 支持外部语音输入（虚拟设备） (even3yu.github.io)]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/https://even3yu.github.io/2023/07/26/virtual-audio-device/)
+[webrtc 支持外部语音输入（虚拟设备） (even3yu.github.io)]({{ site.url }}{{ site.baseurl }}/images/https://even3yu.github.io/2023/07/26/virtual-audio-device/)
 
-[音频采集 (even3yu.github.io)]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/https://even3yu.github.io/2023/12/19/audio-capture/)
+[音频采集 (even3yu.github.io)]({{ site.url }}{{ site.baseurl }}/images/https://even3yu.github.io/2023/12/19/audio-capture/)
 
-![virtal-audio-device]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/custom-audio-devcie.png)
+![virtal-audio-device]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/custom-audio-devcie.png)
 
 
 
 #### 6.2.1音频设备的启动和停止
 
-![img]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/capture-call-stack.jpg)
+![img]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/capture-call-stack.jpg)
 
 
 
-![img]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/start-stop-device.png)
+![img]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/start-stop-device.png)
 
 
 
 ### 6.3 AudioDeviceModule
 
-[AudioDeviceModule (even3yu.github.io)]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/https://even3yu.github.io/2023/07/18/audiodevice/)
+[AudioDeviceModule (even3yu.github.io)]({{ site.url }}{{ site.baseurl }}/images/https://even3yu.github.io/2023/07/18/audiodevice/)
 
 WebRTC的音频设备类主要包含AudioDeviceGeneric和AudioDeviceModule。
 
@@ -188,13 +188,13 @@ WebRTC的音频设备类主要包含AudioDeviceGeneric和AudioDeviceModule。
 
 #### 类图
 
-![audio-AuidoDevieModule-AudioDevice.drawio]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/audio-AuidoDevieModule-AudioDevice.drawio.png)
+![audio-AuidoDevieModule-AudioDevice.drawio]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/audio-AuidoDevieModule-AudioDevice.drawio.png)
 
 
 
 
 
-![img]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/5c85b0fa2e57831467de36d674e701bb.png)
+![img]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/5c85b0fa2e57831467de36d674e701bb.png)
 
 
 
@@ -307,7 +307,7 @@ void WebRtcVoiceEngine::Init() {
 
 #### 6.3.2 对象结构
 
-![audio-device-module]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/audio-device-module.png)
+![audio-device-module]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/audio-device-module.png)
 
 
 
@@ -317,7 +317,7 @@ void WebRtcVoiceEngine::Init() {
 
 ### 6.4 AudioTransport
 
-[AudioTransportImpl (even3yu.github.io)]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/https://even3yu.github.io/2023/12/20/audio-transport-impl/)
+[AudioTransportImpl (even3yu.github.io)]({{ site.url }}{{ site.baseurl }}/images/https://even3yu.github.io/2023/12/20/audio-transport-impl/)
 
 https://www.jianshu.com/p/64d40d7ca74a
 
@@ -355,7 +355,7 @@ audio/audio_state.h
 
 #### 6.4.2 对象组成
 
-![audio-transport]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/audio-transport.png)
+![audio-transport]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/audio-transport.png)
 
 
 
@@ -375,7 +375,7 @@ audio/audio_state.h
 
 ### 6.7 AudioState
 
-[AudioState (even3yu.github.io)]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/https://even3yu.github.io/2023/12/22/audiostate)
+[AudioState (even3yu.github.io)]({{ site.url }}{{ site.baseurl }}/images/https://even3yu.github.io/2023/12/22/audiostate)
 
 WebRTC 音频的静态流水线节点，主要包括 `AudioDeviceModule`，`AudioProcessing`，和 `AudioMixer` 等，这些相关节点状态由 `AudioState` 维护和管理。`AudioState`既是 WebRTC 音频流水线节点的容器，也可用于对这些节点做一些管理和控制，以及将不同节点粘起来构成流水线。
 
@@ -397,7 +397,7 @@ webrtc::internal::AudioState
 
 
 
-![image]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/audiostate.png)
+![image]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/audiostate.png)
 
 
 
@@ -443,7 +443,7 @@ media/engine/webrtc_voice_engine.cc
 
 `webrtc::AudioSendStream` 的实现中，最主要的数据处理流程 —— 音频数据编码、发送过程，及相关模块如下图：
 
-![img]({{ SITE.URL }}{{ SITE.BASEURL }}/IMAGES/audio-introduction.assets/audio-send-stream)
+![img]({{ site.url }}{{ site.baseurl }}/images/audio-introduction.assets/audio-send-stream)
 
 
 
