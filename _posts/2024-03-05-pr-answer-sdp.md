@@ -1061,7 +1061,7 @@ a=rtpmap:118 ulpfec/90000
 
 
 
-pranswer 和 answer 区别
+## pranswer 和 answer 区别
 
-![image-20240304140543886](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240304140543886.png)
+![1]({{ site.url }}{{ site.baseurl }}/images/pr-answer-sdp.assets/1.png)
 
