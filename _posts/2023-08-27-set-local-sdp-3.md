@@ -663,6 +663,8 @@ bool WebRtcVideoChannel::AddSendStream(const StreamParams& sp) {
       video_config_.enable_cpu_adaptation, bitrate_config_.max_bitrate_bps,
       send_codec_, send_rtp_extensions_, send_params_);
 
+  // StreamParams.first_ssrc() 就是第一个元素，就是主流的ssrc
+  // 至少有有一道流，如果有simulcast，rtx，flex fec的流都是在后面添加的。
   uint32_t ssrc = sp.first_ssrc();
   RTC_DCHECK(ssrc != 0);
   // 保存stream，key 是ssrc
