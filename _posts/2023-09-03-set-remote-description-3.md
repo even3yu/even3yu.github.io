@@ -386,6 +386,7 @@ bool VideoChannel::SetRemoteContent_w(const MediaContentDescription* content,
                                       SdpType type,
                                       std::string* error_desc) {
 	...
+  // 指针强制转换，VideoContentDescription 是 MediaContentDescription的子类
   const VideoContentDescription* video = content->as_video();
 
   if (type == SdpType::kAnswer)

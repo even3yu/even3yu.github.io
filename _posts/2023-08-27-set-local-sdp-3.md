@@ -374,7 +374,7 @@ bool VideoChannel::SetLocalContent_w(const MediaContentDescription* content,
                                      SdpType type,
                                      std::string* error_desc) {
 	...
-
+  // 指针强制转换，VideoContentDescription 是 MediaContentDescription的子类
   const VideoContentDescription* video = content->as_video();
 
   ...
@@ -430,7 +430,8 @@ bool VideoChannel::SetLocalContent_w(const MediaContentDescription* content,
   // description too (without a remote description, we won't be able
   // to send them anyway).
   // 3. VideoContentDescription video;
-	// StreamParamsVec streams(); 
+	// StreamParamsVec streams();
+  // StreamParams 对应mid
   if (!UpdateLocalStreams_w(video->streams(), type, error_desc)) {
     SafeSetError(
         "Failed to set local video description streams for m-section with "
@@ -543,10 +544,15 @@ bool BaseChannel::UpdateLocalStreams_w(const std::vector<StreamParams>& streams,
   // Check for streams that have been removed.
   bool ret = true;
   for (const StreamParams& old_stream : local_streams_) {
+    // 1. StreamParams 没有ssrc
+    // 2. GetStream，从新的streams 中找到了
+    // 满足以上任意一个条件就跳过
     if (!old_stream.has_ssrcs() ||
         GetStream(streams, StreamFinder(&old_stream))) {
       continue;
     }
+    // 否则StreamParams无效了
+    // 则删除SendStream
     if (!media_channel()->RemoveSendStream(old_stream.first_ssrc())) {
       rtc::StringBuilder desc;
       desc << "Failed to remove send stream with ssrc "
@@ -610,7 +616,7 @@ bool BaseChannel::UpdateLocalStreams_w(const std::vector<StreamParams>& streams,
 ```
 
 - StreamParams （media/base/stream_params.h），主要的ssrc， 表示rtp流的id
-- for循环，streams， 从local_streams_查找，如果粗在则忽略，不存在则MediaChannel::AddSendStream
+- for循环，streams， 从local_streams_查找，如果存在则忽略，不存在则MediaChannel::AddSendStream
 -  更新local_streams_ = all_streams; 
 
 
