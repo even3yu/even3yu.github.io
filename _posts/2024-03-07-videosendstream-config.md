@@ -1,3 +1,20 @@
+---
+layout: post
+title: webrtc::VideoSendStream::Config 说明和创建时机
+date: 2024-03-07 19:00:00 +0800
+author: Fisher
+pin: True
+meta: Post
+categories: webrtc stream
+---
+
+
+* content
+{:toc}
+
+---
+
+
 ![videoo_send_stream_config]({{ site.url }}{{ site.baseurl }}/images/videosendstream-config.assets/video_send_stream_config.png)
 
 ## 1. webrtc::VideoSendStream::Config
