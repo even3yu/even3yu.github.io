@@ -576,9 +576,7 @@ WebRtcVideoChannel::WebRtcVideoSendStream::ConfigureVideoEncoderSettings(
           webrtc::FieldTrialFlag("Enabled");
       webrtc::FieldTrialEnum<webrtc::InterLayerPredMode> inter_layer_pred_mode(
           "inter_layer_pred_mode", webrtc::InterLayerPredMode::kOnKeyPic,
-          {{"off", webrtc::InterLayerPredMode::kOff},
-           {"on", webrtc::InterLayerPredMode::kOn},
-           {"onkeypic", webrtc::InterLayerPredMode::kOnKeyPic}});
+          ...);
       webrtc::ParseFieldTrial(
           {&interlayer_pred_experiment_enabled, &inter_layer_pred_mode},
           call_->trials().Lookup("WebRTC-Vp9InterLayerPred"));
