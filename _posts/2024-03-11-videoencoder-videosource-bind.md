@@ -1,6 +1,6 @@
 ---
 layout: post
-title: WebRtcVideoChannel 和 VideoSourceInterface 的绑定时机
+title: VideoSourceInterface，WebRtcVideoChannel，WebRtcVideoSendStream，VideoStreamEncoder的绑定流程
 date: 2024-03-11 14:00:00 +0800
 author: Fisher
 pin: True
@@ -20,7 +20,7 @@ categories: webrtc faq
    同时对视频进行一些属性配置，通过VideoOption，比如video_noise_reduction，is_screencast等；
 2. 在WebRtcVideoChannel中 存放了WebRtcVideoSendStream。在 unify plan 中，一个mline 对应只有 就一个 WebRtcVideoSendStream。在WebRtcVideoChannel::AddSendStream 创建了 WebRtcVideoSendStream；
 3. **VideoSourceInterface 和  webrtc::internal::VideoSendStream 进行了绑定；**WebRtcVideoSendStream 中 保存了 VideoSourceInterface * source； 对应一些策略；
-
+4. VideoSourceInterface 和  VideoStreamEncoder 进行了绑定。这样VideoSource 最终会流到VideoStreamEncoder；
 
 
 ### 1. VideoRtpSender.SetSend
@@ -209,6 +209,104 @@ WebRtcVideoChannel::WebRtcVideoSendStream::GetDegradationPreference() const {
   }
 
   return degradation_preference;
+}
+```
+
+
+
+### 4. VideoSendStream::SetSource
+
+```cpp
+void VideoSendStream::SetSource(
+    rtc::VideoSourceInterface<webrtc::VideoFrame>* source,
+    const DegradationPreference& degradation_preference) {
+  RTC_DCHECK_RUN_ON(&thread_checker_);
+  // VideoStreamEncoder, VideoStreamEncoderInterface
+  video_stream_encoder_->SetSource(source, degradation_preference);
+}
+```
+
+
+
+### 5. VideoStreamEncoder::SetSource
+
+video/video_stream_encoder.cc
+
+把VideoSourceInterface 绑定到了 VideoStreamEncoder。这样VideoStreamEncoder 可以注册到VideoSourceInterface，从而视频数据就可以流到 VideoStreamEncoder了。
+
+```cpp
+void VideoStreamEncoder::SetSource(
+    rtc::VideoSourceInterface<VideoFrame>* source,
+    const DegradationPreference& degradation_preference) {
+  RTC_DCHECK_RUN_ON(main_queue_);
+  //!!!!!!!!!!
+  //!!!!!!!!!!
+  //!!!!!!!!!!
+  video_source_sink_controller_.SetSource(source);
+  //!!!!!!!!!!
+  //!!!!!!!!!!
+  //!!!!!!!!!!
+  input_state_provider_.OnHasInputChanged(source);
+
+  // This may trigger reconfiguring the QualityScaler on the encoder queue.
+  encoder_queue_.PostTask([this, degradation_preference] {
+    RTC_DCHECK_RUN_ON(&encoder_queue_);
+    degradation_preference_manager_->SetDegradationPreference(
+        degradation_preference);
+    stream_resource_manager_.SetDegradationPreferences(degradation_preference);
+    if (encoder_) {
+      stream_resource_manager_.ConfigureQualityScaler(
+          encoder_->GetEncoderInfo());
+    }
+  });
+}
+```
+
+
+
+#### 5.1 VideoStreamEncoder::VideoStreamEncoder
+
+video/video_stream_encoder.cc
+
+```cpp
+   VideoStreamEncoder::VideoStreamEncoder(...) 
+   ...
+   video_source_sink_controller_(/*sink=*/this,
+                                    /*source=*/nullptr),
+```
+
+创建VideoSourceSinkController， 主要负责sourc呃呵sink的绑定
+
+
+
+### 6. VideoSourceSinkController::SetSource
+
+video/video_source_sink_controller.cc
+
+```cpp
+void VideoSourceSinkController::SetSource(
+    rtc::VideoSourceInterface<VideoFrame>* source) {
+  RTC_DCHECK_RUN_ON(&sequence_checker_);
+
+  rtc::VideoSourceInterface<VideoFrame>* old_source = source_;
+  source_ = source;
+
+  if (old_source != source && old_source)
+    old_source->RemoveSink(sink_);
+
+  if (!source)
+    return;
+
+  //!!!!!!!!!!
+  //!!!!!!!!!!
+  //!!!!!!!!!!
+  // sink_ 就是 VideoStreamEncoder* 指针
+  // source 数据就流转到 VideoStreamEncoder,  
+  // VideoStreamEncoder 实现了 VideoStreamEncoderInterface， 实现了 VideoSinkInterface
+  source->AddOrUpdateSink(sink_, CurrentSettingsToSinkWants());
+  //!!!!!!!!!!
+  //!!!!!!!!!!
+  //!!!!!!!!!!
 }
 ```
 
