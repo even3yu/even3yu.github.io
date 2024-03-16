@@ -1,11 +1,11 @@
 ---
 layout: post
-title: RTPSenderVideo创建流程
+title: 从Call::CreateVideoSendStream 到 RTPSender创建流程
 date: 2024-03-11 11:00:00 +0800
 author: Fisher
 pin: True
 meta: Post
-categories: webrtc stream
+categories: webrtc stream video
 ---
 
 
@@ -31,6 +31,8 @@ categories: webrtc stream
 
 
 
+![img]({{ site.url }}{{ site.baseurl }}/images/RTPSender-video-create-stack.assets/class2.png)
+
 ## 2. 调用堆栈
 
 ```less
@@ -53,6 +55,11 @@ VideoSendStreamImpl::VideoSendStreamImpl
 RtpTransportControllerSend::CreateRtpVideoSender
 RtpVideoSender::RtpVideoSender
 CreateRtpStreamSenders  // 创建了RTPSenderVideo，主要和RtpVideoSender 区别
+	ModuleRtpRtcpImpl2::ModuleRtpRtcpImpl2
+		ModuleRtpRtcpImpl2::RtpSenderContext::RtpSenderContext
+			RTPSender::RTPSender
+	RtpStreamSender::RtpStreamSender
+  RTPSenderVideo::RTPSenderVideo
 ```
 
 
@@ -61,7 +68,7 @@ CreateRtpStreamSenders  // 创建了RTPSenderVideo，主要和RtpVideoSender 区
 
 
 
-## 3. Call::CreateVideoSendStream
+## 3. A. Call::CreateVideoSendStream
 
 call/call.cc
 
@@ -91,6 +98,7 @@ webrtc::VideoSendStream* Call::CreateVideoSendStream(
             //!!!!!!!!!!!!!!!!!!!!!
             //!!!!!!!!!!!!!!!!!!!!!
             //!!!!!!!!!!!!!!!!!!!!!
+  	    // webrtc::internal::VideoSendStream
   VideoSendStream* send_stream = new VideoSendStream(
       clock_, num_cpu_cores_, module_process_thread_->process_thread(),
       task_queue_factory_, call_stats_->AsRtcpRttStats(),
@@ -170,9 +178,11 @@ Call* Call::Create(const Call::Config& config,
 
 
 
+### -- 3.2 VideoSendStream::VideoSendStream
 
 
-## 4. VideoSendStream::VideoSendStream
+
+## 4. B. VideoSendStream::VideoSendStream
 
 video/video_send_stream.cc
 
@@ -245,7 +255,7 @@ VideoSendStream::VideoSendStream(
 
 
 
-
+### -- 4.1 VideoSendStreamImpl::VideoSendStreamImpl
 
 
 
@@ -276,9 +286,11 @@ VideoSendStreamImpl::VideoSendStreamImpl(...){
 
 
 
+### -- 5.1 RtpTransportControllerSend::CreateRtpVideoSender
 
 
-## 6. RtpTransportControllerSend::CreateRtpVideoSender
+
+## 6. C. RtpTransportControllerSend::CreateRtpVideoSender
 
 call/rtp_transport_controller_send.cc
 
@@ -307,6 +319,8 @@ RtpVideoSenderInterface* RtpTransportControllerSend::CreateRtpVideoSender(
 ```
 
 
+
+### -- 6.1 RtpVideoSender::RtpVideoSender
 
 
 
@@ -449,7 +463,11 @@ RtpVideoSender::RtpVideoSender(
 
 
 
-## 8. !!! CreateRtpStreamSenders
+### -- 7.1 CreateRtpStreamSenders
+
+
+
+## 8. !!!D. CreateRtpStreamSenders
 
 call/rtp_video_sender.cc
 
@@ -563,10 +581,12 @@ std::vector<RtpStreamSender> CreateRtpStreamSenders(
     //!!!!!!!!!!!!!!!!
     //!!!!!!!!!!!!!!!!
     //!!!!!!!!!!!!!!!!
+    // 创建 RTPSenderVideo
     auto sender_video = std::make_unique<RTPSenderVideo>(video_config);
     //!!!!!!!!!!!!!!!!
     //!!!!!!!!!!!!!!!!
     //!!!!!!!!!!!!!!!!
+    // 创建 RtpStreamSender
     rtp_streams.emplace_back(std::move(rtp_rtcp), std::move(sender_video),
                              std::move(fec_generator));
   }
@@ -578,37 +598,21 @@ std::vector<RtpStreamSender> CreateRtpStreamSenders(
 
 
 
-### 8.1  RtpStreamSender
 
-call/rtp_video_sender.h
 
-```cpp
-namespace webrtc_internal_rtp_video_sender {
-// RTP state for a single simulcast stream. Internal to the implementation of
-// RtpVideoSender.
-struct RtpStreamSender {
-  RtpStreamSender(std::unique_ptr<ModuleRtpRtcpImpl2> rtp_rtcp,
-                  std::unique_ptr<RTPSenderVideo> sender_video,
-                  std::unique_ptr<VideoFecGenerator> fec_generator);
-  ~RtpStreamSender();
-
-  RtpStreamSender(RtpStreamSender&&) = default;
-  RtpStreamSender& operator=(RtpStreamSender&&) = default;
-
-  // Note: Needs pointer stability.
-  std::unique_ptr<ModuleRtpRtcpImpl2> rtp_rtcp;
-  std::unique_ptr<RTPSenderVideo> sender_video;
-  std::unique_ptr<VideoFecGenerator> fec_generator;
-};
-
-}  // namespace webrtc_internal_rtp_video_sender
-```
+### -- 8.1 ModuleRtpRtcpImpl2::ModuleRtpRtcpImpl2
 
 
 
+### -- 8.2 RtpStreamSender::RtpStreamSender
 
 
-### 8.2 ModuleRtpRtcpImpl2::ModuleRtpRtcpImpl2
+
+### -- 8.3 RTPSenderVideo::RTPSenderVideo
+
+## --------
+
+## 9. E. ModuleRtpRtcpImpl2::ModuleRtpRtcpImpl2
 
 modules/rtp_rtcp/source/rtp_rtcp_impl2.cc
 
@@ -642,6 +646,10 @@ ModuleRtpRtcpImpl2::ModuleRtpRtcpImpl2(const Configuration& configuration)
   RTC_DCHECK(worker_queue_);
   process_thread_checker_.Detach();
   if (!configuration.receiver_only) {
+    //!!!!!!!!!!!!!!!!
+    //!!!!!!!!!!!!!!!!
+    //!!!!!!!!!!!!!!!!
+    // 创建 RtpSenderContext
     rtp_sender_ = std::make_unique<RtpSenderContext>(configuration);
     // Make sure rtcp sender use same timestamp offset as rtp sender.
     rtcp_sender_.SetTimestampOffset(
@@ -666,14 +674,159 @@ ModuleRtpRtcpImpl2::ModuleRtpRtcpImpl2(const Configuration& configuration)
 
 
 
+### -- 9.1 ModuleRtpRtcpImpl2::RtpSenderContext::RtpSenderContext
 
 
-### 8.3 RTPSenderVideo::RTPSenderVideo
+
+## 10. F. ModuleRtpRtcpImpl2::RtpSenderContext::RtpSenderContext
+
+modules/rtp_rtcp/source/rtp_rtcp_impl2.cc
+
+```cpp
+ModuleRtpRtcpImpl2::RtpSenderContext::RtpSenderContext(
+    const RtpRtcpInterface::Configuration& config)
+    : packet_history(config.clock, config.enable_rtx_padding_prioritization),
+      packet_sender(config, &packet_history),
+      non_paced_sender(&packet_sender, this),
+			// RTPSender
+      packet_generator(
+          config,
+          &packet_history,
+          config.paced_sender ? config.paced_sender : &non_paced_sender) {}
+```
+
+
+
+### RtpSenderContext
+
+```cpp
+ struct RtpSenderContext : public SequenceNumberAssigner {
+    explicit RtpSenderContext(const RtpRtcpInterface::Configuration& config);
+    void AssignSequenceNumber(RtpPacketToSend* packet) override;
+    // Storage of packets, for retransmissions and padding, if applicable.
+    RtpPacketHistory packet_history;
+    // Handles final time timestamping/stats/etc and handover to Transport.
+    RtpSenderEgress packet_sender;
+    // If no paced sender configured, this class will be used to pass packets
+    // from |packet_generator_| to |packet_sender_|.
+    RtpSenderEgress::NonPacedPacketSender non_paced_sender;
+    // Handles creation of RTP packets to be sent.
+    RTPSender packet_generator;
+  };
+```
+
+
+
+### --RTPSender::RTPSender
+
+
+
+## 11. RTPSender::RTPSender
+
+modules/rtp_rtcp/source/rtp_sender.cc
+
+```cpp
+RTPSender::RTPSender(const RtpRtcpInterface::Configuration& config,
+                     RtpPacketHistory* packet_history,
+                     RtpPacketSender* packet_sender)
+    : clock_(config.clock),
+      random_(clock_->TimeInMicroseconds()),
+      audio_configured_(config.audio),
+      ssrc_(config.local_media_ssrc),
+      rtx_ssrc_(config.rtx_send_ssrc),
+      flexfec_ssrc_(config.fec_generator ? config.fec_generator->FecSsrc()
+                                         : absl::nullopt),
+      max_padding_size_factor_(GetMaxPaddingSizeFactor(config.field_trials)),
+      packet_history_(packet_history),
+      paced_sender_(packet_sender),
+      sending_media_(true),                   // Default to sending media.
+      max_packet_size_(IP_PACKET_SIZE - 28),  // Default is IP-v4/UDP.
+      last_payload_type_(-1),
+      rtp_header_extension_map_(config.extmap_allow_mixed),
+      max_media_packet_header_(kRtpHeaderSize),
+      max_padding_fec_packet_header_(kRtpHeaderSize),
+      // RTP variables
+      sequence_number_forced_(false),
+      always_send_mid_and_rid_(config.always_send_mid_and_rid),
+      ssrc_has_acked_(false),
+      rtx_ssrc_has_acked_(false),
+      last_rtp_timestamp_(0),
+      capture_time_ms_(0),
+      last_timestamp_time_ms_(0),
+      last_packet_marker_bit_(false),
+      csrcs_(),
+      rtx_(kRtxOff),
+      supports_bwe_extension_(false),
+      retransmission_rate_limiter_(config.retransmission_rate_limiter) {
+  // This random initialization is not intended to be cryptographic strong.
+  timestamp_offset_ = random_.Rand<uint32_t>();
+  // Random start, 16 bits. Can't be 0.
+  sequence_number_rtx_ = random_.Rand(1, kMaxInitRtpSeqNumber);
+  sequence_number_ = random_.Rand(1, kMaxInitRtpSeqNumber);
+
+  RTC_DCHECK(paced_sender_);
+  RTC_DCHECK(packet_history_);
+}
+```
+
+
+
+## --------
+
+
+
+## 12. RtpStreamSender::RtpStreamSender
+
+call/rtp_video_sender.h
+
+```cpp
+RtpStreamSender::RtpStreamSender(
+    std::unique_ptr<ModuleRtpRtcpImpl2> rtp_rtcp,
+    std::unique_ptr<RTPSenderVideo> sender_video,
+    std::unique_ptr<VideoFecGenerator> fec_generator)
+    : rtp_rtcp(std::move(rtp_rtcp)),
+			// RTPSenderVideo
+      sender_video(std::move(sender_video)),
+      fec_generator(std::move(fec_generator)) {}
+```
+
+
+
+### 12.1 RtpStreamSender
+
+```cpp
+namespace webrtc_internal_rtp_video_sender {
+// RTP state for a single simulcast stream. Internal to the implementation of
+// RtpVideoSender.
+struct RtpStreamSender {
+  RtpStreamSender(std::unique_ptr<ModuleRtpRtcpImpl2> rtp_rtcp,
+                  std::unique_ptr<RTPSenderVideo> sender_video,
+                  std::unique_ptr<VideoFecGenerator> fec_generator);
+  ~RtpStreamSender();
+
+  RtpStreamSender(RtpStreamSender&&) = default;
+  RtpStreamSender& operator=(RtpStreamSender&&) = default;
+
+  // Note: Needs pointer stability.
+  std::unique_ptr<ModuleRtpRtcpImpl2> rtp_rtcp;
+  std::unique_ptr<RTPSenderVideo> sender_video;
+  std::unique_ptr<VideoFecGenerator> fec_generator;
+};
+
+}  // namespace webrtc_internal_rtp_video_sender
+```
+
+
+
+
+
+## 13. RTPSenderVideo::RTPSenderVideo
 
 modules/rtp_rtcp/source/rtp_sender_video.cc
 
 ```cpp
 RTPSenderVideo::RTPSenderVideo(const Config& config)
+  	// RTPSender rtp_sender_
     : rtp_sender_(config.rtp_sender),
       clock_(config.clock),
       retransmission_settings_(
@@ -712,8 +865,4 @@ RTPSenderVideo::RTPSenderVideo(const Config& config)
     frame_transformer_delegate_->Init();
 }
 ```
-
-
-
-
 
