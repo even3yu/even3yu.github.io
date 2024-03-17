@@ -5,7 +5,7 @@ date: 2024-03-07 19:00:00 +0800
 author: Fisher
 pin: True
 meta: Post
-categories: webrtc stream
+categories: webrtc stream video
 ---
 
 
