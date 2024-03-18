@@ -35,6 +35,15 @@ Video模块 (video/video_send_stream.h，video/video_send_stream.cc)
 4. 启动，停止流控制，Start/Stop；
 5. 处理接收端反馈的rtcp消息，（分发到VideoSendStreamImpl进行处理）VideoSendStream::DeliverRtcp
 
+### 说明
+
+webrtc::VideoSendStream，
+子类 webrtc::internal::VideoSendStream
+
+### 创建时机
+
+https://even3yu.github.io/2024/03/11/create-videosendstream/
+
 
 
 ## 2. VideoSendStreamImpl
