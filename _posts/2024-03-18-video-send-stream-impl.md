@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Video Send Stream 介绍
+title: VideoSendStreamImpl 介绍
 date: 2024-03-18 23:00:00 +0800
 author: Fisher
 pin: True
