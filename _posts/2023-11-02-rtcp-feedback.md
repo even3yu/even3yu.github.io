@@ -49,7 +49,7 @@ categories: webrtc rtcp
 1. PID：数据包ID， 指丢失的RTP包的序列号。
 2. BLP：丢失数据包的位掩码，表示从PID开始往后16个RTP包是否有丢失。如果第i位为1，则说明序列号为PID+i的RTP包丢失，若未丢包该位为0。
 
-## 1.2 临时最大媒体流比特率请求（TMMBR）
+## ~~1.2 临时最大媒体流比特率请求（TMMBR）~~
 
 ```less
     0                   1                   2                   3
@@ -70,7 +70,7 @@ categories: webrtc rtcp
 3. Measured Overhead：测量的平均数据包开销值（以字节为单位）
 4. 说明：TMMBR用于流控，接收方向发送方请求按指定的最大比特率传输数据流，通常用于网络抖动情况下保证VOIP通信的流畅性（临时降低质量）。最大比特率 = 系数 * 2^指数。
 
-## 1.3 临时最大媒体流比特率通知(TMMBN)
+## 1.3 ~~临时最大媒体流比特率通知(TMMBN)~~
 
         0                   1                   2                   3
         0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -133,7 +133,7 @@ categories: webrtc rtcp
 6. Lost Packets Counter：
 7. Duplication Counter：
 
-## 1.6 传输宽拥塞控制（TWCC）
+## 1.6 !!! 传输宽拥塞控制（TWCC）
 
 ```less
 0                   1                   2                   3
