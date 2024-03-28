@@ -1,6 +1,6 @@
 ---
 layout: post
-title: rtcp 如何设计nack
+title: rtcp feedback 如何设计nack
 date: 2023-11-16 20:10:00 +0800
 author: Fisher
 pin: True

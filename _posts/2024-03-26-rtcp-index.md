@@ -14,7 +14,6 @@ categories: webrtc rtcp
 
 ---
 
-
 ## 1. 什么是RTCP
 
 在RFC3550中，除了定义了⽤来进⾏实时数据传输的 RTP 协议外，还定义了 RTCP 协议，**⽤来反馈会话传输质量、⽤户源识别、控制 RTCP 传输间隔**。在 Webrtc 中，通过 RTCP 我们可以实现发送数据/接收数据的反馈，传输控制如丢包重传、关键帧请求，⽹络指标 RTT、丢包率、抖动的计算及反馈，拥塞控制相关的带宽 反馈，以及⽤户体验相关的⾳视频同步等等。为了让开发者获取以上数据指标，Webrtc 提供了统⼀的接⼝调用,如在GoogleChrome中,可以通过 RTCPeerConnection.getStats()或者chrome://webrtc-internals/查看以上指标。
@@ -38,21 +37,22 @@ RTCP也是用UDP来传送的，但RTCP封装的仅仅是一些控制信息，因
 
 RTCP 的作用，收集当前网络质量状态
 
-1、为应用程序提供会话质量或者广播性能质量的信息　
+1. 为应用程序提供会话质量或者广播性能质量的信息　
 
 RTCP的主要功能是为应用程序提供会话质量或者广播性能质量的信息。每个RTCP信息包不封装声音数据或者电视数据，而是封装发送端（和 / 或者）接收端的统计报表。这些信息包括发送的信息包数目、丢失的信息包数目和信息包的抖动等情况，这些反馈信息反映了当前的网络状况，对发送端、接收端或者网络管理员都非常有用。RTCP规格没有指定应用程序应该使用这些反馈信息做什么，这完全取决于应用程序开发人员。例如，发送端可以根据反馈信息来调整传输速率，接收端可以根据反馈信息判断问题是本地的、区域性的还是全球性的，网络管理员也可以使用RTCP信息包中的信息来评估网络用于多目标广播的性能。
 
-2、确定 RTP用户源　
+2. 确定 RTP用户源　
 
 RTCP为每个RTP用户提供了一个全局唯一的规范名称 (Canonical Name)标志符 CNAME，接收者使用它来追踪一个RTP进程的参加者。当发现冲突或程序重新启动时，RTP中的同步源标识符SSRC可能发生改变，接收者可利用CNAME来跟踪参加者。同时，接收者也需要利用CNAME在相关RTP连接中的几个数据流之间建立联系。当 RTP需要进行音视频同步的时候，接受者就需要使用 CNAME来使得同一发送者的音视频数据相关联，然后根据RTCP包中的计时信息(Network time protocol)来实现音频和视频的同步。
 
-3、控制 RTCP传输间隔
+3. 控制 RTCP传输间隔
 
 由于每个对话成员定期发送RTCP信息包，随着参加者不断增加，RTCP信息包频繁发送将占用过多的网络资源，为了防止拥塞，必须限制RTCP信息包的流量，控制信息所占带宽一般不超过可用带宽的 5%，因此就需要调整 RTCP包的发送速率。由于任意两个RTP终端之间都互发 RTCP包，因此终端的总数很容易估计出来，应用程序根据参加者总数就可以调整RTCP包的发送速率。
 
-4、传输最小进程控制信息　
+4. 传输最小进程控制信息　
 
 这项功能对于参加者可以任意进入和离开的松散会话进程十分有用，参加者可以自由进入或离开，没有成员控制或参数协调。
+
 
 
 
@@ -84,38 +84,21 @@ RTCP为每个RTP用户提供了一个全局唯一的规范名称 (Canonical Name
 
 ### 5.1 通用header
 
+1. rtcp 通用头的介绍 
+
 ```
         0                   1                   2                   3
         0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 header |V=2|P|    RC   |   PT=RR=201   |             length            |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |                     SSRC of packet sender                     |
-       +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
-report |                 SSRC_1 (SSRC of first source)                 |
-block  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  1    | fraction lost |       cumulative number of packets lost       |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |           extended highest sequence number received           |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |                      interarrival jitter                      |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |                         last SR (LSR)                         |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |                   delay since last SR (DLSR)                  |
-       +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
-report |                 SSRC_2 (SSRC of second source)                |
-block  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  2    :                               ...                             :
-       +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
-       |                  profile-specific extensions                  |
+			...
 ```
 
 1. V，版本号（2bit）: 版本号为2；
 
 2. P，填充（1bit）: 填充标志，同RTP的填充标志；
 
-3. FMT，接收报告数量（5bit）：这是RR包的定义，接收报告块数量，可以是0个（只发送流），也可以是多个。
+3. FMT/COUNT，接收报告数量（5bit）：这是RR包的定义，接收报告块数量，可以是0个（只发送流），也可以是多个。
 
 4. PT，荷载类型（8bit）: 荷载类型SR、RR、SDES、BYE、APP 等，后续介绍QOS策略还会介绍其他的协议类型；
 
@@ -138,11 +121,13 @@ block  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 发送rtp报文端向接受者发送SR报文，**主要目的是方便接收方做好音视频同步工作**。
 
-https://even3yu.github.io/2023/11/01/rtcp-sr/
+1. [rtcp send report 的介绍](https://even3yu.github.io/2023/11/01/rtcp-sr/)
+2. rtcp sender report 发送和接收的源码解读
 
 ### 5.3 RR: Receiver Report RTCP Packet
 
-https://even3yu.github.io/2023/11/01/rtcp-rr/
+1. [rtcp receiver report的介绍](https://even3yu.github.io/2023/11/01/rtcp-rr/)
+2. rtcp recevier report 发送和接收的源码解读
 
 ### 5.4 --SDES（Source Description）
 
@@ -152,7 +137,7 @@ https://even3yu.github.io/2023/11/01/rtcp-rr/
 
 ### 5.7 RTPFB
 
-https://even3yu.github.io/2023/11/02/rtcp-feedback/
+1. [rtp feadback 的类型](https://even3yu.github.io/2023/11/02/rtcp-feedback/)
 
 RTP的反馈报文，是指RTP传输层面的报文。该报文可以装入不同类型的子报文。该报文中可以包含多个子报文，其中WebRTC使用到的报文只有4项。RTP-FEEDBACK 主要⽤来在传输层进⾏反馈，实现数据包的丢包重传，码率控制。
 
@@ -169,11 +154,10 @@ RTP的反馈报文，是指RTP传输层面的报文。该报文可以装入不�
 
 #### 5.7.1 NACK
 
-https://even3yu.github.io/2023/11/16/rtcp-fb-nack-1/
-
-https://even3yu.github.io/2023/11/17/rtcp-fb-nack-2/
-
-https://even3yu.github.io/2023/11/18/rtcp-fb-nack-3/
+1. [rtcp 如何设计nack](https://even3yu.github.io/2023/11/16/rtcp-fb-nack-1/) 
+2. [rtcp nack](https://even3yu.github.io/2023/11/17/rtcp-fb-nack-2/)
+3. [rtcp nack 流程及代码解读](https://even3yu.github.io/2023/11/18/rtcp-fb-nack-3/) 
+4. nack 如何优化
 
 NACK，接收端用于通知发送方在上次包发送周期内有哪些包丢失了。在NACK报文中包含两个字段：PID和BLP。PID（Package ID）字段用于标识从哪个包开始统计丢包；而BLP（16位）字段表示从PID包开始，接下来的16个RTP包的丢失情况。
 
@@ -188,7 +172,7 @@ NACK，接收端用于通知发送方在上次包发送周期内有哪些包丢�
 
 #### 5.7.2 TWCC
 
-https://even3yu.github.io/2023/11/06/rtcp-twcc/
+[rtcp feadback twcc](https://even3yu.github.io/2023/11/06/rtcp-twcc/)
 
 TWCC是WebRTC中TCC算法的反馈报文，该报文会记录包的延迟情况，然后交由发送端的TCC算法计算下行带宽。
 
@@ -197,7 +181,7 @@ TWCC是WebRTC中TCC算法的反馈报文，该报文会记录包的延迟情况�
 
 ### 5.8 PSFB
 
-https://even3yu.github.io/2023/11/08/rtcp-psfb/
+[rtcp psfb](https://even3yu.github.io/2023/11/08/rtcp-psfb/)
 
 RTC 中，主要传输的是⾳频、视频，由于两种媒体有不同的特点，⾳频⼩包，前后帧⽆参考；视频帧具有前后参考关系，关键帧⼜是 GOP 中后续帧的主要参考对象，可以说是重中之重，需要 RTCP 针对具体的载荷类型进⾏更精细化的信息反馈。
 
@@ -225,11 +209,14 @@ RTC 中，主要传输的是⾳频、视频，由于两种媒体有不同的特�
 
 #### 5.8.1 PLI与FIR
 
-https://even3yu.github.io/2023/11/26/rtcp-psfb-pli/
+1. [rtcp psfb pli 关键帧请求](https://even3yu.github.io/2023/11/26/rtcp-psfb-pli/) 
+2. rtcp psfb fir
 
 PLI报文与FIR报文很类似，当发送端收到这两个报文时，都会触发生成关键帧（IDR帧），但两者还是有一些区别的。PLI报文是在接收端解码器无法解码时发送的报文。FIR报文主要应用于多方通信时后加入房间的参与者向已加入房间的共享者申请关键帧。通过这种方式，可以保障后加入房间的参与者不会因收到的第一帧不是关键帧而引起花屏或黑屏的问题。
 
 #### 5.8.2 REMB
+
+1. rtcp psfb remb
 
 REMB报文是WebRTC增加的反馈报文，用于将接收端评估出的带宽值发给发送端。不过，由于最新的WebRTC已全面启用基于发送端的带宽估算方法，即TCC，因此目前REMB仅用于向后兼容，不再做进一步更新。
 
@@ -241,10 +228,7 @@ REMB 估算的码率代表的是⼀个传输通道内所有 SSRC 的码率之和
 
 ### 5.9 ??? XR
 
-https://even3yu.github.io/2023/11/03/rtcp-xr/
-
-RTCP 在很早之前就定义了扩展报告，主要是在 SR/RR 基础之上携带补充信息，开发者可以基于其中更加详细的指标做更深层次的拥塞控制上的优化。包含以下七个报告块：
-...
+[rtp xr](https://even3yu.github.io/2023/11/03/rtcp-xr/) 
 
 
 
@@ -263,15 +247,15 @@ RTP与RTCP相结合虽然保证了实时数据的传输，但也有自己的缺�
 
 ## 8. SR和RR的区别
 
-https://even3yu.github.io/2023/11/01/rtcp-sr-and-rr/
+[rtcp sr 和 rr 的区别](https://even3yu.github.io/2023/11/01/rtcp-sr-and-rr/) 
 
 
 
 ## 9. ??? RTT 计算
 
-https://even3yu.github.io/2023/10/31/rtt/
+[rtt 计算方式](https://even3yu.github.io/2023/10/31/rtt/) 
 
-https://even3yu.github.io/2023/11/03/rtcp-xr/
+[rtp xr](https://even3yu.github.io/2023/11/03/rtcp-xr/) 
 
 
 
